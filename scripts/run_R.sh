@@ -2,6 +2,11 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 export PATH="$HOME/.local/bin:$PATH"
+# Use the same runtime libraries as the working CRG installation.
+if command -v module >/dev/null 2>&1; then
+  module load GLPK/5.0-GCCcore-14.3.0
+  module load FlexiBLAS/3.4.5-GCC-14.3.0
+fi
 # An explicitly supplied Rscript can be a CRG module or container wrapper.
 # Each R script checks the exact version and pinned betAS revision.
 if [[ -n "${RSCRIPT:-}" ]]; then

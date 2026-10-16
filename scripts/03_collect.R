@@ -7,16 +7,14 @@ run <- readRDS(file.path(run_dir, 'run.rds'))
 stopifnot(identical(run$config, config), identical(run$filtered_md5, unname(tools::md5sum(config$filtered))),
           identical(run$lock_md5, unname(tools::md5sum('renv.lock'))))
 x <- readRDS(config$filtered)
-parts <- lapply(run$manifest$chunk, function(id) {
-  p <- file.path(run_dir, 'chunks', sprintf('%05d.rds', id))
-  if (!file.exists(p)) stop('Missing chunk ', id)
-  z <- readRDS(p); row <- run$manifest[run$manifest$chunk == id, ]
-  stopifnot(identical(z$run, run), identical(z$chunk, id),
-            identical(z$results$EVENT, x$PSI$EVENT[seq.int(row$start, row$end)]))
-  z$results
-})
-all <- do.call(rbind, parts); rownames(all) <- NULL
-stopifnot(!anyDuplicated(all$EVENT), identical(all$EVENT, x$PSI$EVENT))
+stopifnot(identical(run$mode, 'full-table'))
+p <- file.path(run_dir, 'statistics.rds')
+if (!file.exists(p)) stop('Missing full-table statistics.rds; simulation must finish first')
+z <- readRDS(p)
+stopifnot(identical(z$run, run))
+all <- z$results; rownames(all) <- NULL
+stopifnot(nrow(all) == run$rows, !anyDuplicated(all$EVENT),
+          identical(all$EVENT, x$PSI$EVENT))
 out <- file.path(run_dir, 'csv'); dir.create(out, showWarnings = FALSE)
 write_csv(all, file.path(out, 'spire_all_events.csv'))
 for (kind in c('exons','introns','alt','ann')) {
@@ -30,5 +28,5 @@ for (kind in c('exons','introns','alt','ann')) {
   write_csv(selected, file.path(out, paste0('spire_', kind, '_combination.csv')))
 }
 writeLines(capture.output(sessionInfo()), file.path(run_dir, 'collection_sessionInfo.txt'))
-writeLines('All expected chunks verified; CSV export complete.', file.path(run_dir, 'COMPLETE'))
+writeLines('Full-table results verified; CSV export complete.', file.path(run_dir, 'COMPLETE'))
 cat('Exported', nrow(all), 'events to', out, '\n')

@@ -12,7 +12,7 @@ config <- list(
   npoints = 500L, nsim = 1000L,
   # betAS seed=TRUE fixes its internal seed to 21122023 (not set.seed(42)).
   seed = TRUE, coverage_weight = FALSE,
-  chunk_size = 500L,
+  chunk_size = 500L, # Legacy filter-manifest setting; unused by single-job submission.
   pdiff_min = 0.95, fdr_max = 0.05, abs_delta_min = 0.10,
   betas_sha = 'cd37737c75ab17a64652baf2fdb00d1b7c67c294'
 )
