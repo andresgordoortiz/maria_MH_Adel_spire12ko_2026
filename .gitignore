@@ -1,0 +1,11 @@
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+logs/
+data/
+input_tables/
+metadata/
+audit/
+results/
+__pycache__/

@@ -1,0 +1,10 @@
+Package: spireDKOanalysis
+Title: Reproducible Spire1/2 Oocyte Splicing Analysis
+Version: 0.1.0
+Description: Filtering and batch differential splicing with pinned betAS.
+License: MIT
+Imports:
+    betAS,
+    renv
+Remotes:
+    DiseaseTranscriptomicsLab/betAS@cd37737c75ab17a64652baf2fdb00d1b7c67c294
