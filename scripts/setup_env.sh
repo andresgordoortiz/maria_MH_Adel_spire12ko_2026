@@ -7,6 +7,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 # Load cluster dependency required by igraph
 module load GLPK/5.0-GCCcore-14.3.0
+module load FlexiBLAS/3.4.5-GCC-14.3.0
 
 if ! command -v rig >/dev/null 2>&1; then
   bash scripts/install_rig.sh
