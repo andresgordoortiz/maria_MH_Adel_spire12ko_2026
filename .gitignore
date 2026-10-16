@@ -9,3 +9,8 @@ metadata/
 audit/
 results/
 __pycache__/
+reference/
+analysis/renv/library/
+analysis/renv/staging/
+analysis/.Rprofile
+.Rbuildignore

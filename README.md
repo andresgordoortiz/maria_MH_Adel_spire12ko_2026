@@ -1,6 +1,6 @@
 # Spire1/2 DKO: CRG betAS workflow
 
-This repository contains the environment, configuration and execution scripts only. Input data, legacy exports, audit results, generated sample sheets, filtered tables, logs and simulation results are not committed.
+The repository separates the CRG simulation workflow (`scripts/`) from the Spire splicing figures (`analysis/`). See [the analysis guide](analysis/README.md) for the paper adaptations and [panel mapping](analysis/panels.tsv). Input data, legacy exports, audit results, generated sample sheets, filtered tables, logs and simulation results are not committed.
 
 ## Input and environment
 
@@ -119,8 +119,17 @@ Under `results/RUN/csv/`:
 - `differential_spire_*.csv`: upstream FDR <=0.05 and |delta PSI| >=0.10.
 - `spire_*_combination.csv`: the same limits plus Pdiff >=0.95.
 
-These are explicit new selection defaults, not a reconstruction of the old unknown thresholds. Full results retain all unselected events. No heatmap clusters or protein-impact predictions are generated.
+These are explicit new selection defaults, not a reconstruction of the old unknown thresholds. Full results retain all unselected events. The simulation export stops at event statistics; `analysis/run.R` creates heatmaps, protein-impact summaries, GO and the other splicing figures.
 
 Pdiff, Fstat and upstream FDR are joined by EVENT after checking that their delta PSI agrees. Delta PSI is on a 0–1 scale; 0.10 means 10 percentage points. The betAS variable named `FDR` is a per-event simulated null tail fraction, **not a BH-adjusted value**. Its source computes `sum(abs(simDeltaPsi) >= abs(foundPsi)) / nsim` separately for each event, without using the total number of rows. The formula therefore has no global multiple-testing denominator. However, this revision calls `simulate_reads()` before resetting its RNG inside `estimateFDR()`, so splitting a table can change simulated values through RNG state; exact split/full equality is not guaranteed. The workflow passes the full table; its empirical resolution with 1,000 simulations is 0.001. See the [pinned source](https://github.com/DiseaseTranscriptomicsLab/betAS/blob/cd37737c75ab17a64652baf2fdb00d1b7c67c294/R/jointBetas_nofitting.R).
 
 Validation covers both the Spire and FMN2 sample layouts with a small synthetic fixture, full-table calculation/export, agreement with a direct full-table FDR/group-estimate call, input paths with spaces, checkpoint reuse, rejection of incomplete or corrupted results, and submission of exactly one sbatch job. Local data and test artifacts are excluded from commits. Live CRG execution remains untested.
+
+## Checks
+
+```bash
+scripts/run_R.sh tests/cluster_smoke.R
+BETAS_DATASET=fmn2 scripts/run_R.sh tests/cluster_smoke.R
+scripts/run_R.sh tests/analysis_checks.R
+scripts/run_R.sh tests/analysis_ingest.R
+```

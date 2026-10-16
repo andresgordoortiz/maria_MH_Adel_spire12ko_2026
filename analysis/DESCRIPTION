@@ -1,0 +1,18 @@
+Package: spireSplicingFigures
+Title: Spire Splicing Figures Adapted from the Oocyte Paper
+Version: 0.1.0
+Description: Splicing figures, sequence features, functional impact and GO.
+License: MIT
+Imports:
+    clusterProfiler,
+    data.table,
+    digest,
+    dplyr,
+    ggplot2,
+    ggrepel,
+    jsonlite,
+    org.Mm.eg.db,
+    patchwork,
+    renv,
+    stringr,
+    tidyr
