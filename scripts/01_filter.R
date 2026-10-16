@@ -1,12 +1,17 @@
 source('scripts/common.R')
 if (!file.exists(config$input)) stop('Inclusion table not found: ', config$input)
-dir.create('metadata', recursive = TRUE, showWarnings = FALSE)
+metadata_dir <- dirname(config$samples)
+dir.create(metadata_dir, recursive = TRUE, showWarnings = FALSE)
 metadata <- data.frame(sample = names(config$sample_groups),
   group = unname(config$sample_groups),
-  replicate_label = sub('.*_', '', names(config$sample_groups)),
-  metadata_source = 'configured_from_inclusion_header', stringsAsFactors = FALSE)
-stopifnot(!anyDuplicated(metadata$sample), nrow(metadata) == 6L,
-          all(table(metadata$group)[c(config$group_a, config$group_b)] == 3L))
+  replicate_label = if (dataset == 'fmn2') c('1','2','1','2') else
+    sub('.*_', '', names(config$sample_groups)),
+  metadata_source = if (dataset == 'fmn2') 'GSE103718_and_reference_run_manifest' else
+    'configured_from_inclusion_header', stringsAsFactors = FALSE)
+stopifnot(!anyDuplicated(metadata$sample),
+          identical(metadata$sample, names(config$sample_groups)),
+          all(metadata$group %in% c(config$group_a, config$group_b)),
+          all(table(factor(metadata$group, levels=c(config$group_a,config$group_b))) >= 2L))
 raw <- betAS::getDataset(config$input, tool = 'vast-tools')
 expected <- c('GENE','EVENT','COORD','LENGTH','FullCO','COMPLEX',
               as.vector(rbind(metadata$sample, paste0(metadata$sample, '.Q'))))
@@ -25,7 +30,7 @@ counts <- lapply(events$Qual[-(1:6)], function(x) {
 coverage <- do.call(cbind, lapply(counts, rowSums))
 valid_counts <- Reduce(`&`, lapply(counts, function(x) rowSums(!is.finite(x) | x < 0) == 0))
 complete <- complete.cases(events$PSI[-(1:6)])
-keep <- complete & valid_counts & rowSums(coverage >= config$min_reads, na.rm = TRUE) == 6L
+keep <- complete & valid_counts & rowSums(coverage >= config$min_reads, na.rm = TRUE) == nrow(metadata)
 stopifnot(identical(filtered$PSI$EVENT, events$PSI$EVENT[keep]))
 n10_counts <- table(filtered$PSI$COMPLEX)
 all_n10_ids <- filtered$PSI$EVENT
@@ -41,18 +46,14 @@ filtered$provenance <- list(input_md5 = unname(tools::md5sum(config$input)),
 atomic_rds(filtered, config$filtered)
 raw_filtered <- raw[match(all_n10_ids, raw$EVENT), ]
 # Restore original quality header spelling for a genuine FULL table.
-names(raw_filtered) <- sub('\\.Q$', '-Q', names(raw_filtered))
-write.table(raw_filtered, 'data/processed/spire_N10_INCLUSION_LEVELS_FULL-mm10.tab',
+names(raw_filtered) <- sub('[.]Q$', '-Q', names(raw_filtered))
+write.table(raw_filtered, file.path(dirname(config$filtered), paste0(dataset, '_N10_INCLUSION_LEVELS_FULL-mm10.tab')),
             sep = '\t', quote = FALSE, row.names = FALSE, na = 'NA')
 qc <- data.frame(sample = metadata$sample, group = metadata$group,
   total_events = nrow(raw), missing_PSI = colSums(is.na(events$PSI[-(1:6)])),
   coverage_ge10 = colSums(coverage >= config$min_reads, na.rm = TRUE))
-write_csv(qc, 'metadata/sample_qc.csv')
+write_csv(qc, file.path(metadata_dir, 'sample_qc.csv'))
 write_csv(data.frame(COMPLEX = names(n10_counts), retained_N10 = as.integer(n10_counts),
-                    included_in_simulation = names(n10_counts) %in% config$analysis_types), 'metadata/filter_counts.csv')
-manifest <- data.frame(chunk = seq_len(ceiling(nrow(filtered$PSI)/config$chunk_size)))
-manifest$start <- (manifest$chunk - 1L)*config$chunk_size + 1L
-manifest$end <- pmin(manifest$chunk*config$chunk_size, nrow(filtered$PSI))
-write_csv(manifest, 'data/processed/chunks.csv')
-writeLines(capture.output(sessionInfo()), 'metadata/filter_sessionInfo.txt')
-cat(nrow(raw), 'input events;', length(all_n10_ids), 'pass N10;', nrow(filtered$PSI), 'AS events; ', nrow(manifest), 'chunks\n')
+                    included_in_simulation = names(n10_counts) %in% config$analysis_types), file.path(metadata_dir, 'filter_counts.csv'))
+writeLines(capture.output(sessionInfo()), file.path(metadata_dir, 'filter_sessionInfo.txt'))
+cat(nrow(raw), 'input events;', length(all_n10_ids), 'pass N10;', nrow(filtered$PSI), 'AS events\n')

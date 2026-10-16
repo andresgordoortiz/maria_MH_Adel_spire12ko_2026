@@ -6,4 +6,4 @@ export PATH="$HOME/.local/bin:$PATH"
 scripts/setup_env.sh
 scripts/run_R.sh scripts/01_filter.R
 echo 'Preparation complete. Submit from the login node with:'
-echo 'scripts/submit_crg.sh results/spire_N10_nsim1000_run01'
+echo "BETAS_DATASET=${BETAS_DATASET:-spire} scripts/submit_crg.sh results/${BETAS_DATASET:-spire}_N10_nsim1000_run01"

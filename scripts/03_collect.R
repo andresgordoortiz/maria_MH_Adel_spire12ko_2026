@@ -16,16 +16,16 @@ all <- z$results; rownames(all) <- NULL
 stopifnot(nrow(all) == run$rows, !anyDuplicated(all$EVENT),
           identical(all$EVENT, x$PSI$EVENT))
 out <- file.path(run_dir, 'csv'); dir.create(out, showWarnings = FALSE)
-write_csv(all, file.path(out, 'spire_all_events.csv'))
+write_csv(all, file.path(out, paste0(dataset, '_all_events.csv')))
 for (kind in c('exons','introns','alt','ann')) {
   z <- all[family(all$EVENT, all$COMPLEX) == kind, , drop = FALSE]
-  write_csv(z, file.path(out, paste0('spire_statistics_', kind, '.csv')))
+  write_csv(z, file.path(out, paste0(dataset, '_statistics_', kind, '.csv')))
   differential <- z[z$FDR <= config$fdr_max & abs(z$deltapsi) >= config$abs_delta_min, , drop = FALSE]
-  write_csv(differential, file.path(out, paste0('differential_spire_', kind, '.csv')))
+  write_csv(differential, file.path(out, paste0('differential_', dataset, '_', kind, '.csv')))
   selected <- z[z$Pdiff >= config$pdiff_min & z$FDR <= config$fdr_max &
                 abs(z$deltapsi) >= config$abs_delta_min,
               c('GENE','EVENT','COORD','deltapsi','Pdiff','Fstat','FDR'), drop = FALSE]
-  write_csv(selected, file.path(out, paste0('spire_', kind, '_combination.csv')))
+  write_csv(selected, file.path(out, paste0(dataset, '_', kind, '_combination.csv')))
 }
 writeLines(capture.output(sessionInfo()), file.path(run_dir, 'collection_sessionInfo.txt'))
 writeLines('Full-table results verified; CSV export complete.', file.path(run_dir, 'COMPLETE'))

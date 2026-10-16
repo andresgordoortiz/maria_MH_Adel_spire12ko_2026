@@ -7,7 +7,8 @@ command -v sbatch >/dev/null
 mkdir -p logs
 run_dir=$1
 scripts/run_R.sh scripts/00_init_run.R "$run_dir"
-job=$(sbatch --parsable scripts/betas.sbatch "$run_dir")
+job=$(sbatch --parsable --job-name="${BETAS_DATASET:-spire}-betAS" \
+  --export="ALL,BETAS_DATASET=${BETAS_DATASET:-spire}" scripts/betas.sbatch "$run_dir")
 printf '%s\n' "$job" > "$run_dir/slurm_jobs.txt"
 printf 'Submitted single full-table simulation and CSV export job %s.\n' "${job%%;*}"
 printf 'Monitor with: squeue -j %s\n' "${job%%;*}"

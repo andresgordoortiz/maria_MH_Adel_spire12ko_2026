@@ -1,3 +1,5 @@
+dataset <- Sys.getenv('BETAS_DATASET', unset = 'spire')
+if (!dataset %in% c('spire', 'fmn2')) stop('BETAS_DATASET must be spire or fmn2')
 config <- list(
   input = Sys.getenv('SPIRE_INCLUSION_TABLE', unset =
     '/users/aaljord/agordo/git/24CRG_ADEL_MANU_OOCYTE_SPLICING/notebooks/inclusion_tables/spiredko_INCLUSION_LEVELS_FULL-mm10.tab'),
@@ -16,3 +18,18 @@ config <- list(
   pdiff_min = 0.95, fdr_max = 0.05, abs_delta_min = 0.10,
   betas_sha = 'cd37737c75ab17a64652baf2fdb00d1b7c67c294'
 )
+
+if (dataset == 'fmn2') {
+  config$input <- Sys.getenv('FMN2_INCLUSION_TABLE', unset =
+    '/users/aaljord/aaljord/Al Jord Lab - CRG/Lab Members/Andres Gordo Ortiz/Data/Oocyte/FMN2KO and SPIRE/FMN2KO SPIRE sent to MHV 14 02 2025/oocyte_fmn2_spire_report_andresgordo/raw_data/fmndko_INCLUSION_LEVELS_FULL-mm10.tab')
+  config$samples <- 'metadata/fmn2/samples.csv'
+  # GSE103718: Fmn7/Fmn8 are +/- pools; Fmn9/Fmn10 are -/- pools.
+  config$sample_groups <- setNames(c('Het','Het','KO','KO'), c(
+    'SRR6026682_SRR6026683_SRR6026684_merged',
+    'SRR6026685_SRR6026686_SRR6026687_merged',
+    'SRR6026688_SRR6026689_SRR6026690_merged',
+    'SRR6026691_SRR6026692_SRR6026693_merged'))
+  config$filtered <- 'data/processed/fmn2/fmn2_N10.rds'
+  config$group_a <- 'Het'
+  config$group_b <- 'KO'
+}
