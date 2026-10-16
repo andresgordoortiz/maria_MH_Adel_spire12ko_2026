@@ -16,7 +16,7 @@ R 4.5.2 is managed by rig in user mode. renv restores the pinned dependencies, i
 
 ## Prepare on CRG
 
-From this repository's root, with rig already installed and available, run:
+From this repository's root, run:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
@@ -25,7 +25,9 @@ srun --job-name=spire-setup --qos=short --time=02:00:00 \
   bash scripts/prepare_cluster.sh
 ```
 
-This installs/restores R and packages, validates the six expected sample/quality column pairs, generates `metadata/samples.csv` from the group mapping in `config/analysis.R`, and filters the existing inclusion table. It creates all required output directories. The allocated node needs internet access for installation and shared access to the project and home directory. The input is read without modification.
+If rig is missing, setup first installs the official rig 0.10.0 Linux binary into `~/.local/bin`, verifying its pinned SHA-256. No sudo is needed. An existing rig on PATH is reused. This follows the [official user-install method](https://rig.r-lib.org/install.html).
+
+Setup then installs/restores R and packages, validates the six expected sample/quality column pairs, generates `metadata/samples.csv` from the group mapping in `config/analysis.R`, and filters the existing inclusion table. It creates all required output directories. The allocated node needs internet access for installation and shared access to the project and home directory. The input is read without modification.
 
 The filter is `betAS::filterEvents(..., N=10)`: no missing PSI and corrected inclusion+exclusion coverage >=10 in **each of the six samples**. An independent coverage check must agree exactly. ANN annotation-module exons are retained and exported separately. The filtered FULL table, paired PSI/Qual RDS and chunk manifest are generated in `data/processed/`; QC reports are generated in `metadata/`.
 

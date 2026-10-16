@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
+export PATH="$HOME/.local/bin:$PATH"
 # An explicitly supplied Rscript can be a CRG module or container wrapper.
 # Each R script checks the exact version and pinned betAS revision.
 if [[ -n "${RSCRIPT:-}" ]]; then
