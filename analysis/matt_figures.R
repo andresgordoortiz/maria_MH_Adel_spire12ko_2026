@@ -39,7 +39,7 @@ for (kind in c('EX', 'IR')) {
     mutate(significance = stars(p.value), effect = ifelse(difference >= 0, 'Increase', 'Decrease'))
   save_plot(ggplot(summary, aes(group1, feature)) + geom_point(aes(color = effect, size = -log10(pmax(p.value, 1e-300))), alpha = .8) +
     geom_text(aes(label = significance), nudge_x = .2, size = 3) +
-    scale_color_manual(values = c(Increase = '#C85450', Decrease = '#5B8FA3')) +
+    scale_color_manual(values = c(Increase = direction_colors[['up']], Decrease = direction_colors[['down']])) +
     labs(x = 'Versus ndiff', y = NULL, title = paste(kind, 'sequence-feature summary'),
       subtitle = 'Paper features; stars use raw Mann–Whitney p-values', size = '-log10 p'), paste0('Fig2G_Matt_', kind), 9, 4)
   sig_features <- unique(matt_stats$feature[matt_stats$event_type == kind & !is.na(matt_stats$p.value) & matt_stats$p.value <= .05])

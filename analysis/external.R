@@ -49,7 +49,7 @@ input_names <- list.files(file.path(out, 'external_inputs'), pattern = '[.]txt$'
 write.csv(data.frame(file = input_names, sha256 = vapply(input_names, function(n)
   digest::digest(file = file.path(out, 'external_inputs', n), algo = 'sha256'), character(1))),
   file.path(out, 'external_inputs', 'input_checksums.csv'), row.names = FALSE)
-status <- rbind(status, data.frame(step = 'RBP_rMAPS2_inputs', status = 'ready; external server analysis needs user intervention'))
+status <- rbind(status, data.frame(step = 'RBP_rMAPS2_inputs', status = 'ready; use the checked local rMAPS3 converter or a compatible external server'))
 
 matt_dir <- Sys.getenv('MATT_OUTPUT_DIR', paste0('data/processed/', dataset, '_matt_final'))
 if (!isTRUE(get0('prepare_only')) && file.exists(file.path(matt_dir, 'COMPLETE'))) {
@@ -63,6 +63,13 @@ if (!isTRUE(get0('prepare_only')) && file.exists(file.path(matt_dir, 'COMPLETE')
 
 rmaps_dir <- Sys.getenv('RMAPS_OUTPUT_DIR', paste0('data/processed/', dataset, '_rmaps'))
 if (!isTRUE(get0('prepare_only')) && dir.exists(rmaps_dir)) {
-  source('analysis/rbp_figures.R')
+  source('analysis/rbp_helpers.R')
+  motifs <- read_rmaps_motifs(rmaps_dir,out)
+  motifs$dataset <- dataset
+  write_table(rbp_minima(motifs) %>% select(-dataset),'RBP_minimum_motif_pvalues')
+  source_files <- c(source_files,list.files(rmaps_dir,
+    pattern='^pVal[.](up|dn)[.]vs[.]bg[.]RNAmap[.]txt$',recursive=TRUE,full.names=TRUE))
+  status <- rbind(status,data.frame(step='RBP_heatmaps_and_region_summaries',
+    status='motif tables validated; render joint paper figures with analysis/render_rmaps3.R'))
 } else status <- rbind(status, data.frame(step = 'RBP_heatmaps_and_region_summaries',
-  status = 'pending external rMAPS2 results; set RMAPS_OUTPUT_DIR and rerender'))
+  status = 'pending rMAPS results; see analysis/RMAPS3.md or set RMAPS_OUTPUT_DIR and rerender'))

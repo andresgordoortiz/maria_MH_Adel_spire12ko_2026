@@ -168,7 +168,7 @@ for (kind in c('EX', 'IR')) {
       agg <- long %>% group_by(category, bin, region) %>% summarise(mean_GC = mean(GC),
         se = sd(GC) / sqrt(n()), n = n(), .groups = 'drop')
       write_table(agg, paste('GC_gradient', kind, level, view, sep = '_'))
-      colors <- c(direction_colors, differential = '#706993')
+      colors <- c(direction_colors, differential = '#222222')
       save_plot(ggplot(agg, aes(bin, mean_GC, color = category, fill = category)) +
         geom_ribbon(aes(ymin = mean_GC - 1.96 * se, ymax = mean_GC + 1.96 * se), alpha = .15, color = NA) +
         geom_line(linewidth = .6) + facet_grid(~region, scales = 'free_x', space = 'free_x') +

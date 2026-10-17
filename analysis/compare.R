@@ -20,8 +20,7 @@ dir.create(file.path(out, 'tables'), recursive = TRUE)
 dir.create(file.path(out, 'figures'))
 figure_names <- character(); main_plots <- list()
 provenance_label <- 'Final betAS runs; FPR ≤0.05 and |ΔPSI| ≥0.10; common tested events'
-colors <- c('Both: same direction' = '#268A6C', 'Both: opposite direction' = '#985277',
-  'Spire only' = '#706993', 'FMN2 only' = '#70A0AF', Neither = '#BDBDBD')
+colors <- overlap_colors
 common <- join_common_events(tables$spire, tables$fmn2)
 common$comparison <- factor(common$comparison, levels = names(colors))
 for (ds in names(studies)) {
@@ -91,7 +90,7 @@ counts <- bind_rows(lapply(names(studies), function(ds) {
 }))
 write_table(counts, 'common_universe_event_rates')
 save_plot(ggplot(counts, aes(event_type, selected_per_1000, fill = dataset)) + geom_col(position = 'dodge') +
-  scale_fill_manual(values = c(spire = '#706993', fmn2 = '#70A0AF')) + labs(x = 'Event type', y = 'Selected per 1,000 commonly tested events',
+  scale_fill_manual(values = dataset_colors) + labs(x = 'Event type', y = 'Selected per 1,000 commonly tested events',
     title = 'Differential splicing with matched detection opportunities'), 'Comparison_event_rates', 8, 5)
 scatter <- common[order(common$comparison != 'Neither'), ]
 label_rows <- candidates %>% arrange(desc(min_abs_deltapsi)) %>% distinct(GENE, .keep_all = TRUE) %>% slice_head(n = 8)
@@ -107,7 +106,7 @@ bars <- data.frame(category = c('Spire only', 'Shared', 'FMN2 only'),
 write_table(bars, 'shared_and_dataset_specific_counts')
 save_plot(ggplot(pivot_longer(bars, c(events, genes), names_to = 'unit', values_to = 'n'), aes(category, n, fill = category)) +
   geom_col(width = .65) + geom_text(aes(label = n), vjust = -.4) + facet_wrap(~unit, scales = 'free_y') +
-  scale_fill_manual(values = c('Spire only' = '#706993', Shared = '#268A6C', 'FMN2 only' = '#70A0AF')) +
+  scale_fill_manual(values = c(colors[c('Spire only', 'FMN2 only')], Shared = '#222222')) +
   labs(x = NULL, y = 'Count', title = 'Shared affected events and genes within the common universe'), 'Comparison_overlap_counts', 9, 5)
 if (nrow(candidates)) {
   psi <- bind_rows(lapply(names(tables), function(ds) {
@@ -121,7 +120,8 @@ if (nrow(candidates)) {
   }))
   psi$event_label <- factor(paste(psi$GENE, psi$EVENT), levels = rev(unique(paste(candidates$GENE, candidates$EVENT))))
   save_plot(ggplot(psi, aes(sample, event_label, fill = PSI)) + geom_tile() +
-    facet_grid(~dataset, scales = 'free_x', space = 'free_x') + scale_fill_viridis_c(limits = c(0, 100)) +
+    facet_grid(~dataset, scales = 'free_x', space = 'free_x') +
+    scale_fill_viridis_c(option = sequential_palette, direction = -1, limits = c(0, 100)) +
     labs(x = NULL, y = NULL, title = 'Raw sample PSI for events selected in both studies') +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)), 'Comparison_shared_event_sample_PSI', 13, max(6, nrow(candidates) * .3))
   write_table(psi, 'shared_event_sample_PSI')
@@ -159,7 +159,7 @@ report <- c('# Spire versus FMN2: final splicing comparison', '',
     sum(joined_features$group2 == 'ndiff' & joined_features$same_effect_direction & joined_features$BH_significant_both, na.rm = TRUE)), '',
   'GO uses the same common-tested Entrez universe for both studies and for their shared-gene sets. A shared GO label alone does not show that the same genes or events drive enrichment. Complete results and overlapping term/driver tables are exported.', '',
   'Cautions: FMN2 has two biological pools per group with heterozygous controls; Spire has three profiles per group with animal/pooling identity unverified. These are separate experiments, not a factorial design. A missing selection is not proof of no effect. betAS FDR is an empirical per-event FPR, not a multiplicity-adjusted FDR. Complementary alternative-site rows and multiple events within genes are dependent; event/locus Fisher and sign tests are exploratory. Gene overlap uses a uniform gene null and does not fully correct gene length or event-count bias.', '',
-  'RBP motifs still require the external rMAPS2 run. No motifs or gene-expression results are inferred here.')
+  'Completed RBP motif figures and their separate statistical limitations are in ../rbp/index.html. No gene-expression results are inferred here.')
 writeLines(report, file.path(out, 'REPORT.md'))
 html <- c('<!doctype html><html lang="en"><meta charset="utf-8"><title>Spire and FMN2 comparison</title>',
   '<style>body{font:16px system-ui;max-width:1100px;margin:30px auto;padding:0 20px}img{max-width:100%}article{border-top:1px solid #ccc;margin:30px 0}</style>',
@@ -175,7 +175,7 @@ if (length(unique(dirname(c(unname(studies), out)))) == 1L) {
     '<style>body{font:18px system-ui;max-width:800px;margin:40px auto;padding:0 20px}</style><h1>Final splicing analyses</h1>',
     sprintf('<p>%s shared selected events: %s concordant, %s opposing; %s shared affected genes.</p>', sum(both), sum(same), sum(opposite), length(shared_genes)),
     sprintf('<p><a href="%s/index.html">%s figures and report</a></p>', links, names(links)),
-    '<p>Comparison uses the common tested universe. FMN2 controls are heterozygous; biological replication and coverage differ. RBP motifs require the external rMAPS2 analysis.</p></html>'),
+    '<p>Comparison uses the common tested universe. FMN2 controls are heterozygous; biological replication and coverage differ. Joint RBP figures are in results/rbp/index.html.</p></html>'),
     file.path(dirname(out), 'index.html'))
 }
 stopifnot(nrow(common) <= min(vapply(tables, nrow, integer(1))), sum(same) + sum(opposite) == sum(both))

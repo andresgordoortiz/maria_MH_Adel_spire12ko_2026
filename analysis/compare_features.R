@@ -25,7 +25,7 @@ if (nrow(rows)) {
   x$label <- paste(x$event_type, x$feature, x$group, sep = ': ')
   write_table(x, 'Matt_comparison_plotted_effects')
   save_plot(ggplot(x, aes(dataset, label)) + geom_point(aes(color = effect, size = -log10(pmax(p.value, 1e-300)), shape = p.BH <= .05)) +
-    scale_color_gradient2(low = '#5B8FA3', mid = 'white', high = '#C85450', midpoint = 0) +
+    scale_color_gradient2(low = signed_colors[1], mid = signed_colors[2], high = signed_colors[3], midpoint = 0) +
     labs(x = NULL, y = NULL, color = 'Median shift / ndiff IQR', size = '-log10 raw p', shape = 'BH p ≤0.05',
       title = 'Sequence-feature responses in both knockouts', subtitle = 'Each study uses its own tested-event background.\nShared feature signatures do not establish an RBP mechanism.') + theme(legend.box = 'vertical'),
     'Comparison_Matt_feature_signatures', 12, max(8, 2 + length(unique(x$label)) * .25))
@@ -35,7 +35,7 @@ if (all(vapply(studies, function(p) file.exists(file.path(p, 'tables', 'protein_
     z <- fread(file.path(studies[[ds]], 'tables', 'protein_impact_summary.csv'));z$dataset <- ds;z
   }))
   write_table(x, 'protein_impact_comparison')
-  save_plot(ggplot(x, aes(dataset, 100 * prop, fill = Impact)) + geom_col(width = .65) + scale_fill_brewer(palette = 'Set2') +
+  save_plot(ggplot(x, aes(dataset, 100 * prop, fill = Impact)) + geom_col(width = .65) + scale_fill_manual(values = impact_colors) +
     labs(x = NULL, y = '% of selected events', title = 'Predicted functional impact in each full dataset',
       subtitle = 'Descriptive full-dataset proportions; the tested event universes differ'), 'Comparison_protein_impact', 10, 5)
 }

@@ -54,7 +54,7 @@ Overlap Fisher tests use a uniform event/locus/gene null. Events within genes an
 
 ## Methods and limits
 
-- Spire: Cont_a/b/c versus DKO_a/b/c, exactly as named in the inclusion table. Independent animals, pooling, pairing and batches are not established by these column names. FMN2: two merged Het control pools versus two KO pools; these are four profiles, not twelve biological replicates. See the root README for the GEO mapping. Positive delta means higher inclusion/site use/retention in the knockout group.
+- Spire: Cont_a/b/c versus DKO_a/b/c, exactly as named in the inclusion table. Independent animals, pooling, pairing and batches are not established by these column names. FMN2: two merged Het control pools versus two KO pools; these are four profiles, not twelve biological replicates. See [the cluster guide](../docs/CLUSTER.md) for the GEO mapping. Positive delta means higher inclusion/site use/retention in the knockout group.
 - N≥10 and complete PSI in every sample (six for Spire, four for FMN2), as filtered by the existing workflow. Paper selection: upstream `FDR <= 0.05` and `abs(deltapsi) >= 0.10`; Pdiff is not an extra selection criterion for these figures. Delta is a fraction: 0.10 is 10 percentage points. The reference scripts use inclusive cutoffs, even where prose says “lower than”.
 - betAS calls its empirical per-event false-positive rate `FDR`. It is not a BH-adjusted multiple-testing FDR. Exact zeros have finite simulation resolution, and tiny fitted changes at PSI boundaries can have FPR zero. Raw values are preserved; the volcano floor, compression and jitter affect display only. The effect-size filter matches the paper and does not calibrate the FPR.
 - Legacy reconstruction requires identical statistical vectors across the three full `spire_pdiff_*.csv` files, and exact annotation/sample-PSI agreement at every identified row. ANN annotations come from the inclusion table at verified positions. The historical R/betAS revision, simulation settings and seed remain unverified. Historical “differential” and “combination” exports are not pooled into this analysis.
@@ -67,28 +67,37 @@ Overlap Fisher tests use a uniform event/locus/gene null. Events within genes an
 - GO uses the same `clusterProfiler::enrichGO`, mouse `org.Mm.eg.db`, BH correction, 0.05 p/adjusted-p cutoffs and default q cutoff 0.2, gene-set sizes 10–500. The primary `paper_OrgDb` universe matches the paper; `tested_N10` is a separately named sensitivity analysis. Gene mappings, full results and objects are exported. GO annotations/package versions are pinned here but the paper did not pin its OrgDb release, so exact historical GO replication is not claimed.
 - Paper drug intersections/convergence are adapted to a two-study comparison, with the different coverage and controls made explicit. Gene expression, protein abundance/stability and microscopy panels are outside the requested splicing-only scope. No mechanistic or meiotic phenotype is inferred from these tables alone.
 
-## RBP handoff: user intervention required
+## RBP motif analysis
 
-Use `OUTPUT/external_inputs/DATASET_TYPE_{up,down,ndiff}.txt` in rMAPS2 with mm10 (`DATASET=spire` or `fmn2`). Types: EX, IR, Alt5 and Alt3. These are the paper's **custom** coordinate tables, with VASTDB 1-based closed coordinates, not rMATS result files. On the minus strand the flanking exons are sorted by genomic coordinate, correcting the old export's strand ambiguity. Check the current custom-upload coordinate convention in the server interface before uploading; its help endpoint was inaccessible during preparation. Do not select a rMATS upload mode for these files.
+The active figures are in `results/rbp/index.html`: Figure 2H, all five splicing
+panels S6A–E, alternative-site extensions and RBP count comparisons. Both datasets
+appear together. Raw maps remain under each dataset's `rmaps3_outputs/`.
 
-Use 50 bp exon windows and 250 bp intron windows as stated in the paper. Background is all eligible unselected events per type (not Matt's sampled subset). Keep up/down defined relative to the knockout. Use SE for EX and RI for IR; alternative-site coordinate tables are provided, but their mapping to the server's A5SS/A3SS custom format needs checking in the current interface before use. Export manifests identify every input event and counts/exclusions.
+See [RMAPS3.md](RMAPS3.md) for the tested fork, methods and commands. The counter
+and its regression tests are maintained in the sibling rMAPS3 repository; this
+repository owns coordinate conversion and analysis figures. Rerender with:
 
-Before uploading, copy `OUTPUT/external_inputs/input_checksums.csv` into a new local result directory, e.g. `data/processed/spire_rmaps/`. Save downloaded tables as:
-
-```
-spire_rmaps/input_checksums.csv
-spire_rmaps/EX/pVal.up.vs.bg.RNAmap.txt
-spire_rmaps/EX/pVal.dn.vs.bg.RNAmap.txt
-spire_rmaps/IR/pVal.up.vs.bg.RNAmap.txt
-spire_rmaps/IR/pVal.dn.vs.bg.RNAmap.txt
+```bash
+bash scripts/run_R.sh --vanilla analysis/render_rmaps3.R
 ```
 
-EX expects RBP plus eight region columns; IR expects four; optional Alt5/Alt3 expect six (as in the reference analysis). Set `RMAPS_OUTPUT_DIR` to this directory and rerun `analysis/run.R` into a new output directory. The renderer checks input hashes, validates p-values, takes the minimum motif p per RBP/region and generates heatmaps and region counts. These are raw minimum p-values, not corrected motif significance. Zero p-values get a documented finite plotting floor. No external upload has been performed.
+The separate RNAmotifs exploration does not feed the rMAPS renderer. Historical
+server-upload instructions and earlier rMAPS attempts are archived under
+`legacy/rmaps3/`; no old result is silently reused for different input tables.
 
 ## Checks
 
+Shared colours are defined once in `palettes.R`; see
+[the palette guide](../docs/COLOURS.md). Current biological conclusions are in
+[the evidence summary](../docs/CONCLUSIONS.md). Diagnostic code formerly stored
+inside results now lives at `check_spire_raw.py`, `check_spire_labels.R` and
+`review_plots.R`; their commands and required local tables are documented in the
+root README and diagnostic reports.
+
 ```bash
 scripts/run_R.sh tests/analysis_checks.R
+scripts/run_R.sh tests/palette_checks.R
+scripts/run_R.sh tests/rbp_paper_checks.R
 scripts/run_R.sh tests/analysis_ingest.R
 BETAS_DATASET=fmn2 scripts/run_R.sh tests/analysis_ingest.R
 scripts/run_R.sh tests/comparison_checks.R

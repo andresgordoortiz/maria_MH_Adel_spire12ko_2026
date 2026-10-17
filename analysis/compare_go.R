@@ -27,7 +27,7 @@ for (ont in c('BP', 'CC', 'MF')) for (set in names(sets)) {
     if (nrow(selected_go)) {
       x <- head(selected_go[order(selected_go$p.adjust, -selected_go$Count), ], 15)
       x$Description <- factor(x$Description, levels = rev(x$Description))
-      p <- ggplot(x, aes(-log10(p.adjust), Description)) + geom_point(aes(size = Count), color = '#268A6C') +
+      p <- ggplot(x, aes(-log10(p.adjust), Description)) + geom_point(aes(size = Count), color = '#222222') +
         labs(x = '-log10 BH-adjusted p', y = NULL, title = paste('Shared-target GO:', set, ont),
           subtitle = paste(length(common_entrez), 'Entrez genes in the common tested universe'))
     } else p <- empty_plot(paste(if (length(ids) < 5) 'Insufficient mapped genes:' else 'No enriched terms:', set, ont))
@@ -64,7 +64,8 @@ if (length(plot_terms)) {
   x$selected <- x$p.adjust <= .05
   write_table(x, 'GO_comparison_plotted_terms')
   save_plot(ggplot(x, aes(dataset, Description)) + geom_point(aes(size = Count, color = score, alpha = selected)) +
-    facet_grid(ontology ~ ., scales = 'free_y', space = 'free_y') + scale_color_viridis_c() +
+    facet_grid(ontology ~ ., scales = 'free_y', space = 'free_y') +
+    scale_color_viridis_c(option = sequential_palette, direction = -1) +
     scale_alpha_manual(values = c('FALSE' = .25, 'TRUE' = 1)) +
     labs(x = NULL, y = NULL, color = '-log10 BH p', alpha = 'BH p ≤0.05',
       title = 'GO term profiles on the same tested-gene background', subtitle = 'Top 8 terms in either study per ontology; faded points are not significant'),

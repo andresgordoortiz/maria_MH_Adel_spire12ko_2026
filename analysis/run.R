@@ -78,7 +78,7 @@ if (exists('matched')) report <- c(report,
   sprintf('VASTDB EVENT_INFO lacks %s tested IDs (%s selected). An additional %s IDs have changed coordinates and are excluded from sequence/Matt/RBP inputs. They remain in splicing/GO results. Protein-impact annotations use available mm10 v3 rather than the unavailable v2.3.',
     sum(!matched), sum(!matched & events$direction != 'ndiff'), sum(changed_coords)), '')
 report <- c(report, 'Panel status:', '', paste0('- ', status$step, ': ', status$status), '',
-  'The companion comparison report evaluates shared events, directions, genes and GO using a common tested universe. Gene expression and experimental imaging/meiosis panels are outside the splicing-only analysis. RBP motifs require an external rMAPS2 run; inputs and the checked output parser are prepared. No upload was performed.')
+  'The companion comparison report evaluates shared events, directions, genes and GO using a common tested universe. Gene expression and experimental imaging/meiosis panels are outside the splicing-only analysis. RBP motif analysis can run locally with rMAPS3; see analysis/RMAPS3.md and the panel status above. No upload was performed.')
 writeLines(report, file.path(out, 'REPORT.md'))
 stopifnot(all(file.exists(file.path(out, 'figures', paste0(figs, '.pdf')))),
   sum(table(events$direction)) == nrow(events))

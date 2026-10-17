@@ -56,7 +56,6 @@ for (kind in c('EX', 'IR')) {
   write_table(z[!varying, c('EVENT', 'GENE', 'deltapsi', 'FDR')], paste0(kind, '_constant_PSI_excluded_from_clustering'))
   mat <- mat[varying, , drop = FALSE]
   if (!nrow(mat)) next
-  palette <- if (kind == 'EX') c('#E0E0E0', '#E0E0E0', '#7A2048') else c('#E0E0E0', '#E0E0E0', '#2C2C2C')
   mini <- robust_scale(mat, 1)
   cl <- cluster_rows(mini)
   collapsed <- data.frame(EVENT = rownames(mat), Cluster = cl$cluster,
@@ -69,7 +68,7 @@ for (kind in c('EX', 'IR')) {
   mini_plot$Pattern <- paste0('Pattern ', mini_plot$Cluster, ' (n=', mini_plot$n, ')')
   save_plot(ggplot(mini_plot, aes(factor(Group, levels = c(config$group_a, config$group_b)), Pattern, fill = scaled_PSI)) +
     geom_tile(width = .95, height = .95) + geom_text(aes(label = sprintf('%.2f', scaled_PSI)), size = 4) +
-    scale_fill_gradientn(colors = palette, limits = c(-1, 1)) + coord_equal() +
+    scale_fill_gradientn(colors = signed_colors, limits = c(-1, 1)) + coord_equal() +
     labs(x = NULL, y = NULL, fill = 'MAD-scaled PSI', title = paste(kind, 'collapsed patterns')),
     paste0('Fig2F_', kind, '_miniheatmap'), 6, 3.5)
   full <- robust_scale(mat, 2)
@@ -87,7 +86,7 @@ for (kind in c('EX', 'IR')) {
     paste0(kind, '_full_heatmap_event_clusters'))
   write_table(data.frame(sample = samples, cor(full, method = 'spearman'), check.names = FALSE), paste0(kind, '_sample_correlations'))
   save_plot(ggplot(hm, aes(sample, row, fill = value)) + geom_raster() +
-    scale_fill_gradientn(colors = palette, limits = c(-2, 2)) +
+    scale_fill_gradientn(colors = signed_colors, limits = c(-2, 2)) +
     labs(x = NULL, y = paste0(nrow(full), ' events'), fill = 'MAD-scaled PSI', title = paste(kind, 'sample heatmap')) +
     theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1)),
     paste0('Supplement_', kind, '_full_heatmap'), 6, 7)
@@ -100,6 +99,7 @@ cor_df$SampleA <- unname(sample_labels[as.character(cor_df$SampleA)])
 cor_df$SampleB <- unname(sample_labels[as.character(cor_df$SampleB)])
 write_table(data.frame(sample = samples, cor_mat, check.names = FALSE), 'QC_sample_Spearman')
 save_plot(ggplot(cor_df, aes(SampleA, SampleB, fill = rho)) + geom_tile() +
-  geom_text(aes(label = sprintf('%.3f', rho)), size = 3) + scale_fill_gradient(low = '#F1EEF6', high = '#706993') +
+  geom_text(aes(label = sprintf('%.3f', rho)), size = 3, color = 'white') +
+  scale_fill_viridis_c(option = sequential_palette, direction = -1, limits = c(0, 1)) +
   coord_equal() + labs(x = NULL, y = NULL, title = 'N10 PSI sample correlations') +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)), 'QC_sample_correlations', 6, 5)

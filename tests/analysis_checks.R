@@ -1,5 +1,6 @@
 .libPaths(c(normalizePath('analysis/renv/library', mustWork = FALSE), .libPaths()))
 source('analysis/common.R')
+source('analysis/rbp_helpers.R')
 dataset <- 'spire'
 stopifnot(identical(valid_genes(c('B', NA, '', 'NA', 'NaN', 'A', 'A')), c('A', 'B')))
 stopifnot(identical(classify(c(.05, .05, .051, 0, 0), c(.1, -.1, .9, 0, .099)),
@@ -61,10 +62,31 @@ for (i in 1:8) fixture[[paste0('R', i)]] <- c(.01, .02, .5)
 fixture$R1[1] <- 0
 for (file in c('pVal.up.vs.bg.RNAmap.txt', 'pVal.dn.vs.bg.RNAmap.txt'))
   fwrite(fixture, file.path(rmaps_dir, 'EX', file), sep = '\t')
-source('analysis/rbp_figures.R')
-rbp <- read.csv(file.path(out, 'tables', 'RBP_minimum_motif_pvalues.csv'))
-stopifnot(nrow(rbp) == 32, rbp$pvalue[rbp$RBP == 'RBP1' & rbp$region == 'R1' & rbp$direction == 'up'] == 0,
-  file.exists(file.path(out, 'figures', 'Fig2H_S6_RBP_EX.pdf')))
+motifs <- read_rmaps_motifs(rmaps_dir,out)
+motifs$dataset <- dataset
+rbp <- rbp_minima(motifs) %>% select(-dataset)
+stopifnot(nrow(rbp) == 32, rbp$pvalue[rbp$RBP == 'RBP1' & rbp$region == 'R1' & rbp$direction == 'up'] == 0)
+for (kind in c('IR', 'Alt5', 'Alt3')) {
+  dir.create(file.path(rmaps_dir, kind))
+  fixture3 <- fixture[seq_len(if (kind == 'IR') 6L else 9L)]
+  for (file in c('pVal.up.vs.bg.RNAmap.txt', 'pVal.dn.vs.bg.RNAmap.txt'))
+    fwrite(fixture3, file.path(rmaps_dir, kind, file), sep = '\t')
+}
+motifs <- read_rmaps_motifs(rmaps_dir,out)
+motifs$dataset <- dataset
+rbp <- rbp_minima(motifs) %>% select(-dataset)
+rbp3 <- rbp
+stopifnot(nrow(rbp3) == 116, sum(rbp3$type == 'IR' & rbp3$region == 'R5') == 4,
+  sum(rbp3$type == 'Alt5' & rbp3$region == 'R8') == 4,
+  sum(rbp3$type == 'Alt3' & rbp3$region == 'R8') == 4)
+fixture51 <- data.frame(RBP=paste0('RBP',1:51,'.motif'))
+for (i in 1:8) fixture51[[paste0('R',i)]] <- .01
+for (file in c('pVal.up.vs.bg.RNAmap.txt', 'pVal.dn.vs.bg.RNAmap.txt'))
+  fwrite(fixture51, file.path(rmaps_dir, 'EX', file), sep='\t')
+motifs <- read_rmaps_motifs(rmaps_dir,out)
+motifs$dataset <- dataset
+all_minima <- rbp_minima(motifs)
+stopifnot(n_distinct(all_minima$RBP[all_minima$type=='EX'])==51)
 sequence <- paste0(strrep('A', 80), strrep('GC', 80), strrep('G', 80))
 ex <- data.frame(EVENT = paste0('EX', 1:3), DATASET = c('up', 'down', 'ndiff'),
   SEQ_UPEXON = strrep('ATGC', 100), SEQ_UPINTRON = sequence, SEQ_EXON = strrep('ATGC', 30),

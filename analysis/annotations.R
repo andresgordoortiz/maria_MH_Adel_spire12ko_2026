@@ -58,7 +58,7 @@ if (nrow(impact_summary)) {
   stopifnot(sum(cells) == 100)
   waffle <- data.frame(x = rep(1:10, 10), y = rep(10:1, each = 10), Impact = rep(impact_summary$Impact, cells))
   save_plot(ggplot(waffle, aes(x, y, fill = Impact)) + geom_tile(color = 'white', linewidth = .4) + coord_equal() +
-    scale_fill_brewer(palette = 'Set2') + theme_void() + labs(title = 'Predicted functional impact of differential events',
+    scale_fill_manual(values = impact_colors) + theme_void() + labs(title = 'Predicted functional impact of differential events',
       subtitle = 'VASTDB PROT_IMPACT mm10 v3; each square ≈1%'), 'Fig3A_protein_impact', 8, 5)
   save_plot(ggplot(impact_selected %>% count(Impact, direction), aes(Impact, n, fill = direction)) + geom_col() +
     coord_flip() + scale_fill_manual(values = direction_colors) + labs(x = NULL, y = 'Events', title = 'Functional annotations and splicing direction'),
@@ -100,7 +100,8 @@ if (requireNamespace('clusterProfiler', quietly = TRUE) && requireNamespace('org
           df$ratio <- vapply(strsplit(df$GeneRatio, '/', fixed = TRUE), function(x) as.numeric(x[1]) / as.numeric(x[2]), numeric(1))
           df$Description <- factor(df$Description, levels = rev(df$Description))
           p <- ggplot(df, aes(ratio, Description)) + geom_segment(aes(x = 0, xend = ratio, yend = Description), color = 'grey70') +
-            geom_point(aes(size = Count, color = p.adjust)) + scale_color_gradient(low = '#d73027', high = '#4575b4', trans = 'log10') +
+            geom_point(aes(size = Count, color = p.adjust)) +
+            scale_color_viridis_c(option = sequential_palette, direction = 1, trans = 'log10') +
             labs(x = 'Gene ratio', y = NULL, title = paste(dataset_title, 'GO', ont, '-', set), subtitle = paste('Universe:', background))
         } else p <- empty_plot(paste('No enriched GO terms:', set, ont, background))
         save_plot(p, name, 10, 7)

@@ -7,7 +7,7 @@ suppressPackageStartupMessages({
 })
 theme_set(theme_classic(base_size = 11) + theme(plot.title = element_text(face = 'bold'),
   strip.background = element_blank(), legend.position = 'bottom'))
-direction_colors <- c(up = '#D4A574', down = '#B85450', ndiff = '#808080')
+source('analysis/palettes.R')
 valid_genes <- function(x) sort(unique(x[!is.na(x) & !x %in% c('', 'NA', 'NaN')]))
 classify <- function(fdr, delta) {
   if (any(!is.finite(fdr) | fdr < 0 | fdr > 1 | !is.finite(delta) | abs(delta) > 1))
