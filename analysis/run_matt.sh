@@ -13,6 +13,8 @@ for path in "$analysis_dir" "$matt_dir"; do
     echo 'Use repository-relative paths with letters, digits, /, _, - or . only; upstream Matt interpolates filenames.' >&2; exit 1;
   }
 done
+dataset=$(cat "$analysis_dir/DATASET")
+[[ "$dataset" == spire || "$dataset" == fmn2 ]]
 image='docker.io/andresgordoortiz/matt-container@sha256:6b729b82e312f06153f8faeb643402df4e1729485fba90359a6cf3928c24c20e'
 runtime=${CONTAINER_RUNTIME:-podman}
 command -v "$runtime" >/dev/null
@@ -22,10 +24,11 @@ python3 - "$analysis_dir" "$matt_dir" <<'PY'
 import csv, pathlib, sys
 from analysis.prepare_references import file_hash
 source, dest = map(pathlib.Path, sys.argv[1:])
+dataset = (source/'DATASET').read_text().strip()
 with (dest/'input_checksums.csv').open('w',newline='') as f:
     w=csv.writer(f);w.writerow(['file','sha256'])
     for kind in ('EX','IR'):
-        name=f'spire_{kind}_matt.tab'
+        name=f'{dataset}_{kind}_matt.tab'
         w.writerow([name,file_hash(source/'external_inputs'/name)])
 PY
 extra=()
@@ -36,13 +39,13 @@ for kind in EX IR; do
   "$runtime" run --rm "${extra[@]}" -v "$PWD:/data" -w "/data/$matt_dir" --entrypoint /bin/bash "$image" -c '
     set -euo pipefail
     export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE
-    matt "$1" "/data/$2/external_inputs/spire_$3_matt.tab" START END SCAFFOLD STRAND GENEID_ENSEMBL \
+    matt "$1" "/data/$2/external_inputs/$5_$3_matt.tab" START END SCAFFOLD STRAND GENEID_ENSEMBL \
       /data/data/reference/gencode.vM10.annotation.gtf /data/data/reference/GRCm38.primary_assembly.genome.fa \
       Mmus 150 "DATASET[up,down,ndiff]" "$3" -notrbts
-  ' _ "$command" "$analysis_dir" "$kind" "$matt_dir" > "$matt_dir/$kind.log" 2>&1
+  ' _ "$command" "$analysis_dir" "$kind" "$matt_dir" "$dataset" > "$matt_dir/$kind.log" 2>&1
   feature_suffix=efeatures
   [[ "$kind" != IR ]] || feature_suffix=ifeatures
-  [[ -s "$matt_dir/$kind/spire_${kind}_matt_with_${feature_suffix}.tab" ]]
+  [[ -s "$matt_dir/$kind/${dataset}_${kind}_matt_with_${feature_suffix}.tab" ]]
 done
 python3 analysis/validate_matt.py "$analysis_dir" "$matt_dir"
 printf '%s\n' "$image" > "$matt_dir/COMPLETE"

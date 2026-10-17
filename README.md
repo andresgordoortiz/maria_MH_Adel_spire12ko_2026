@@ -1,6 +1,6 @@
-# Spire1/2 DKO: CRG betAS workflow
+# Spire1/2 DKO and FMN2 KO: CRG betAS workflow
 
-The repository separates the CRG simulation workflow (`scripts/`) from the Spire splicing figures (`analysis/`). See [the analysis guide](analysis/README.md) for the paper adaptations and [panel mapping](analysis/panels.tsv). Input data, legacy exports, audit results, generated sample sheets, filtered tables, logs and simulation results are not committed.
+The repository separates the CRG simulation workflow (`scripts/`) from the Spire and FMN2 splicing figures and comparison (`analysis/`). See [the analysis guide](analysis/README.md) for reproducible commands and [panel mapping](analysis/panels.tsv). Locally, unchanged inclusion tables and completed simulation exports live in `final_input_tables/`; provisional results and historical tables are archived under `legacy/`. New galleries are generated under `results/spire_final/`, `results/fmn2_final/` and `results/comparison/`. Input data, legacy exports, audit results, generated sample sheets, filtered tables, logs and results are not committed.
 
 ## Input and environment
 
@@ -132,4 +132,6 @@ scripts/run_R.sh tests/cluster_smoke.R
 BETAS_DATASET=fmn2 scripts/run_R.sh tests/cluster_smoke.R
 scripts/run_R.sh tests/analysis_checks.R
 scripts/run_R.sh tests/analysis_ingest.R
+BETAS_DATASET=fmn2 scripts/run_R.sh tests/analysis_ingest.R
+scripts/run_R.sh tests/comparison_checks.R
 ```

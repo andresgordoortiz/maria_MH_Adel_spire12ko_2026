@@ -5,6 +5,8 @@
 logs/
 data/
 input_tables/
+final_input_tables/
+legacy/
 metadata/
 audit/
 results/

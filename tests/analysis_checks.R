@@ -1,5 +1,7 @@
 .libPaths(c(normalizePath('analysis/renv/library', mustWork = FALSE), .libPaths()))
 source('analysis/common.R')
+dataset <- 'spire'
+stopifnot(identical(valid_genes(c('B', NA, '', 'NA', 'NaN', 'A', 'A')), c('A', 'B')))
 stopifnot(identical(classify(c(.05, .05, .051, 0, 0), c(.1, -.1, .9, 0, .099)),
   c('up', 'down', 'ndiff', 'ndiff', 'ndiff')))
 for (bad in list(c(NA, .2), c(-.1, .2), c(1.1, .2)))
@@ -44,6 +46,13 @@ stopifnot(coverage$exported[coverage$tool == 'rMAPS2' & coverage$type == 'EX' & 
 matt <- fread(file.path(out, 'external_inputs', 'spire_EX_matt.tab'))
 stopifnot(identical(matt$EVENT, c('MmuEXtest1', 'MmuEXtest2')), all(matt$UPSTRM_EX_BORDER < matt$START),
   all(matt$DOSTRM_EX_BORDER > matt$END))
+dir.create(file.path(out, 'cached-matt'))
+writeLines('Synthetic cache marker', file.path(out, 'cached-matt', 'COMPLETE'))
+Sys.setenv(MATT_OUTPUT_DIR = file.path(out, 'cached-matt'))
+prepare_only <- TRUE
+source('analysis/external.R')
+stopifnot(length(figure_names) == 0)
+rm(prepare_only)
 rmaps_dir <- file.path(out, 'rmaps')
 dir.create(file.path(rmaps_dir, 'EX'), recursive = TRUE)
 file.copy(file.path(out, 'external_inputs', 'input_checksums.csv'), rmaps_dir)

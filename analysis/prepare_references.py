@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download published mm10 annotations and stream only the tested Spire events."""
+"""Download published mm10 annotations and stream the union of tested events."""
 import csv
 import fcntl
 import gzip
@@ -45,8 +45,8 @@ def parse_coord(value):
     return m[1], int(m[2]), int(m[3])
 
 def main():
-    if len(sys.argv) != 2:
-        raise SystemExit('Usage: python analysis/prepare_references.py RESULTS/tables/all_events.csv')
+    if len(sys.argv) < 2:
+        raise SystemExit('Usage: python analysis/prepare_references.py RESULTS1/tables/all_events.csv [RESULTS2/tables/all_events.csv ...]')
     REF.mkdir(parents=True, exist_ok=True)
     lock = (REF / '.prepare.lock').open('w')
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -74,8 +74,10 @@ def main():
                 target.with_suffix(target.suffix + '.part').replace(target)
     (REF / 'sources.json').write_text(json.dumps(sources, indent=2) + '\n')
     csv.field_size_limit(sys.maxsize)
-    with open(sys.argv[1], newline='') as f:
-        events = {r['EVENT'] for r in csv.DictReader(f)}
+    events = set()
+    for table in sys.argv[1:]:
+        with open(table, newline='') as f:
+            events.update(r['EVENT'] for r in csv.DictReader(f))
     genes = {}
     with gzip.open(REF / 'gencode.vM10.annotation.gtf.gz', 'rt') as f:
         for line in f:
@@ -89,7 +91,7 @@ def main():
                'SCAFFOLD', 'START', 'END', 'STRAND', 'GENEID_ENSEMBL', 'UPSTRM_EX_BORDER',
                'DOSTRM_EX_BORDER', 'TARGET_LENGTH', 'TARGET_GC', 'C1_GC', 'C2_GC']
     found = set()
-    temporary = REF / 'spire_event_annotations.tsv.part'
+    temporary = REF / 'event_annotations.tsv.part'
     with gzip.open(REF / 'EVENT_INFO-mm10.tab.gz', 'rt') as f, temporary.open('w', newline='') as out:
         writer = csv.DictWriter(out, columns, delimiter='\t')
         writer.writeheader()
@@ -109,9 +111,9 @@ def main():
                 'UPSTRM_EX_BORDER': left, 'DOSTRM_EX_BORDER': right,
                 'TARGET_LENGTH': len(r['Seq_A']) if r['Seq_A'] not in ('NA', '-', '') else '', 'TARGET_GC': gc(r['Seq_A']),
                 'C1_GC': gc(r['Seq_C1']), 'C2_GC': gc(r['Seq_C2'])})
-    with (REF / 'spire_missing_reference_events.txt').open('w') as f:
+    with (REF / 'missing_reference_events.txt').open('w') as f:
         f.write('\n'.join(sorted(events - found)))
-    temporary.replace(REF / 'spire_event_annotations.tsv')
+    temporary.replace(REF / 'event_annotations.tsv')
     print('Annotated', len(found), 'tested events;', len(events - found), 'missing IDs recorded separately', flush=True)
 
 if __name__ == '__main__':

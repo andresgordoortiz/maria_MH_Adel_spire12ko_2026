@@ -1,21 +1,4 @@
-message('Sequence features, protein impact and GO')
-annotation <- as.data.frame(fread(annotation_path, na.strings = c('', 'NA')))
-stopifnot(all(c('EVENT', 'GENE', 'COORD_o') %in% names(annotation)), !anyDuplicated(annotation$EVENT))
-matched <- events$EVENT %in% annotation$EVENT
-annotation <- annotation[match(events$EVENT, annotation$EVENT), ]
-stopifnot(identical(annotation$EVENT[matched], events$EVENT[matched]))
-changed_coords <- matched & !is.na(annotation$COORD_o) & annotation$COORD_o != events$COORD
-write_table(data.frame(EVENT = events$EVENT[changed_coords], input_coord = events$COORD[changed_coords],
-  reference_coord = annotation$COORD_o[changed_coords]), 'VASTDB_changed_event_coordinates')
-annotation[changed_coords, setdiff(names(annotation), c('EVENT', 'GENE'))] <- NA
-renamed <- matched & !is.na(annotation$GENE) & annotation$GENE != events$GENE
-write_table(data.frame(EVENT = events$EVENT[renamed], input_gene = events$GENE[renamed],
-  reference_gene = annotation$GENE[renamed], direction = events$direction[renamed]), 'VASTDB_gene_name_changes')
-write_table(events[!matched, c('EVENT', 'GENE', 'COMPLEX', 'direction')], 'missing_VASTDB_event_annotations')
-annotation$EVENT <- events$EVENT
-annotation$reference_GENE <- annotation$GENE
-annotation$GENE <- events$GENE
-source_files <- c(source_files, annotation_path, 'data/reference/PROT_IMPACT-mm10-v3.tab.gz')
+source('analysis/annotation_input.R')
 features <- cbind(events[, c('EVENT', 'GENE', 'event_type', 'direction', 'deltapsi', 'FDR')],
   annotation[, c('TARGET_LENGTH', 'TARGET_GC', 'C1_GC', 'C2_GC')])
 write_table(features, 'VASTDB_sequence_features')
@@ -58,7 +41,7 @@ simplified[grepl('UTR', onto, ignore.case = TRUE)] <- 'Regulatory'
 impact_levels <- c('ORF disrupted upon inclusion', 'ORF disrupted upon exclusion', 'Alternative isoform', 'Regulatory', 'Unknown/noncoding')
 impact_events <- data.frame(EVENT = events$EVENT, GENE = events$GENE, direction = events$direction,
   deltapsi = events$deltapsi, FDR = events$FDR, ONTO = onto, Impact = factor(simplified, levels = impact_levels),
-  predicted_disruption_in_DKO = (simplified == 'ORF disrupted upon inclusion' & events$direction == 'up') |
+  predicted_disruption_in_KO = (simplified == 'ORF disrupted upon inclusion' & events$direction == 'up') |
     (simplified == 'ORF disrupted upon exclusion' & events$direction == 'down'))
 write_table(impact_events, 'protein_impact_all_events')
 impact_selected <- impact_events[events$direction != 'ndiff', ]
@@ -90,9 +73,10 @@ if (requireNamespace('clusterProfiler', quietly = TRUE) && requireNamespace('org
   write_table(gene_map, 'GO_gene_mapping')
   map_genes <- function(g) unique(na.omit(gene_map$ENTREZID[gene_map$SYMBOL %in% g]))
   sets <- list(all = unique(impact_selected$GENE),
-    predicted_ORF_disruption = unique(impact_selected$GENE[impact_selected$predicted_disruption_in_DKO]),
+    predicted_ORF_disruption = unique(impact_selected$GENE[impact_selected$predicted_disruption_in_KO]),
     EX = unique(events$GENE[events$direction != 'ndiff' & events$event_type == 'EX']),
     IR = unique(events$GENE[events$direction != 'ndiff' & events$event_type == 'IR']))
+  sets <- lapply(sets, valid_genes)
   go_results <- list()
   for (ont in c('BP', 'CC', 'MF')) for (background in c('paper_OrgDb', 'tested_N10')) {
     for (set in names(sets)) {
@@ -117,7 +101,7 @@ if (requireNamespace('clusterProfiler', quietly = TRUE) && requireNamespace('org
           df$Description <- factor(df$Description, levels = rev(df$Description))
           p <- ggplot(df, aes(ratio, Description)) + geom_segment(aes(x = 0, xend = ratio, yend = Description), color = 'grey70') +
             geom_point(aes(size = Count, color = p.adjust)) + scale_color_gradient(low = '#d73027', high = '#4575b4', trans = 'log10') +
-            labs(x = 'Gene ratio', y = NULL, title = paste('Spire GO', ont, '-', set), subtitle = paste('Universe:', background))
+            labs(x = 'Gene ratio', y = NULL, title = paste(dataset_title, 'GO', ont, '-', set), subtitle = paste('Universe:', background))
         } else p <- empty_plot(paste('No enriched GO terms:', set, ont, background))
         save_plot(p, name, 10, 7)
       }

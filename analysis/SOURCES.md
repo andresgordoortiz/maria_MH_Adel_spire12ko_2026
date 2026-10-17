@@ -2,9 +2,9 @@
 
 Reference analysis: https://github.com/andresgordoortiz/oocyte_splicing_ssa_pladb_tub_2025/tree/e231983fd82736971aef7fc938cf34bed5ce3121
 
-Paper: Al Shami et al., *The post-transcriptional RNA splicing landscape driving oocyte division*, bioRxiv v1, 20 August 2026, https://doi.org/10.64898/2026.08.19.745726 . Full JATS text was retrieved and read on 16 October 2026. Only new plots of the Spire dataset are generated here. The upstream code is MIT licensed; its notice is preserved in LICENSE.reference.
+Paper: Al Shami et al., *The post-transcriptional RNA splicing landscape driving oocyte division*, bioRxiv v1, 20 August 2026, https://doi.org/10.64898/2026.08.19.745726 . Full JATS text was retrieved and read on 16 October 2026. New plots of the Spire and FMN2 datasets and their comparison are generated here. The upstream code is MIT licensed; its notice is preserved in LICENSE.reference.
 
-Adaptations retain the reference thresholds, colors, row scaling, miniheatmap clustering, feature tests, GO function and GC binning. Drug-specific inputs and global R objects have been replaced with a validated Spire table and explicit inputs. The source tree and paper XML are cached locally under ignored reference/; they are not runtime dependencies.
+Adaptations retain the reference thresholds, colors, row scaling, miniheatmap clustering, feature tests, GO function and GC binning. Drug-specific inputs and global R objects have been replaced with validated completed simulation tables and explicit inputs. The two-study comparison adds a common tested universe and distinguishes shared targets from concordant changes. The source tree and paper XML are cached locally under ignored reference/; they are not runtime dependencies.
 
 Corrections are explicit: empirical FPR is labelled correctly; minus-strand flanking coordinates use the adjacent exon edges; undefined correlations of constant PSI rows are excluded; zero motif p-values are retained with a plotting floor; the GC gradient's reversed intron 5′/3′ slices are corrected. The main large-heatmap code uses Euclidean/complete clustering by default, whereas the miniheatmap explicitly uses Spearman/Ward.D2; both choices are preserved.
 

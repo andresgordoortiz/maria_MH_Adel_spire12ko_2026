@@ -3,12 +3,12 @@ matt_stats <- list()
 matt_tables <- list()
 for (kind in c('EX', 'IR')) {
   suffix <- if (kind == 'EX') 'efeatures' else 'ifeatures'
-  path <- file.path(matt_dir, kind, paste0('spire_', kind, '_matt_with_', suffix, '.tab'))
+  path <- file.path(matt_dir, kind, paste0(dataset, '_', kind, '_matt_with_', suffix, '.tab'))
   df <- as.data.frame(fread(path, na.strings = c('NA', '', 'nan', '-nan', 'NaN')))
   source_files <- c(source_files, path, file.path(matt_dir, 'COMPLETE'), file.path(matt_dir, 'input_checksums.csv'))
   stopifnot(nrow(df) > 0, all(c('EVENT', 'DATASET') %in% names(df)), !anyDuplicated(df$EVENT),
     all(df$EVENT %in% events$EVENT), all(as.character(df$DATASET) == as.character(events$direction[match(df$EVENT, events$EVENT)])))
-  expected <- as.data.frame(fread(file.path(out, 'external_inputs', paste0('spire_', kind, '_matt.tab'))))
+  expected <- as.data.frame(fread(file.path(out, 'external_inputs', paste0(dataset, '_', kind, '_matt.tab'))))
   stopifnot(all(df$EVENT %in% expected$EVENT))
   for (column in names(expected)) stopifnot(isTRUE(all.equal(df[[column]],
     expected[[column]][match(df$EVENT, expected$EVENT)], check.attributes = FALSE)))
@@ -19,12 +19,12 @@ for (kind in c('EX', 'IR')) {
   for (feature in feature_cols) for (pair in list(c('up', 'ndiff'), c('down', 'ndiff'), c('up', 'down'))) {
     a <- df[[feature]][df$DATASET == pair[1]]; a <- a[is.finite(a)]
     b <- df[[feature]][df$DATASET == pair[2]]; b <- b[is.finite(b)]
-    p <- if (length(a) >= 3 && length(b) >= 3 && length(a) + length(b) >= 10)
+    p <- if (length(a) >= 3 && length(b) >= 3 && sum(is.finite(df[[feature]])) >= 10)
       suppressWarnings(wilcox.test(a, b, exact = FALSE)$p.value) else NA_real_
     matt_stats[[length(matt_stats) + 1L]] <- data.frame(event_type = kind, feature = feature,
       group1 = pair[1], group2 = pair[2], n1 = length(a), n2 = length(b),
       median1 = if (length(a)) median(a) else NA_real_, median2 = if (length(b)) median(b) else NA_real_,
-      p.value = p, difference = if (length(a) && length(b)) median(a) - median(b) else NA_real_)
+      p.value = p, background_IQR = IQR(df[[feature]][df$DATASET == 'ndiff'], na.rm = TRUE), difference = if (length(a) && length(b)) median(a) - median(b) else NA_real_)
   }
 }
 matt_stats <- bind_rows(matt_stats)
