@@ -66,7 +66,7 @@ report <- c(paste('#', dataset_title, 'splicing'), '', provenance_label, '',
     nrow(events), sum(events$direction != 'ndiff'), length(valid_genes(events$GENE[events$direction != 'ndiff']))), '',
   sprintf('%s selected events lack gene labels; they remain in event-level analyses.',
     sum(events$direction != 'ndiff' & !events$GENE %in% valid_genes(events$GENE))), '',
-  if (dataset == 'spire') 'Independent animals, pooling and batches remain unverified.' else
+  if (dataset != 'fmn2') 'Independent animals, pooling and batches remain unverified.' else
     'FMN2 controls are heterozygous pools, not wild type; two biological pools per group, with technical runs merged.', '',
   'Open [the figure gallery](index.html). PDFs and PNGs are in figures/; plotted data and full statistical tables are in tables/.', '',
   'betAS FDR is an empirical per-event FPR, not a BH-adjusted FDR. Small fitted differences at PSI boundaries can receive zero FPR; the paper effect-size filter is applied, but does not calibrate that statistic.', '',

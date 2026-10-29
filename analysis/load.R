@@ -1,11 +1,11 @@
 #!/usr/bin/env Rscript
 args <- commandArgs(trailingOnly = TRUE)
-if (length(args) != 2L) stop('Usage: BETAS_DATASET=spire|fmn2 scripts/run_R.sh analysis/run.R legacy|RUN/csv/DATASET_all_events.csv OUTPUT_DIR')
+if (length(args) != 2L) stop('Usage: BETAS_DATASET=spire|spire_fastq|fmn2 scripts/run_R.sh analysis/run.R legacy|RUN/csv/DATASET_all_events.csv OUTPUT_DIR')
 .libPaths(c(normalizePath('analysis/renv/library', mustWork = FALSE), .libPaths()))
 source('analysis/common.R')
 source('config/analysis.R')
 stopifnot(as.character(getRversion()) == trimws(readLines('.R-version')))
-dataset_title <- if (dataset == 'spire') 'Spire1/2 DKO' else 'FMN2 KO'
+dataset_title <- if (dataset == 'fmn2') 'FMN2 KO' else 'Spire1/2 DKO'
 contrast_label <- paste(config$group_b, '−', config$group_a)
 out <- args[2]
 if (file.exists(out)) stop('Output already exists; choose a new directory: ', out)
@@ -19,7 +19,8 @@ stopifnot(length(group_a_columns) >= 2, length(group_b_columns) >= 2,
   nrow(input$PSI) > 0, all(is.finite(as.matrix(input$PSI[, samples]))),
   all(as.matrix(input$PSI[, samples]) >= 0), all(as.matrix(input$PSI[, samples]) <= 100))
 source_files <- config$filtered
-raw_path <- file.path('final_input_tables', if (dataset == 'spire') 'spiredko_INCLUSION_LEVELS_FULL-mm10.tab' else 'fmndko_INCLUSION_LEVELS_FULL-mm10.tab')
+raw_path <- if (dataset == 'spire_fastq') config$input else
+  file.path('final_input_tables', if (dataset == 'spire') 'spiredko_INCLUSION_LEVELS_FULL-mm10.tab' else 'fmndko_INCLUSION_LEVELS_FULL-mm10.tab')
 if (file.exists(raw_path)) {
   stopifnot(identical(input$provenance$input_md5, unname(tools::md5sum(raw_path))))
   source_files <- c(source_files, raw_path)

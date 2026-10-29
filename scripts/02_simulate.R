@@ -7,6 +7,7 @@ stopifnot(identical(run$mode, 'full-table'), identical(run$config, config),
           identical(run$filtered_md5, unname(tools::md5sum(config$filtered))),
           identical(run$lock_md5, unname(tools::md5sum('renv.lock'))))
 x <- readRDS(config$filtered)
+stopifnot(identical(x$provenance$input_md5, unname(tools::md5sum(config$input))))
 psi <- x$PSI; qual <- x$Qual
 stopifnot(nrow(psi) == run$rows, identical(psi$EVENT, qual$EVENT),
           !anyNA(psi$EVENT), !anyDuplicated(psi$EVENT))

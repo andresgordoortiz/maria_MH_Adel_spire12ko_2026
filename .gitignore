@@ -16,3 +16,8 @@ analysis/renv/library/
 analysis/renv/staging/
 analysis/.Rprofile
 .Rbuildignore
+runs/
+.nextflow/
+.nextflow.log*
+*.fastq.gz
+*.fq.gz

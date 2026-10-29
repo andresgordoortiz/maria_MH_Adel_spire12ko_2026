@@ -7,7 +7,8 @@ metadata <- data.frame(sample = names(config$sample_groups),
   replicate_label = if (dataset == 'fmn2') c('1','2','1','2') else
     sub('.*_', '', names(config$sample_groups)),
   metadata_source = if (dataset == 'fmn2') 'GSE103718_and_reference_run_manifest' else
-    'configured_from_inclusion_header', stringsAsFactors = FALSE)
+    if (dataset == 'spire_fastq') 'user_supplied_fastq_filenames' else
+      'configured_from_inclusion_header', stringsAsFactors = FALSE)
 stopifnot(!anyDuplicated(metadata$sample),
           identical(metadata$sample, names(config$sample_groups)),
           all(metadata$group %in% c(config$group_a, config$group_b)),

@@ -54,6 +54,11 @@ before <- file.info(checkpoints)$mtime
 run('02_simulate.R','results/test')
 stopifnot(identical(before,file.info(checkpoints)$mtime),
           identical(whole,readRDS('results/test/statistics.rds')$results))
+# Reusing checkpoints must reject a changed source inclusion table.
+original_input <- readLines(config$input)
+writeLines(c(original_input, ''), config$input)
+run('02_simulate.R','results/test',expected=1L)
+writeLines(original_input, config$input)
 # Submission must invoke sbatch once, without array/dependency options.
 dir.create('bin')
 writeLines(c('#!/bin/sh', 'printf "%s\\n" "$*" >> "$SPIRE_SBATCH_CALLS"',
@@ -74,4 +79,4 @@ saveRDS(z,'results/test/statistics.rds')
 run('03_collect.R','results/test',expected=1L)
 stopifnot(!file.exists('results/test/COMPLETE'))
 setwd(root)
-cat('PASS: full-table export, direct FDR/group estimates, paths with spaces, checkpoint reuse, single sbatch dataset export and corrupt-result rejection.\n')
+cat('PASS: full-table export, direct FDR/group estimates, paths with spaces, checkpoint reuse, changed-input rejection, single sbatch dataset export and corrupt-result rejection.\n')

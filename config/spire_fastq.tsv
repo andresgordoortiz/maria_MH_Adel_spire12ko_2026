@@ -1,0 +1,7 @@
+sample	condition	fastq_1	filename_date_label
+SPIRE_Cont_1	Cont	reads_1-controle-12mars.fastq.gz	12mars
+SPIRE_Cont_2	Cont	reads_2-controle-12mars.fastq.gz	12mars
+SPIRE_Cont_7	Cont	reads_7-controle-14mars.fastq.gz	14mars
+SPIRE_DKO_4	DKO	reads_4-doubleKO-12mars.fastq.gz	12mars
+SPIRE_DKO_5	DKO	reads_5-doubleKO-12mars.fastq.gz	12mars
+SPIRE_DKO_6	DKO	reads_6-doubleKO-12mars.fastq.gz	12mars

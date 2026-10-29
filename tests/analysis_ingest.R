@@ -14,7 +14,7 @@ psi <- data.frame(GENE = paste0('Gene', 1:4),
   COORD = 'chr1:100-199', LENGTH = 100, FullCO = 'chr1:1,100-199,300', COMPLEX = c('S', 'IR', 'Alt5', 'Alt3'))
 values <- rbind(c(20, 21, 19, 40, 41, 39), c(60, 59, 61, 40, 39, 41),
   c(40, 39, 41, 50, 49, 51), c(50, 51, 49, 50, 51, 49))
-columns <- if (dataset == 'spire') 1:6 else c(1, 2, 4, 5)
+columns <- if (dataset == 'fmn2') c(1, 2, 4, 5) else 1:6
 for (i in seq_along(config$sample_groups)) psi[[names(config$sample_groups)[i]]] <- values[, columns[i]]
 dir.create(file.path(work, dirname(config$filtered)), recursive = TRUE)
 saveRDS(list(PSI = psi), file.path(work, config$filtered))

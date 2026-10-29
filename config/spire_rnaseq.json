@@ -1,0 +1,10 @@
+{
+  "aligner": "star_salmon",
+  "trimmer": "fastp",
+  "extra_fastp_args": "--length_required 35",
+  "save_trimmed": true,
+  "save_reference": true,
+  "skip_stringtie": true,
+  "skip_bigwig": true,
+  "igenomes_ignore": true
+}

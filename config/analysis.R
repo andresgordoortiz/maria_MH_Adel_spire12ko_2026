@@ -1,5 +1,6 @@
 dataset <- Sys.getenv('BETAS_DATASET', unset = 'spire')
-if (!dataset %in% c('spire', 'fmn2')) stop('BETAS_DATASET must be spire or fmn2')
+if (!dataset %in% c('spire', 'spire_fastq', 'fmn2'))
+  stop('BETAS_DATASET must be spire, spire_fastq or fmn2')
 config <- list(
   input = Sys.getenv('SPIRE_INCLUSION_TABLE', unset =
     '/users/aaljord/agordo/git/24CRG_ADEL_MANU_OOCYTE_SPLICING/notebooks/inclusion_tables/spiredko_INCLUSION_LEVELS_FULL-mm10.tab'),
@@ -18,6 +19,15 @@ config <- list(
   pdiff_min = 0.95, fdr_max = 0.05, abs_delta_min = 0.10,
   betas_sha = 'cd37737c75ab17a64652baf2fdb00d1b7c67c294'
 )
+
+if (dataset == 'spire_fastq') {
+  samples <- read.delim('config/spire_fastq.tsv', check.names = FALSE)
+  config$input <- Sys.getenv('SPIRE_FASTQ_INCLUSION_TABLE', unset =
+    'results/spire_fastq/vast/inclusion_tables/spire_fastq_INCLUSION_LEVELS_FULL-mm10.tab')
+  config$samples <- 'metadata/spire_fastq/samples.csv'
+  config$sample_groups <- setNames(samples$condition, samples$sample)
+  config$filtered <- 'data/processed/spire_fastq/spire_fastq_N10.rds'
+}
 
 if (dataset == 'fmn2') {
   config$input <- Sys.getenv('FMN2_INCLUSION_TABLE', unset =
