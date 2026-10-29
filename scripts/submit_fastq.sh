@@ -11,7 +11,13 @@ source config/fastq_cluster.env
 export RAW_DIR VAST_PIPELINE VASTDB SCRATCH_DIR GENOME_FASTA GENES_GTF SPIRE_FASTQ_INCLUSION_TABLE
 command -v sbatch >/dev/null
 if [[ $stage == all || $stage == rnaseq || $stage == vast ]]; then
-    python3 -I scripts/prepare_fastq_samples.py "$RAW_DIR" data/processed/spire_fastq/samples
+    while IFS=$'\t' read -r sample condition fastq filename_date_label; do
+        [[ $sample == sample ]] && continue
+        if [[ ! -f $RAW_DIR/$fastq || ! -s $RAW_DIR/$fastq ]]; then
+            echo "Missing or empty FASTQ: $RAW_DIR/$fastq" >&2
+            exit 1
+        fi
+    done < config/spire_fastq.tsv
 fi
 if [[ $stage == all || $stage == rnaseq || $stage == dge ]]; then
     for path in "$GENOME_FASTA" "$GENES_GTF"; do

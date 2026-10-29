@@ -13,6 +13,7 @@ export RAW_DIR VAST_PIPELINE VASTDB SCRATCH_DIR GENOME_FASTA GENES_GTF
 module load Nextflow
 module load Java
 module load Python/3.12.3-GCCcore-13.2.0
+python3 -I -c 'import csv, pathlib, sys; print("Using Python:", sys.executable)'
 command -v singularity >/dev/null
 export NXF_VER=25.10.4
 export NXF_JVM_ARGS='-Xms1g -Xmx5g'
