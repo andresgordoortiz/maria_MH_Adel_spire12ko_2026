@@ -57,9 +57,9 @@ for downstream in vast dge; do
         if [[ $downstream == vast ]]; then vast_job=${job%%;*}; fi
     fi
 done
-if [[ $stage == all || $stage == betas ]]; then
+if [[ $stage == all || $stage == vast || $stage == betas ]]; then
     dependency=()
-    if [[ $stage == all ]]; then dependency=(--dependency="afterok:$vast_job"); fi
+    if [[ $stage == all || $stage == vast ]]; then dependency=(--dependency="afterok:$vast_job"); fi
     job=$(sbatch --parsable --export=ALL --job-name=spire_betas "${dependency[@]}" \
         --output="$PROJECT_DIR/logs/spire_betas.%j.log" \
         scripts/fastq_betas.sbatch "$PROJECT_DIR")
