@@ -133,6 +133,9 @@ if pathlib.Path(sys.argv[0]).name == "Rscript" and sys.argv[1] == "scripts/00_in
     commands = calls()[4:]
     assert len(commands) == 3
     assert commands[0]["args"][:4] == ["run", "nf-core/rnaseq", "-r", "3.27.0"]
+    local_vast = project / "runs/spire_fastq/vast/main.nf"
+    assert commands[1]["args"][:2] == ["run", str(local_vast)]
+    assert local_vast.read_bytes() == (project / "vast/main.nf").read_bytes()
     assert all(flag in commands[1]["args"] for flag in ("--skip_trimming", "--skip_compare", "--skip_betas"))
     assert commands[2]["args"][:4] == ["run", "nf-core/differentialabundance", "-r", "2.0.0"]
     assert "--feature_length_matrix" in commands[2]["args"]

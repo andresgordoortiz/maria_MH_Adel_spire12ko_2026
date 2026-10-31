@@ -45,7 +45,9 @@ case "$stage" in
     vast)
         python3 -I "$PROJECT_DIR/scripts/prepare_fastq_samples.py" "$RAW_DIR" "$samples" \
             --trimmed "$outdir/rnaseq/fastp"
-        exec nextflow run "$VAST_PIPELINE/main.nf" \
+        # Match Murielle: load the shared config only after our parameters are defined.
+        cp "$VAST_PIPELINE/main.nf" "$PWD/main.nf"
+        exec nextflow run "$PWD/main.nf" \
             -c "$PROJECT_DIR/config/spire_vast.config" \
             --sample_csv "$samples/vast.csv" --data_dir "$outdir/rnaseq/fastp" \
             --vastdb_path "$VASTDB" --species mm10 --project_name spire_fastq \
