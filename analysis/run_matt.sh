@@ -14,7 +14,7 @@ for path in "$analysis_dir" "$matt_dir"; do
   }
 done
 dataset=$(cat "$analysis_dir/DATASET")
-[[ "$dataset" == spire || "$dataset" == fmn2 ]]
+[[ "$dataset" == spire || "$dataset" == spire_fastq || "$dataset" == fmn2 ]]
 image='docker.io/andresgordoortiz/matt-container@sha256:6b729b82e312f06153f8faeb643402df4e1729485fba90359a6cf3928c24c20e'
 runtime=${CONTAINER_RUNTIME:-podman}
 command -v "$runtime" >/dev/null
@@ -36,7 +36,8 @@ extra=()
 for kind in EX IR; do
   command=cmpr_exons
   [[ "$kind" != IR ]] || command=cmpr_introns
-  "$runtime" run --rm "${extra[@]}" -v "$PWD:/data" -w "/data/$matt_dir" --entrypoint /bin/bash "$image" -c '
+  "$runtime" run --rm --network=none "${extra[@]}" -v "$PWD:/data:ro" \
+    -v "$PWD/$matt_dir:/data/$matt_dir:rw" -w "/data/$matt_dir" --entrypoint /bin/bash "$image" -c '
     set -euo pipefail
     export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE
     matt "$1" "/data/$2/external_inputs/$5_$3_matt.tab" START END SCAFFOLD STRAND GENEID_ENSEMBL \

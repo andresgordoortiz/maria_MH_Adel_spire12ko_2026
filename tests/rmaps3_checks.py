@@ -43,7 +43,7 @@ with tempfile.TemporaryDirectory() as tmp:
             for key in value:
                 if key not in ('chr', 'strand'):
                     value[key] += index * 1000
-            path = analysis / f'external_inputs/test_{kind}_{group}.txt'
+            path = analysis / f'external_inputs/spire_fastq_{kind}_{group}.txt'
             rmaps3.write_rows(path, list(value), [list(value.values())])
             checks.append([path.name, rmaps3.file_hash(path)])
             rmaps3.write_rows(analysis / f'tables/rmaps_{kind}_{group}_event_manifest.csv',
@@ -51,18 +51,21 @@ with tempfile.TemporaryDirectory() as tmp:
     rmaps3.write_rows(analysis / 'external_inputs/input_checksums.csv', ['file', 'sha256'], checks)
     fasta = root / 'mm10.fa'
     Path(str(fasta) + '.fai').write_text('chr1\t100000\t0\t60\t61\n')
-    sources, counts = rmaps3.prepare(analysis, 'test', root / 'output', fasta)
+    sources, counts = rmaps3.prepare(analysis, 'spire_fastq', root / 'output', fasta)
     assert len(sources) == 24 and len(counts) == 12
     assert len(list((root / 'output/inputs').glob('*.txt'))) == 12
+    for kind, column in [('IR', 'riExonStart'), ('Alt5', 'longExonStart'), ('Alt3', 'longExonStart')]:
+        with (root / f'output/inputs/spire_fastq_{kind}_up.txt').open() as handle:
+            assert next(csv.reader(handle, delimiter='\t'))[2] == column
     try:
-        rmaps3.prepare(analysis, 'test', root / 'output', fasta)
+        rmaps3.prepare(analysis, 'spire_fastq', root / 'output', fasta)
         raise AssertionError('Existing output overwritten')
     except FileExistsError:
         pass
-    with (analysis / 'external_inputs/test_EX_up.txt').open('a') as handle:
+    with (analysis / 'external_inputs/spire_fastq_EX_up.txt').open('a') as handle:
         handle.write('\n')
     try:
-        rmaps3.prepare(analysis, 'test', root / 'bad-checksum', fasta)
+        rmaps3.prepare(analysis, 'spire_fastq', root / 'bad-checksum', fasta)
         raise AssertionError('Changed input accepted')
     except ValueError as error:
         assert 'checksum' in str(error)

@@ -98,7 +98,7 @@ def prepare(analysis_dir, dataset, output, fasta):
             sources[str(mapping)] = file_hash(mapping)
     (output / 'inputs').mkdir(parents=True)
     for filename, rows in converted.items():
-        kind = filename.split('_')[1]
+        kind = filename.removeprefix(f'{dataset}_').split('_')[0]
         middle = ['exonStart', 'exonEnd', 'firstExonStart', 'firstExonEnd', 'secondExonStart', 'secondExonEnd']
         if kind == 'IR':
             middle = ['riExonStart', 'riExonEnd', 'upstreamExonStart', 'upstreamExonEnd', 'downstreamExonStart', 'downstreamExonEnd']
@@ -130,7 +130,7 @@ def validate_result(output, kind, motifs):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('analysis_dir', type=Path)
-    parser.add_argument('dataset', choices=('spire', 'fmn2'))
+    parser.add_argument('dataset', choices=('spire', 'spire_fastq', 'fmn2'))
     parser.add_argument('output_dir', type=Path)
     parser.add_argument('rmaps_repo', type=Path)
     args = parser.parse_args()

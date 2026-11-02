@@ -23,7 +23,7 @@ config <- list(
 if (dataset == 'spire_fastq') {
   samples <- read.delim('config/spire_fastq.tsv', check.names = FALSE)
   config$input <- Sys.getenv('SPIRE_FASTQ_INCLUSION_TABLE', unset =
-    'results/spire_fastq/vast/inclusion_tables/spire_fastq_INCLUSION_LEVELS_FULL-mm10.tab')
+    'data/inputs/spire_fastq/vast/inclusion_tables/spire_fastq_INCLUSION_LEVELS_FULL-mm10.tab')
   config$samples <- 'metadata/spire_fastq/samples.csv'
   config$sample_groups <- setNames(samples$condition, samples$sample)
   config$filtered <- 'data/processed/spire_fastq/spire_fastq_N10.rds'

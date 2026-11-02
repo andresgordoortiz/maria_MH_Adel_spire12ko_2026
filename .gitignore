@@ -10,6 +10,7 @@ legacy/
 metadata/
 audit/
 results/
+reports/
 __pycache__/
 reference/
 analysis/renv/library/
@@ -21,3 +22,9 @@ runs/
 .nextflow.log*
 *.fastq.gz
 *.fq.gz
+.vscode/
+.DS_Store
+*.bam
+*.bai
+*.cram
+*.crai

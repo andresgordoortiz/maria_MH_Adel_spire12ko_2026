@@ -2,7 +2,7 @@
 from pathlib import Path
 from collections import defaultdict
 import csv,gzip,math,re,statistics,json,hashlib
-out=Path('results/spire_identity_check/tables')
+out=Path('legacy/pre_fastq_2026-11-02/results/spire_identity_check/tables')
 def write(name,rows):
  assert rows
  with (out/f'{name}.csv').open('w',newline='') as f:

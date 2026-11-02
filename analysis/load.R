@@ -13,7 +13,8 @@ input <- readRDS(config$filtered)
 samples <- names(config$sample_groups)
 group_a_columns <- which(config$sample_groups == config$group_a)
 group_b_columns <- which(config$sample_groups == config$group_b)
-sample_labels <- setNames(paste0(config$sample_groups, '_', ave(seq_along(samples), config$sample_groups, FUN = seq_along)), samples)
+sample_labels <- setNames(if (dataset == 'spire_fastq') sub('^SPIRE_', '', samples) else
+  paste0(config$sample_groups, '_', ave(seq_along(samples), config$sample_groups, FUN = seq_along)), samples)
 stopifnot(length(group_a_columns) >= 2, length(group_b_columns) >= 2,
   identical(names(input$PSI)[-(1:6)], samples), !anyDuplicated(input$PSI$EVENT),
   nrow(input$PSI) > 0, all(is.finite(as.matrix(input$PSI[, samples]))),

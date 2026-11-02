@@ -10,7 +10,7 @@ if len(sys.argv) != 3:
     raise SystemExit('Usage: python analysis/validate_matt.py ANALYSIS_DIR MATT_DIR')
 source, target = map(pathlib.Path, sys.argv[1:])
 dataset = (source / 'DATASET').read_text().strip()
-assert dataset in ('spire', 'fmn2')
+assert dataset in ('spire', 'spire_fastq', 'fmn2')
 csv.field_size_limit(sys.maxsize)
 with (target / 'input_checksums.csv').open() as f:
     for check in csv.DictReader(f):

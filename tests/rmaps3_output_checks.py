@@ -9,8 +9,8 @@ assert math.isclose(float(hypergeom.sf(0,10,2,2)),17/45)
 from pathlib import Path
 
 dataset = sys.argv[1]
-assert dataset in ('spire', 'fmn2')
-root = Path(f'results/{dataset}_final/rmaps3_outputs')
+assert dataset in ('spire', 'spire_fastq', 'fmn2')
+root = Path(f'reports/{"spire" if dataset == "spire_fastq" else dataset}_final/rmaps3_outputs')
 assert (root / 'COMPLETE').is_file()
 se = ['UpstreamExon_3prime', 'UpstreamExonIntron', 'UpstreamIntron',
       'TargetExon_5prime', 'TargetExon-3prime', 'DownstreamIntron',

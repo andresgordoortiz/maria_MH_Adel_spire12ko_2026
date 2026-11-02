@@ -66,7 +66,7 @@ report <- c(paste('#', dataset_title, 'splicing'), '', provenance_label, '',
     nrow(events), sum(events$direction != 'ndiff'), length(valid_genes(events$GENE[events$direction != 'ndiff']))), '',
   sprintf('%s selected events lack gene labels; they remain in event-level analyses.',
     sum(events$direction != 'ndiff' & !events$GENE %in% valid_genes(events$GENE))), '',
-  if (dataset != 'fmn2') 'Independent animals, pooling and batches remain unverified.' else
+  if (dataset == 'spire_fastq') 'Three independent animals per group, confirmed by the investigator on 2 November 2026; batch identities remain unverified.' else if (dataset == 'spire') 'Historical labels are superseded; use the original FASTQ analysis.' else
     'FMN2 controls are heterozygous pools, not wild type; two biological pools per group, with technical runs merged.', '',
   'Open [the figure gallery](index.html). PDFs and PNGs are in figures/; plotted data and full statistical tables are in tables/.', '',
   'betAS FDR is an empirical per-event FPR, not a BH-adjusted FDR. Small fitted differences at PSI boundaries can receive zero FPR; the paper effect-size filter is applied, but does not calibrate that statistic.', '',
@@ -78,7 +78,7 @@ if (exists('matched')) report <- c(report,
   sprintf('VASTDB EVENT_INFO lacks %s tested IDs (%s selected). An additional %s IDs have changed coordinates and are excluded from sequence/Matt/RBP inputs. They remain in splicing/GO results. Protein-impact annotations use available mm10 v3 rather than the unavailable v2.3.',
     sum(!matched), sum(!matched & events$direction != 'ndiff'), sum(changed_coords)), '')
 report <- c(report, 'Panel status:', '', paste0('- ', status$step, ': ', status$status), '',
-  'The companion comparison report evaluates shared events, directions, genes and GO using a common tested universe. Gene expression and experimental imaging/meiosis panels are outside the splicing-only analysis. RBP motif analysis can run locally with rMAPS3; see analysis/RMAPS3.md and the panel status above. No upload was performed.')
+  'The companion comparison evaluates shared events, directions, genes and GO using a common tested universe. Current SPIRE FASTQ expression and historical sample correspondence are reviewed separately in ../spire_review/. See the panel status and analysis/RMAPS3.md for motif-analysis methods and coverage.')
 writeLines(report, file.path(out, 'REPORT.md'))
 stopifnot(all(file.exists(file.path(out, 'figures', paste0(figs, '.pdf')))),
   sum(table(events$direction)) == nrow(events))

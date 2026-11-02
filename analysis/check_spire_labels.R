@@ -1,6 +1,6 @@
 .libPaths(c(normalizePath('analysis/renv/library'),.libPaths()))
 source('analysis/common.R')
-out <- 'results/spire_identity_check'
+out <- 'legacy/pre_fastq_2026-11-02/results/spire_identity_check'
 main_plots <- list(); figure_names <- character()
 provenance_label <- 'Diagnostic tests only; original labels retained; RNA phenotypes do not establish DNA genotype'
 select_markers <- function(m, gene, id, A, B, cutoff) {
@@ -24,7 +24,7 @@ stopifnot(identical(f$EVENT,c('E1','E2')),all(project(fixture,f)[,3]>.9),all(pro
 changed <- fixture;changed[,c(3,6)] <- -999
 stopifnot(identical(f,select_markers(changed,gene,id,1:2,4:5,10)))
 
-x <- as.data.frame(fread('results/spire_final/tables/all_events.csv'))
+x <- as.data.frame(fread('legacy/pre_fastq_2026-11-02/results/spire_final/tables/all_events.csv'))
 samples <- names(x)[grepl('^Oocytes_FG_Spire12_',names(x))]
 labels <- sub('Oocytes_FG_Spire12_','',samples)
 stopifnot(identical(labels,c('Cont_a','Cont_b','Cont_c','DKO_a','DKO_b','DKO_c')))

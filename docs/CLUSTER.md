@@ -1,6 +1,10 @@
 # Spire1/2 DKO and FMN2 KO: CRG betAS workflow
 
-The repository separates the CRG simulation workflow (`scripts/`) from the Spire and FMN2 splicing figures and comparison (`analysis/`). See [the analysis guide](../analysis/README.md) for reproducible commands and [panel mapping](../analysis/panels.tsv). Locally, unchanged inclusion tables and completed simulation exports live in `final_input_tables/`; provisional results and historical tables are archived under `legacy/`. New galleries are generated under `results/spire_final/`, `results/fmn2_final/` and `results/comparison/`. Input data, legacy exports, audit results, generated sample sheets, filtered tables, logs and results are not committed.
+For the six newly recovered SPIRE FASTQs, use the separate
+[FASTQ → VAST and DGE guide](FASTQ_CLUSTER.md). It generates new results and
+sample identifiers without replacing the historical inputs described below.
+
+The repository separates the CRG simulation workflow (`scripts/`) from the Spire and FMN2 splicing figures and comparison (`analysis/`). See [the analysis guide](../analysis/README.md) for reproducible commands and [panel mapping](../analysis/panels.tsv). The current SPIRE inputs are the imported FASTQ outputs in `data/inputs/spire_fastq/`; `final_input_tables/` preserves historical SPIRE inputs and the unchanged FMN2 inputs. SPIRE reports before 2 November 2026 are in `legacy/pre_fastq_2026-11-02/`. Current galleries are generated under `reports/spire_final/`, `reports/fmn2_final/` and `reports/comparison/`. Input data, legacy exports, audit results, generated sample sheets, filtered tables, logs and results are not committed.
 
 ## Input and environment
 

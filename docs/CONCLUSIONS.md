@@ -1,116 +1,173 @@
-# Spire and FMN2: what the splicing data support
+# SPIRE y FMN2: revisión desde los FASTQ originales
 
-Reviewed 17 October 2026 using the final betAS tables and corrected rMAPS3 runs.
-The strongest common finding is **overlap in affected targets and sequence
-architecture**, with limited agreement in direction. These data do not establish
-a common causal RBP or direct spliceosome regulation. Spire genotype labels
-remain unresolved; its conclusions, including overlaps with FMN2, are provisional.
-No samples have been relabelled.
+Actualizado el 2 de noviembre de 2026. La referencia actual es el
+[informe de revisión SPIRE](../reports/spire_review/REPORT.md).
+Las conclusiones anteriores se conservan en
+[el archivo histórico](../legacy/pre_fastq_2026-11-02/docs/CONCLUSIONS.md).
 
-## What changes in each dataset
+## Las etiquetas antiguas no coinciden con las de los FASTQ
 
-Selection is N≥10 and complete PSI in every profile, empirical betAS FPR≤0.05
-and absolute fitted ΔPSI≥10 percentage points (pp). This FPR is not a
-multiple-testing-adjusted FDR. Pdiff and raw sample separation provide additional
-descriptive support without changing the paper's selection rule.
+La correspondencia entre los seis perfiles es unívoca usando 4.316 genes variables,
+un evento por gen y excluyendo Spire1/2. Coinciden los mejores emparejamientos por
+RMSE y Spearman:
 
-| Readout | Spire1/2 DKO versus labelled Cont | Fmn2 KO versus Het |
+| Etiqueta antigua | Perfil de los FASTQ originales |
+|---|---|
+| Cont_a | Cont_1 |
+| Cont_b | Cont_2 |
+| Cont_c | DKO_4 |
+| DKO_a | DKO_5 |
+| DKO_b | DKO_6 |
+| DKO_c | Cont_7 |
+
+Esto identifica una inconsistencia entre las etiquetas históricas y las de los
+FASTQ. No establece en que paso ocurrio ni sustituye un genotipado de ADN.
+La nueva asignación es consistente con la evidencia de RNA en los loci diana:
+9 de 13 eventos exónicos observados de Spire1 y los 6 de Spire2 tienen soporte
+VAST>=10 en los tres controles y <10 en los tres DKO. Otros cuatro exones de
+Spire1 conservan soporte en DKO; por eso la expresión total y la cobertura de
+los exones afectados deben revisarse por separado.
+
+## Cambia mucho la lista de eventos, aunque el total sea parecido
+
+Se mantienen los criterios: N>=10 y PSI completa en las seis muestras,
+FPR empirico betAS<=0,05 y |delta PSI ajustado|>=10 puntos porcentuales.
+El campo FDR de betAS es un FPR por evento; no es FDR corregida por pruebas múltiples.
+
+| Medida | SPIRE anterior | SPIRE desde FASTQ |
 |---|---:|---:|
-| Profiles per group | 3 | 2 merged pools |
-| Tested events | 289,583 | 50,415 |
-| Selected events | 1,436 (0.50%) | 275 (0.55%) |
-| Affected named genes | 945 | 208 |
-| EX / IR / Alt5 / Alt3 | 537 / 241 / 293 / 365 | 145 / 46 / 25 / 59 |
-| Increased / decreased event use | 711 / 725 | 141 / 134 |
-| Increased / decreased intron retention | 127 / 114 | 15 / 31 |
-| Selected in the 48,908-event common universe | 94 (0.19%) | 264 (0.54%) |
+| Eventos evaluados | 289.583 | 287.393 |
+| Eventos seleccionados | 1.436 | 1.547 |
+| Genes afectados con nombre | 945 | 1.000 |
+| EX / IR / Alt5 / Alt3 seleccionados | 537 / 241 / 293 / 365 | 551 / 271 / 330 / 395 |
+| Uso aumentado / disminuido | 711 / 725 | 784 / 763 |
+| Retención de intrones aumentada / disminuida | 127 / 114 | 139 / 132 |
 
-**Spire:** the labelled contrast contains bidirectional changes across event
-types, without generalized increased intron retention. Its larger absolute count
-accompanies a much larger tested universe and cannot establish a stronger
-phenotype than FMN2. Even matched-universe rates remain descriptive because
-controls, coverage and replication differ.
+En los 286.899 eventos comunes, con anotación identica, 358 mantienen selección
+y dirección, 102 invierten dirección, 967 dejan de seleccionarse y 1.080 pasan
+a seleccionarse. Otros 9 eventos seleccionados antes ya no son evaluables;
+7 seleccionados ahora no se evaluaban antes. Por tanto, la lista antigua de
+candidatos no debe seguir usandose como lista actual. Los cambios incluyen
+reprocesamiento y reasignacion de condiciones; no se atribuyen exclusivamente
+al etiquetado. Las listas completas y las transiciones se exportan en
+`reports/spire_review/tables/`.
 
-Spire1's retained-intron event MmuINT0151614 is a target-locus/QC candidate,
-not evidence of autoregulation: fitted ΔPSI is +70.1 pp, arithmetic mean ΔPSI
-is +23.4 pp, and samples are heterogeneous. Exon support at both Spire loci
-separates Cont_a/b and DKO_c from Cont_c and DKO_a/b. Independent PCA and held-out
-marker checks do not validate the original identities or a c-label swap.
-Spire2 has no event passing all-profile N10; its differential splicing is
-untestable. See the [identity report](../results/spire_identity_check/REPORT.md)
-and [target-locus review](../results/biological_review/REPORT.md).
+No se observa un predominio general de aumento de retención de intrones.
+Spire1 MmuINT0151614 sigue seleccionado y aumenta a +91,7 pp de delta ajustado
+(Pdiff=1; PSI cruda 4,49-6,93% en controles frente a 76-100% en DKO).
+Es un evento del locus manipulado y requiere esa cautela al interpretarlo;
+no demuestra por si solo autoregulacion. Spire2 queda sin eventos evaluables
+tras el filtro que exige N10 también en los DKO.
 
-**FMN2:** changes are also selective and bidirectional. Selected introns more
-often decrease retention (31 versus 15), arguing against generalized
-intron-retention failure. Camk2g exon MmuEX0008978 (−53.7 pp) and Fmn1 exon
-MmuEX0019373 (−48.6 pp) have complete raw-PSI separation of the two pools per
-group; these are candidates, without demonstrated protein consequences.
-Lower Fmn2 exon support in both KO pools is consistent with the manipulation,
-but no Fmn2 event survives all-profile N10. Controls are heterozygous, not wild type.
+## Expresión y heterogeneidad
 
-## What is common
+En las salidas DESeq2 suministradas, contraste DKO/Cont, hay 111 genes con
+padj<=0,05: 40 aumentan y 71 disminuyen. De ellos, 50 cumplen ademas
+|log2FC|>=1. Se conservan los log2FC exportados con shrinkage y sus p-valores;
+no se ha vuelto a ejecutar DESeq2.
 
-The comparison uses **48,908 events in 4,229 named genes tested in both studies**.
+- Spire2: log2FC=-7,749; padj=0,000382. Los controles tienen aproximadamente
+  1.959-2.460 cuentas normalizadas y los DKO 0-26.
+- Spire1: log2FC=-0,177; padj=0,207. El soporte residual de algunos exones
+  coexiste con la pérdida casi completa de otros.
+- Fmn2: log2FC=+0,111; padj=0,419.
 
-- **25 affected genes overlap**, versus 3.26 expected under a uniform-gene null
-  (one-sided Fisher p≈1.14×10⁻¹⁶). Shared targeting exceeds that null, which does
-  not correct gene length or event-count bias.
-- **18 exact event IDs overlap at 15 loci:** 11 concordant, seven opposing.
-  Direction agreement is not convincingly above 50% (exploratory sign-test
-  p=0.481); raw mean ΔPSI across all common events is almost uncorrelated
-  (Spearman 0.0096). The knockouts are not interchangeable splicing phenocopies.
-- **Rev3l alternative 3′-site choice** is the clearest shared computational
-  candidate after inspecting complete raw separation and Pdiff≥0.95 in both.
-  Its two complementary rows represent one locus. **Zfp957** exon exclusion
-  also separates both groups (−11.2/−15.3 pp; FMN2 Pdiff=0.927). Ktn1 and Asap1
-  are concordant secondary candidates with overlapping FMN2 pools. Nexn and
-  Stag1 retained introns change in opposing directions.
-- **Longer flanking introns accompany increased exon inclusion in both.**
-  Upstream medians: 1,867 versus 1,402 nt in Spire; 3,311 versus 1,509 nt in FMN2,
-  comparing up events with each study's ndiff background. Downstream medians:
-  2,284 versus 1,339 nt and 2,321 versus 1,416 nt. All four comparisons pass the
-  exported BH threshold. These are pre-existing genomic features of the affected
-  exons, not introns becoming longer in KO. Ten feature comparisons have matching
-  median-shift direction and BH significance; several features are correlated.
-- **No common enriched GO pathway is established.** No term passes in both
-  separate study sets on the common-tested background; shared-gene GO has no
-  significant BP/CC/MF terms. Full-dataset BP themes with the paper's OrgDb
-  background (112 terms in Spire, seven in FMN2) disappear with each study's
-  tested-gene background. Those background-sensitive themes should not headline
-  the interpretation.
+El investigador confirmó el 2 de noviembre de 2026 que las seis muestras SPIRE
+proceden de animales independientes (tres por condición). La asignación coherente
+de condiciones no elimina la heterogeneidad. DKO_4 y
+Cont_7 siguen separados de las demas muestras en las PCA de expresión y splicing,
+que excluyen los loci Spire1/2. No aparecen dos grupos compactos. STAR tiene
+86,26-88,98% de alineamiento unico; ese QC no explica por si solo los ejes de
+variación. Cont_7 lleva la etiqueta de fecha 14mars y las otras cinco muestras,
+12mars; no se ha supuesto un lote biológico a partir de esos nombres.
+No se ha descartado ninguna muestra ni aplicado una correccion de lote.
 
-See the [comparison report and candidate tables](../results/comparison/REPORT.md).
+## Funcion y comparación con FMN2
 
-## What the RBP figures add
+SPIRE conserva la sensibilidad de GO al fondo: 106 términos BP con el fondo
+OrgDb completo y ninguno con el universo de genes evaluados N10. También quedan
+sin términos CC/MF significativos con ese universo. Los temas obtenidos solo
+con el fondo amplio no deben presentarse como vias confirmadas.
 
-Corrected scans restore motif counting and reproduce the requested paper panels,
-but do **not** identify a defensible common driver. Same-label/region/direction
-raw-p≤0.05 selects 85/91 labels for IR-up and 86/91 for IR-down in both studies:
-the criterion is too broad to establish specificity.
+La comparación actual usa 48.323 eventos en 4.229 genes evaluados en ambos
+experimentos: 11 eventos seleccionados comunes (7 concordantes y 4 opuestos),
+frente a 18 antes, y 22 genes afectados comunes, frente a 25 antes. Hay más
+solapamiento que bajo un nulo uniforme de genes (22 frente a 3,44 esperados;
+Fisher p=6,22e-13), que no corrige longitud de gen ni número de eventos por gen.
+La concordancia de dirección no supera de forma convincente el 50%
+(prueba de signo exploratoria p=0,549); la correlación de deltas medios crudos
+en todos los eventos comunes es 0,0065.
 
-Sparse counts can produce extreme asymptotic Mann–Whitney p-values. One FMN2
-exon window has one positive event among 61 versus two among 19,992 background
-events: native p≈1.4×10⁻²⁵, versus exact conditional p≈0.0091 before multiple
-searching. Shared SRSF1 scores use different motif variants/windows: 21/127
-positive events in the Spire winner versus 1/15 in FMN2. Motif presence is not
-binding, expression, protein abundance or causal activity. See the
-[RBP report](../results/rbp/REPORT.md) and support-count audits.
+Ktn1 se mantiene como evento concordante. Huwe1, Plag1, Pla2g4c y Zmynd11
+aparecen entre los concordantes actuales. Rev3l ya no cumple la selección
+compartida. Las diferencias de controles, cobertura y replicacion impiden
+tratar los knockouts como experimentos intercambiables. FMN2 conserva dos pools
+por grupo y controles heterocigotos. Ver las listas, PSI individuales, GO y
+características de secuencia en [el informe comparativo](../reports/comparison/REPORT.md).
+Ninguno de los siete eventos concordantes compartidos presenta separacion
+completa de las PSI individuales en ambos experimentos; siguen siendo candidatos.
 
-## Biological interpretation and next priorities
+No hay términos GO enriquecidos en los conjuntos compartidos ni en cada estudio
+al usar ese mismo universo común, en BP/CC/MF.
 
-A connection through actin-dependent cell organization is plausible: Spire and
-FMN2 cooperate in mouse-oocyte actin assembly
-([Pfender et al., 2011](https://pubmed.ncbi.nlm.nih.gov/21620703/)). Independent
-oocyte work connects cytoplasmic forces with nuclear-condensate remodeling and
-RNA processing ([Al Jord et al., 2022](https://www.nature.com/articles/s41467-022-32675-5)).
-**Our interpretation is a hypothesis:** perturbing this system could affect
-overlapping splicing targets, with different directions and additional targets
-in each dataset. These tables cannot distinguish direct regulation from altered
-cell state, mechanics or technical effects.
+Se mantiene la asociacion descriptiva entre mayor inclusión exónica y flancos
+intronicos más largos en ambos estudios. En SPIRE, las medianas de los eventos
+EX-up frente a ndiff son 2.118 frente a 1.444 nt aguas arriba y 1.838 frente a
+1.376,5 nt aguas abajo; ambas comparaciones pasan BH<0,01. Son características
+genómicas de esos eventos, no intrones que se alarguen tras el knockout.
+En SPIRE el mismo patrón de intrones flanqueantes más largos aparece también
+en EX-down; por tanto, no distingue de forma específica los aumentos de inclusión.
 
-First recover Spire genotype/sample provenance or allele-aware alignment evidence.
-Prioritize Rev3l and Zfp957 for shared splice-junction validation, and Camk2g/Fmn1
-for FMN2 follow-up. RBP prioritization needs calibrated sparse-count statistics
-and multiple-search control. No simulation, expression analysis or label
-correction was performed for this review. The shared [palette](COLOURS.md)
-changes appearance only; biological cutoffs and statistical results are unchanged.
+## RBP: mapas recalculados con las condiciones corregidas
+
+rMAPS ha terminado EX, IR, Alt5 y Alt3: 114 motivos bajo 91 etiquetas RBP,
+con todos los eventos de fondo preparados. La auditoría valida 741.000 p-valores
+de ventanas y 456 pares PDF/PNG por estudio; los recuentos independientes de
+las ventanas más extremas coinciden con los resultados nativos.
+
+El criterio de p crudo<=0,05 en la misma etiqueta, región y dirección en ambos
+estudios selecciona 82/91 etiquetas para IR-up y 84/91 para IR-down; para EX-up
+son 86/91 y EX-down 82/91. Es una interseccion demasiado amplia para identificar
+un regulador común específico. Un mismo nombre puede ganar con variantes de
+motivo y ventanas diferentes.
+
+Los mínimos puntuales de SPIRE corresponden a motivos RBM4 en EX-down e IR-up,
+y RBM42 en Alt5-up y Alt3-up. Su soporte es escaso: cuatro eventos con hits entre
+271 en el ejemplo EX, tres entre 138 en IR, tres entre 83 en Alt5 y tres entre
+114 en Alt3. En la ventana binaria Alt5, el p nativo es 5,96e-12 y el diagnóstico
+condicional exacto 0,000719; en Alt3, 2,51e-10 frente a 0,00113. Ninguno de esos
+diagnósticos corrige todas las búsquedas entre motivos y ventanas. Por tanto,
+RBM4/RBM42 son etiquetas de motivos candidatas, no reguladores causales establecidos.
+
+Las figuras 2H y S6A–E y las extensiones están en la
+[galería RBP actual](../reports/rbp/index.html). Los recuentos, ventanas y limites
+se detallan en [su informe](../reports/rbp/REPORT.md). La expresión o abundancia
+de un RBP no se deduce de un enriquecimiento de su motivo.
+
+## Alcance y archivos
+
+Los FASTQ no se han vuelto a alinear aquí: se utilizan los resultados nuevos
+suministrados de RNA-seq, DGE, VAST y betAS. Se han validado PSI, anotaciones,
+orden de eventos, contraste, muestras y estadísticas contra los checkpoints,
+y regenerado figuras, GO y características Matt/GC con las entradas nuevas.
+Los originales y los resultados numericos de FMN2 se conservan.
+
+Matt/GC y rMAPS están completos con las listas corregidas; la Figura 2 integra
+los seis paneles de splicing y Matt. Se han retirado solo las secuencias generadas
+del intento interrumpido, conservando su procedencia y la ejecución completa.
+Los originales y los informes anteriores siguen archivados.
+
+La conclusión computacional es una alteración selectiva y bidireccional del
+splicing, con algunos genes y características de secuencia compartidos con FMN2.
+No se establece una respuesta direccional global común, una vía GO robusta al
+fondo evaluado ni un RBP causal común. La heterogeneidad entre muestras, el FPR
+por evento de betAS y la calibración de los motivos limitan la inferencia.
+
+## Figuras para el manuscrito
+
+La selección final para publicación está en `results/publication/index.html`:
+dos figuras principales, cuatro suplementarias, métodos/resultados/leyendas y
+tablas S1–S8. Añade sensibilidad al retirar cada animal, candidatos de división
+seleccionados con una regla explícita y control aproximado por número de eventos
+por gen en el solapamiento con FMN2. Las conclusiones cuantitativas actualizadas
+se generan directamente en `results/publication/text/RESULTS.md`.

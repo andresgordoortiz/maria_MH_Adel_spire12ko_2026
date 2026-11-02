@@ -34,3 +34,10 @@ scores and tests are unchanged. Raw rMAPS3 maps are preserved as tool outputs
 with their original rendering; their derived paper panels use this palette.
 Previous report figures and checksums are archived under
 `legacy/figures_before_palette_2026-10-17/` and `audit/palette_2026-10-17/`.
+
+The publication assembly reuses these colors with Liberation Sans, 8-point
+base text, 7-point tick/legend text, 9-point panel titles and 12-point panel
+letters at 180 mm figure width. PDFs embed fonts (with glyph fallback where
+needed); PNG exports are 450 dpi. Individual animals remain visible as separate
+points even when measurements coincide. Layout and font settings are in
+`analysis/publication_helpers.R`; earlier analysis reports retain their layouts.

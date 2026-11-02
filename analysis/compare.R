@@ -12,7 +12,7 @@ for (ds in names(studies)) {
   p <- studies[[ds]]
   stopifnot(file.exists(file.path(p, 'COMPLETE')))
   params[[ds]] <- jsonlite::fromJSON(file.path(p, 'tables', 'analysis_parameters.json'))
-  stopifnot(params[[ds]]$dataset == ds, !params[[ds]]$legacy,
+  stopifnot(params[[ds]]$dataset %in% (if (ds == 'spire') c('spire', 'spire_fastq') else 'fmn2'), !params[[ds]]$legacy,
     params[[ds]]$min_reads_all_samples == 10, params[[ds]]$fpr_max == .05, params[[ds]]$abs_deltapsi_min == .1)
   tables[[ds]] <- as.data.frame(fread(file.path(p, 'tables', 'all_events.csv')))
 }
@@ -114,7 +114,8 @@ if (nrow(candidates)) {
     groups <- unlist(params[[ds]]$samples)
     x <- x[, c('GENE', 'EVENT', names(groups))]
     x <- pivot_longer(x, all_of(names(groups)), names_to = 'sample', values_to = 'PSI')
-    labels <- setNames(paste0(groups, '_', ave(seq_along(groups), groups, FUN = seq_along)), names(groups))
+    labels <- setNames(if (params[[ds]]$dataset == 'spire_fastq') sub('^SPIRE_', '', names(groups)) else
+      paste0(groups, '_', ave(seq_along(groups), groups, FUN = seq_along)), names(groups))
     x$sample <- factor(paste(ds, labels[x$sample]), levels = paste(ds, labels))
     x$dataset <- ds; x
   }))
@@ -158,8 +159,8 @@ report <- c('# Spire versus FMN2: final splicing comparison', '',
     sum(joined_features$group2 == 'ndiff' & joined_features$same_effect_direction & joined_features$raw_significant_both, na.rm = TRUE),
     sum(joined_features$group2 == 'ndiff' & joined_features$same_effect_direction & joined_features$BH_significant_both, na.rm = TRUE)), '',
   'GO uses the same common-tested Entrez universe for both studies and for their shared-gene sets. A shared GO label alone does not show that the same genes or events drive enrichment. Complete results and overlapping term/driver tables are exported.', '',
-  'Cautions: FMN2 has two biological pools per group with heterozygous controls; Spire has three profiles per group with animal/pooling identity unverified. These are separate experiments, not a factorial design. A missing selection is not proof of no effect. betAS FDR is an empirical per-event FPR, not a multiplicity-adjusted FDR. Complementary alternative-site rows and multiple events within genes are dependent; event/locus Fisher and sign tests are exploratory. Gene overlap uses a uniform gene null and does not fully correct gene length or event-count bias.', '',
-  'Completed RBP motif figures and their separate statistical limitations are in ../rbp/index.html. No gene-expression results are inferred here.')
+  'Cautions: FMN2 has two biological pools per group with heterozygous controls. For the current FASTQ SPIRE data, the investigator confirmed three independent animals per group on 2 November 2026. Historical labels remain superseded. These are separate experiments, not a factorial design. A missing selection is not proof of no effect. betAS FDR is an empirical per-event FPR, not a multiplicity-adjusted FDR. Complementary alternative-site rows and multiple events within genes are dependent; event/locus Fisher and sign tests are exploratory. Gene overlap uses a uniform gene null and does not fully correct gene length or event-count bias.', '',
+  'Current joint RBP motif figures and methods are in ../rbp/index.html; the motif analysis is separate from these event/gene overlaps. Historical SPIRE motif results remain archived. SPIRE gene expression is reviewed in ../spire_review/.')
 writeLines(report, file.path(out, 'REPORT.md'))
 html <- c('<!doctype html><html lang="en"><meta charset="utf-8"><title>Spire and FMN2 comparison</title>',
   '<style>body{font:16px system-ui;max-width:1100px;margin:30px auto;padding:0 20px}img{max-width:100%}article{border-top:1px solid #ccc;margin:30px 0}</style>',
@@ -175,7 +176,7 @@ if (length(unique(dirname(c(unname(studies), out)))) == 1L) {
     '<style>body{font:18px system-ui;max-width:800px;margin:40px auto;padding:0 20px}</style><h1>Final splicing analyses</h1>',
     sprintf('<p>%s shared selected events: %s concordant, %s opposing; %s shared affected genes.</p>', sum(both), sum(same), sum(opposite), length(shared_genes)),
     sprintf('<p><a href="%s/index.html">%s figures and report</a></p>', links, names(links)),
-    '<p>Comparison uses the common tested universe. FMN2 controls are heterozygous; biological replication and coverage differ. Joint RBP figures are in results/rbp/index.html.</p></html>'),
+    '<p>Comparison uses the common tested universe. FMN2 controls are heterozygous; biological replication and coverage differ. See the main results index for current RBP motif status.</p></html>'),
     file.path(dirname(out), 'index.html'))
 }
 stopifnot(nrow(common) <= min(vapply(tables, nrow, integer(1))), sum(same) + sum(opposite) == sum(both))

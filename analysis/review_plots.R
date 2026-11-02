@@ -1,6 +1,6 @@
 .libPaths(c(normalizePath('analysis/renv/library'),.libPaths()))
 source('analysis/common.R')
-out <- 'results/biological_review'
+out <- 'legacy/pre_fastq_2026-11-02/results/biological_review'
 main_plots <- list();figure_names <- character()
 provenance_label <- 'Original sample labels retained; target-locus patterns require genotype/sample-sheet verification'
 x <- fread(file.path(out,'tables/target_locus_read_support.csv'))
@@ -80,7 +80,7 @@ p2 <- ggplot(ir,aes(sample,PSI,fill=declared_group)) + geom_col(width=.65) +
  subtitle='betAS fitted delta: +70.1 pp; raw mean delta: +23.4 pp; Pdiff: 0.618')
 save_plot(p2,'Spire1_retained_intron_sample_PSI',10,5)
 # Label-blind variable-event PCA is descriptive and does not assign genotypes.
-all <- fread('results/spire_final/tables/all_events.csv')
+all <- fread('legacy/pre_fastq_2026-11-02/results/spire_final/tables/all_events.csv')
 mat <- as.matrix(all[,..samples])
 means <- rowMeans(mat); variance <- rowMeans((mat-means)^2)
 ix <- head(order(variance,decreasing=TRUE),5000)
