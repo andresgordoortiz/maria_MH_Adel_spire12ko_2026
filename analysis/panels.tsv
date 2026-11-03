@@ -1,22 +1,17 @@
 figure_panel	analysis	rationale_or_limit
-SPIRE_1A	DESeq2 MA plot	Primary expression result; 111 BH-selected genes
-SPIRE_1B-C	Splicing classes and all 1547 selected PSI profiles	Primary splicing result; row dendrogram; biological-replicate columns
-SPIRE_1D	Compact GO context: seven manuscript processes	Observed vs tested-background expected gene counts; q across all BP+CC+MF; full events move to S7
-SPIRE_2A-B	EX upstream intron length and IR GC boxes/event points	Interpretable sequence contexts; not selected by minimum P alone
-SPIRE_2C	Two exact regional motif associations	PCBP2/EX and PPRC1/Alt5; 5278 regional presence tests; complete-family BH
-SPIRE_S1	Expression/PSI PCA and target-gene/exon support	Target validation and heterogeneity; STAR mapping QC remains table-only
-SPIRE_S2	Splicing sensitivity and clustered expression	Robustness; no refitting or biological-replicate exclusions
-SPIRE_S3	All six reference Matt feature distributions	Includes nonsignificant results; labelled MaxEnt view and outside-range counts
-SPIRE_S4	EX/IR absolute and background-relative GC profiles	Same original bin data; separate within-study comparisons; sequence-level GC audit in S7
-SPIRE_S6	GO top terms and manuscript processes	BP/CC/MF pooled BH; identical tested-background eligible terms across all sensitivities; direct/unique-alias mapping
-SPIRE_S5	EX/IR regional RBP effect heatmaps and distributions	Exact presence tests; full-family q dots; clustered hidden trees; named angled regions; descriptive effects
-FMN2_1	Splicing counts/profiles and EX flank lengths	Independent study set; two biological pools per condition; no invented expression analysis
-FMN2_S1	Omission sensitivity	Descriptive checks with two pools per condition
-FMN2_S2	Six reference features	Small IR groups; all tests retained
-FMN2_S3	Absolute/relative GC profiles	Does not establish the SPIRE GC effect in FMN2
-FMN2_S5	GO top terms and manuscript processes	Same transparent selections as SPIRE S6 within FMN2; all tested-background adjusted P above .05
-FMN2_S4	EX/IR regional motif effects	Exact regional presence and BH across all 5278 tests; none significant in FMN2
-SPIRE_S7	Background, event opportunity, selection sensitivity and all 127 division events	Explains why 79 named division genes do not imply pathway overrepresentation
+SPIRE_1A	DESeq2 MA plot	111 BH-selected expression genes
+SPIRE_1B-C	Splicing classes and all 1547 selected PSI profiles	Primary event-level result; row dendrogram; biological-replicate columns
+SPIRE_1D	All 127 division-annotated splicing events in 79 genes	Answers the email; each point is an event; annotation does not imply enrichment
+SPIRE_2A	Standard GO gene-ratio dot plot	Top three terms per BP/CC/MF; count size and complete-family BH color; no forced division terms; none significant
+SPIRE_2B-C	EX upstream intron length and IR GC boxes/event points	Interpretable genomic contexts; complete Matt family retained
+SPIRE_2D	EX RBP regional-effect heatmap	Exact regional presence odds ratios; full-family BH dots; clustered rows with hidden tree
+FMN2_1A-B	Splicing classes and all 275 selected PSI profiles	Independent study; two biological pools per condition
+FMN2_1C-E	EX intron flank lengths and RBP heatmap	Study-specific background and correction; no significant regional motif association
 Convergence_1	Common-universe overlap and raw/shared fitted effects	Limited shared targeting; weak overall directional agreement
-Tables_S1-S8	Complete results, annotations, tests and individual measurements	Preserve nonsignificant results, all features, GO, transcript impact and source data
+S1A-D	SPIRE expression/PSI PCA, target-exon support and clustered expression	Essential sample QC; target panel is VAST junction support, not expression
+S1E-F	SPIRE/FMN2 leave-one-sample stability	Descriptive raw-PSI checks; no refitting or exclusions
+S2A-D	SPIRE/FMN2 exon number and IR 5-prime splice-site strength	Complementary features; includes nonsignificant results and labelled MaxEnt display limits
+S3A-B	SPIRE/FMN2 IR RBP regional-effect heatmaps	Complements main EX matrices; hidden trees; all tests corrected before display selection
+S3C-D	SPIRE/FMN2 IR GC difference from background	Descriptive pointwise event-level uncertainty; independent sequence-level audit in S7
+Tables_S1-S8	Complete results, annotation, families and individual measurements	All features, backgrounds, sensitivities, absolute/EX profiles and nonsignificant tests retained
 Cellular_phenotype	Actin, nucleus, nuclear envelope, chromatin, speckles and division	Requires independent imaging or functional measurements

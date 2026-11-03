@@ -108,16 +108,17 @@ pools BP, CC and MF within each study/background/selection analysis, including
 zero-overlap terms. No correction is restricted to the terms chosen for a
 figure. Full-annotation comparisons are reference diagnostics.
 
-The compact main panel shows seven question-driven GO terms, with
-observed gene counts, their tested-background expectations,
-and q from the complete primary GO family. q tests overrepresentation;
-odds ratios and pointwise exact intervals remain in the source tables.
-The supplemental ontology panel shows the union of the three smallest raw-P terms per ontology and
-background, with GO-ID tie breaking. Nine additional terms motivated by the
-email are displayed separately. These are post-analysis editorial selections,
-not preregistered pathway hypotheses. Related ontology terms are retained.
-The original four-term-only adjusted P values are archived as legacy reference;
-current inference uses the complete pooled GO family.
+The main GO dot plot shows the three top-ranked terms in each ontology,
+ordered by complete-family BH q, nominal P and GO ID. The x axis gives
+Count/query genes annotated in that ontology; point size gives gene count
+and color gives q from the full tested-background BP/CC/MF family.
+This post-analysis display does not require significance or a connection
+to the manuscript themes; related ontology terms are retained. All background
+and selection sensitivities and nine email-motivated terms remain in complete
+tables and the inference audit. The main division-event panel retains every
+selected event whose host gene maps to one of four division GO categories;
+annotation is distinguished from pathway overrepresentation. Original
+four-term-only adjusted P values remain legacy reference results.
 
 A second sensitivity test preserves the selected-gene count within strata
 floor(log2(number of testable events per gene)). Ten thousand gene allocations
@@ -151,8 +152,8 @@ replication and detection opportunities. No factorial interaction is estimated.
 Matt 1.3.2, GENCODE M10 and GRCm38 inputs are unchanged. Unselected Matt
 backgrounds are capped at 10,000 events with seed 42. Existing two-sided
 Mann–Whitney tests retain BH across every exported EX/IR feature and all
-three contrasts within study; the six displayed features do not define a
-smaller correction family. VASTDB transcript consequences remain predictions.
+three contrasts within study; displayed feature choices do not define a smaller
+correction family. All six reference features remain in the exported measurements. VASTDB transcript consequences remain predictions.
 
 The primary RBP analysis now tests regional motif presence rather than a
 selected minimum window P. The original rMAPS3 asymptotic window tests and
@@ -175,8 +176,9 @@ foreground/background event counts are checked against the prepared manifests.
 One-sided exact Fisher/hypergeometric tests compare motif-positive events
 in the selected direction versus its unselected background. BH is applied
 once across all 91 RBPs, 29 regions spanning EX/IR/Alt5/Alt3, and both
-directions: 5,278 tests per study. The two passing SPIRE associations appear
-in the main figure; complete effects and corrected results are supplemental.
+directions: 5,278 tests per study. Main EX heatmaps and supplemental IR
+heatmaps show effects and corrected dots; complete Alt5/Alt3 results remain
+in Table S8, including the passing PPRC1/Alt5 association.
 Event correlation, GC/length composition and catalogue specificity remain
 limitations of this sequence-level association analysis. It measures neither
 RBP expression nor binding or causal activity.
@@ -187,19 +189,18 @@ R/ggplot2/patchwork layouts use Liberation Sans, embedded in vector PDFs,
 with 450-dpi PNGs at 180-mm width. Direction is blue (#2166AC), red (#B2182B)
 and background grey (#BDBDBD); study identity uses purple/green. Restrained
 borders and grids follow the Lena reference. Both studies have distinct
-figure sets and a compact convergence figure.
+main figure sets and a compact convergence figure, with three shared
+supplementary figures in total: QC/stability, additional features and IR
+sequence context.
 
-The RBP heatmaps are supplemental. Thirty EX and fifteen IR labels per
+The EX RBP heatmaps are main panels and the IR heatmaps are supplemental.
+Thirty EX and fifteen IR labels per
 study are ordered by their smallest regional q, then largest absolute effect
 and label; all tests were corrected before this display selection. Cell
 color shows log2 odds ratio with a 0.5 continuity correction for display,
 saturated at ±2. Dots mark exact regional tests with BH q ≤0.05. Unsaturated
 row effects are standardized for Euclidean/complete-linkage clustering;
 constant rows are centered without division by zero. Trees are hidden.
-Regional boxplots summarize log2 odds ratios across all 91 labels; they
-receive no second test between preselected score distributions. Full,
-angled region names match the heatmap mapping.
-
 Matt boxplots show quartiles/1.5-IQR whiskers and individual selected-event
 measurements with horizontal jitter. Background measurements are summarized
 by boxes; separate outlier symbols are suppressed, with all values retained

@@ -1,4 +1,4 @@
-# Main panels answer the biological question; study-specific supplements hold diagnostics.
+# Main panels answer the biological question; three shared supplements hold supporting evidence.
 polish <- function(p, title) p + labs(title = title, subtitle = NULL, caption = NULL)
 heat_theme <- theme(panel.grid = element_blank(), panel.grid.major = element_blank(),
   panel.grid.major.y = element_blank(), panel.grid.major.x = element_blank(),
@@ -197,7 +197,7 @@ rbp_heatmap <- function(ds, kind) {
     facet_grid(~region, labeller = as_labeller(setNames(labs_region, regions$region))) +
     scale_x_continuous(limits = c(.5, 2.5), expand = c(0, 0)) +
     scale_fill_manual(values = direction_colors, labels = usage_labels, name = NULL) +
-    labs(title = paste(kind, 'RBP motif enrichment'), subtitle = 'Regional presence; dot: BH q ≤ 0.05; rows clustered') +
+    labs(title = paste(toupper(ds), kind, 'RBP motif effects'), subtitle = 'Regional presence; dot: BH q ≤ 0.05; rows clustered') +
     theme_void(base_family = 'Liberation Sans', base_size = 7) +
     theme(strip.text = element_text(size = 6.5), panel.spacing.x = grid::unit(.7, 'mm'),
       legend.position = 'top', legend.key.size = grid::unit(2.5, 'mm'),
@@ -243,171 +243,64 @@ gc_plot <- function(ds, kind, difference = FALSE) {
       title = paste(kind, if (difference) 'difference from background' else 'sequence profile')) +
     theme(axis.text.x = element_text(size = 6))
 }
-motif_distribution <- function(ds, kind) {
-  x <- motif_tests[motif_tests$dataset == ds & motif_tests$event_type == kind, ]
-  x$score <- x$log2_OR
-  regions <- rbp_regions(kind)
-  x$direction <- factor(x$direction, c('down', 'up')); x$region <- factor(x$region, regions$region)
-  x$region_label <- regions$label[match(x$region, regions$region)]
-  export(x, paste0(toupper(ds), '_RBP_', kind, '_regional_scores'), 'source_data')
-  ggplot(x, aes(region, score, fill = direction)) +
-    geom_boxplot(width = .65, outlier.size = .45, alpha = .7, linewidth = .25, position = position_dodge(.7)) +
-    geom_hline(yintercept = 0, linetype = 'dotted', color = '#555555', linewidth = .3) +
-    scale_x_discrete(labels = setNames(regions$label, regions$region)) +
-    scale_fill_manual(values = direction_colors, labels = usage_labels, name = NULL) +
-    labs(x = NULL, y = 'log2 motif odds ratio', title = paste(kind, 'regional motif effects')) +
-    theme(axis.text.x = element_text(angle = 50, hjust = 1, size = 6))
+go_dotplot <- function() {
+  x <- go_revised %>% filter(dataset == 'spire', background == 'tested_N10', selection == 'selected') %>%
+    group_by(ontology) %>% arrange(q_BH, pvalue, ID, .by_group = TRUE) %>% slice_head(n = 3) %>% ungroup()
+  x <- x[order(match(x$ontology, c('BP', 'CC', 'MF')), x$q_BH, x$pvalue, x$ID), ]
+  x$GeneRatio <- x$Count/x$query_genes
+  x$term <- factor(x$ID, rev(x$ID))
+  x$ontology_label <- factor(x$ontology, c('BP', 'CC', 'MF'), c('Biological\nprocess', 'Cellular\ncomponent', 'Molecular\nfunction'))
+  stopifnot(nrow(x) == 9, !anyDuplicated(x$ID), all(x$q_BH > .05))
+  export(x, 'SPIRE_main_GO', 'source_data')
+  ggplot(x, aes(GeneRatio, term, size = Count, color = q_BH)) + geom_point(alpha = .95) +
+    facet_grid(ontology_label~., scales = 'free_y', space = 'free_y') +
+    scale_y_discrete(labels = setNames(vapply(x$Description, function(label)
+      paste(strwrap(label, 48), collapse = '\n'), character(1)), x$ID)) +
+    scale_x_continuous(labels = scales::label_percent(accuracy = 1), expand = expansion(mult = c(.12, .15))) +
+    scale_size_area(max_size = 4, breaks = c(10, 30, 50), name = 'Genes') +
+    scale_color_gradient(low = '#6A3D9A', high = '#CFD3DB', trans = 'log10', limits = c(.05, 1),
+      breaks = c(.05, .1, .5, 1), labels = c('0.05', '0.1', '0.5', '1'), name = 'BH q') +
+    guides(color = guide_colorbar(order = 1, barheight = grid::unit(20, 'mm')),
+      size = guide_legend(order = 2)) +
+    labs(x = 'Gene ratio', y = NULL, title = 'Top-ranked GO terms in selected splicing genes',
+      subtitle = 'Tested-gene background; top 3 terms per ontology; none pass BH q ≤0.05') +
+    theme(legend.position = 'right', strip.text.y = element_text(angle = 0, size = 6.5),
+      axis.text.y = element_text(size = 6.5), panel.spacing.y = grid::unit(1.5, 'mm'))
 }
 
-go_panels <- function(ds) {
-  all_go <- go_revised[go_revised$dataset == ds & go_revised$selection == 'selected', ] %>%
-    group_by(ontology, background) %>% arrange(pvalue, ID, .by_group = TRUE) %>%
-    mutate(rank_in_background = row_number()) %>% ungroup()
-  all_go$p.adjust <- all_go$q_BH
-  all_go$tested <- TRUE
-  top_ids <- unique(all_go$ID[all_go$rank_in_background <= 3])
-  top <- all_go[all_go$ID %in% top_ids, ]
-  top <- top[order(match(top$ontology, c('BP', 'CC', 'MF')), top$pvalue, top$ID), ]
-  focus <- all_go[all_go$ID %in% go_themes, ]
-  stopifnot(nrow(focus) == length(go_themes)*2)
-  export(top, paste0(toupper(ds), '_GO_top_terms'), 'source_data')
-  export(focus, paste0(toupper(ds), '_GO_manuscript_themes'), 'source_data')
-  max_count <- max(c(top$Count, focus$Count), na.rm = TRUE)
-  draw_go <- function(x, ids, title, subtitle) {
-    names_by_id <- setNames(x$Description, x$ID)
-    x$term <- factor(x$ID, rev(ids))
-    x$background <- factor(x$background, c('tested_N10', 'paper_OrgDb'), c('Tested genes', 'Full annotation'))
-    x$ontology <- factor(x$ontology, c('BP', 'CC', 'MF'),
-      c('Biological\nprocess', 'Cellular\ncomponent', 'Molecular\nfunction'))
-    x$score <- -log10(pmax(x$p.adjust, 1e-300))
-    ggplot(x, aes(FoldEnrichment, term)) +
-      geom_vline(xintercept = 1, linetype = 'dotted', linewidth = .3, color = '#999999') +
-      geom_point(data = x[!is.na(x$p.adjust), ], aes(size = Count, color = score)) +
-      geom_text(data = x[is.na(x$p.adjust), ], aes(x = 1, label = 'Not tested'),
-        hjust = 0, size = 2, color = '#777777', family = 'Liberation Sans') +
-      facet_grid(ontology~background, scales = 'free_y', space = 'free_y') +
-      scale_y_discrete(labels = function(ids) vapply(names_by_id[ids], function(s)
-        paste(strwrap(s, width = 43), collapse = '\n'), character(1))) +
-      scale_x_log10(breaks = c(.5, 1, 2, 4, 8, 16)) +
-      scale_color_gradientn(colors = c('#B8B8B8', '#969696', '#7B60A5', '#3F2368'),
-        values = scales::rescale(c(0, -log10(.05), 3, 7)), limits = c(0, 7), oob = scales::squish,
-        breaks = c(0, -log10(.05), 3, 6), labels = c('1', '0.05', '0.001', '10⁻⁶'), name = 'BH-adjusted P') +
-      scale_size_continuous(range = c(1.2, 3.8), limits = c(0, max_count), name = 'Genes') +
-      guides(color = guide_colorbar(order = 1, barwidth = grid::unit(40, 'mm'), barheight = grid::unit(2, 'mm')),
-        size = guide_legend(order = 2, nrow = 1)) +
-      labs(x = 'Gene enrichment (observed / expected)', y = NULL, title = title, subtitle = subtitle) +
-      theme(panel.grid.major.y = element_line(color = '#F0F0F0'),
-        axis.text.y = element_text(size = 6.5), strip.text.y = element_text(size = 6.5, angle = 0),
-        panel.spacing.y = grid::unit(2, 'mm'))
-  }
-  draw_go(top, unique(top$ID), 'Top-ranked GO terms across all three ontologies',
-    'Same eligible terms in both backgrounds; BH across BP, CC and MF') /
-    draw_go(focus, go_themes, 'Processes raised in the manuscript',
-      'Question-driven display; q values use the full GO family') +
-    plot_layout(heights = c(length(unique(top$ID)) + 3, length(go_themes) + 2), guides = 'collect') &
-    theme(legend.position = 'bottom')
-}
-
-go_main <- function(ds) {
-  ids <- c('GO:0051301', 'GO:0051321', 'GO:0030036', 'GO:0005635', 'GO:0006338', 'GO:0016607', 'GO:0008380')
-  x <- go_revised[go_revised$dataset == ds & go_revised$selection == 'selected' &
-    go_revised$background == 'tested_N10' & go_revised$ID %in% ids, ]
-  x$term <- factor(x$ID, rev(ids))
-  labels <- setNames(x$Description, x$ID)
-  export(x, paste0(toupper(ds), '_main_GO'), 'source_data')
-  ggplot(x, aes(y = term)) +
-    geom_segment(aes(x = expected, xend = Count, yend = term), linewidth = .6, color = '#BBBBBB') +
-    geom_point(aes(x = expected, shape = 'Expected', color = 'Expected'), size = 2.1, stroke = .6) +
-    geom_point(aes(x = Count, shape = 'Observed', color = 'Observed'), size = 2.1) +
-    geom_text(aes(x = Inf, label = sprintf('%d genes · q=%.2f', Count, q_BH)), hjust = -.1,
-      family = 'Liberation Sans', size = 2.4, color = '#333333') +
-    scale_y_discrete(labels = labels) + scale_x_continuous(limits = c(0, NA), expand = expansion(mult = c(.04, .08))) +
-    scale_shape_manual(values = c(Expected = 1, Observed = 16), name = NULL) +
-    scale_color_manual(values = c(Expected = '#999999', Observed = '#6A3D9A'), name = NULL) +
-    coord_cartesian(clip = 'off') +
-    labs(x = 'Genes with a selected event', y = NULL, title = 'GO context of affected splicing genes',
-      subtitle = 'Observed versus tested-background expectation; BH across BP + CC + MF') +
-    theme(panel.grid.major.y = element_line(color = '#F0F0F0'), plot.margin = margin(2, 32, 2, 2, unit = 'mm'))
-}
-
-motif_main <- function() {
-  x <- motif_tests[motif_tests$dataset == 'spire' & motif_tests$q_BH <= .05, ]
-  stopifnot(setequal(x$RBP, c('PCBP2', 'PPRC1')), nrow(x) == 2)
-  x$label <- vapply(seq_len(nrow(x)), function(i) {
-    region <- rbp_regions(x$event_type[i]); name <- region$label[match(x$region[i], region$region)]
-    paste0(x$RBP[i], ' · ', x$event_type[i], ': ', gsub('\n', ' ', name), '\nq=', formatC(x$q_BH[i], digits = 2, format = 'g'))
-  }, character(1))
-  h <- bind_rows(transmute(x, label, group = 'Background', positive = background_positive, n = background_n),
-    transmute(x, label, group = 'Increased use', positive, n))
-  h$group <- factor(h$group, c('Background', 'Increased use'))
-  export(x, 'SPIRE_main_exact_motif_associations', 'source_data')
-  ggplot(h, aes(group, 100*positive/n, fill = group)) + geom_col(width = .5) +
-    geom_text(aes(label = paste0(format(positive, big.mark = ',', trim = TRUE), '/', format(n, big.mark = ',', trim = TRUE))),
-      vjust = -.5, size = 2.3, family = 'Liberation Sans') + facet_wrap(~label, nrow = 1) +
-    scale_fill_manual(values = c('#BDBDBD', '#B2182B'), guide = 'none') +
-    scale_y_continuous(expand = expansion(mult = c(0, .25))) +
-    labs(x = NULL, y = 'Motif-positive events (%)', title = 'Two regional motif associations survive BH correction',
-      subtitle = 'Exact presence tests; all 91 RBPs × 29 regions × 2 directions',
-      caption = 'Each event contributes once; motif variants are combined. Motif presence does not measure RBP activity.') +
-    theme(strip.text = element_text(size = 6.5), plot.caption = element_text(size = 6))
-}
-
-go_diagnostics <- function() {
-  opportunity <- go_opportunities %>% filter(dataset == 'spire') %>% group_by(stratum = pmin(stratum, 7L)) %>%
-    summarise(genes = n(), selected_genes = sum(selected), fraction = mean(selected), .groups = 'drop')
-  opportunity$label <- c('1', '2–3', '4–7', '8–15', '16–31', '32–63', '64–127', '128+')[opportunity$stratum+1]
-  export(opportunity, 'SPIRE_GO_event_opportunity_rates', 'source_data')
-  a <- ggplot(opportunity, aes(factor(label, label), fraction)) + geom_col(width = .6, fill = '#6A3D9A') +
-    scale_y_continuous(labels = scales::label_percent(), expand = expansion(mult = c(0, .1))) +
-    labs(x = 'Testable events per gene', y = 'Genes with a selected event (%)', title = 'More events provide more selection opportunities') +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(size = 8))
-  z <- go_revised %>% filter(dataset == 'spire', selection == 'selected', ID %in% go_themes)
-  primary <- z[z$background == 'tested_N10', ]
-  bdata <- bind_rows(transmute(primary, ID, Description, value = Count, method = 'Observed'),
-    transmute(primary, ID, Description, value = expected, method = 'Tested'),
-    transmute(z[z$background == 'paper_OrgDb', ], ID, Description, value = expected, method = 'Full annotation'),
-    transmute(left_join(primary, go_matched[go_matched$dataset == 'spire', c('ID', 'expected_matched')], by = 'ID'),
-      ID, Description, value = expected_matched, method = 'Event-matched'))
-  bdata$term <- factor(bdata$ID, rev(go_themes))
-  export(bdata, 'SPIRE_GO_observed_and_expected', 'source_data')
-  b <- ggplot(bdata, aes(value, term, color = method, shape = method)) + geom_point(size = 1.6) +
-    scale_y_discrete(labels = function(ids) vapply(setNames(primary$Description, primary$ID)[ids],
-      function(label) paste(strwrap(label, 20), collapse = '\n'), character(1))) +
-    scale_color_manual(values = c(Observed = '#222222', Tested = '#6A3D9A', 'Full annotation' = '#AAAAAA', 'Event-matched' = '#1B9E77'), name = NULL) +
-    scale_shape_manual(values = c(Observed = 16, Tested = 1, 'Full annotation' = 2, 'Event-matched' = 3), name = NULL) +
-    guides(color = guide_legend(nrow = 2), shape = guide_legend(nrow = 2)) +
-    labs(x = 'Observed or expected genes', y = NULL, title = 'Background changes expectation') +
-    theme(axis.text.y = element_text(size = 6), plot.title = element_text(size = 8))
-  cdata <- go_revised %>% filter(dataset == 'spire', background == 'tested_N10', ID %in% go_themes)
-  cdata$term <- factor(cdata$ID, rev(go_themes))
-  cdata$selection <- factor(cdata$selection, c('selected', 'consistent', 'separated'),
-    c('All selected events', 'Every omission ≥10 pp', 'Complete raw-PSI separation'))
-  c <- ggplot(cdata, aes(selection, term, fill = FoldEnrichment)) + geom_tile(color = 'white') +
-    geom_text(aes(label = sprintf('%d genes · q=%.2f', Count, q_BH)), size = 2.2, family = 'Liberation Sans') +
-    scale_y_discrete(labels = setNames(primary$Description, primary$ID)) +
-    scale_fill_gradient2(low = '#2166AC', mid = '#F7F7F7', high = '#B2182B', midpoint = 1,
-      limits = c(0, 2), oob = scales::squish, name = 'Observed / expected') +
-    labs(x = NULL, y = NULL, title = 'Functional context across event-selection sensitivity checks') + heat_theme
-  a + free(b, side = 'l') + free(c, side = 'l') + free(p_division, side = 'l') +
-    plot_layout(design = 'AB\nCC\nDD', heights = c(1.2, 1, .85))
+stability_plot <- function(ds) {
+  x <- sensitivity[[ds]] %>% group_by(event_type) %>% summarise(
+    `Same direction` = mean(loo_same_direction), `At least 10 pp` = mean(loo_min_signed_pp >= 10),
+    .groups = 'drop') %>% pivot_longer(-event_type)
+  x$event_type <- factor(x$event_type, c('EX', 'IR', 'Alt5', 'Alt3'))
+  export(x, paste0(toupper(ds), '_display_stability'), 'source_data')
+  ggplot(x, aes(event_type, value, fill = name)) + geom_col(position = 'dodge', width = .65) +
+    scale_y_continuous(limits = c(0, 1), breaks = seq(0, 1, .25), labels = scales::label_percent()) +
+    scale_fill_manual(values = c('#999999', '#222222'), name = NULL) +
+    labs(x = 'Event class', y = 'Selected events', title = paste(toupper(ds), 'leave-one-sample stability'))
 }
 
 p_spire_psi <- psi_heatmap('spire'); p_fmn2_psi <- psi_heatmap('fmn2')
-
-save_figure(p_ma + event_counts('spire') + p_spire_psi + free(go_main('spire'), side = 'l') +
+p_spire_rbp <- rbp_heatmap('spire', 'EX'); p_fmn2_rbp <- rbp_heatmap('fmn2', 'EX')
+save_figure(p_ma + event_counts('spire') + p_spire_psi + free(p_division, side = 'l') +
   plot_layout(design = 'AB\nCC\nDD', heights = c(1, 1.35, .85)), 'SPIRE_Figure_1',
   'SPIRE: expression and splicing changes, including events in division-annotated genes', 225)
-save_figure(feature_distribution('spire', 'UPINTRON_MEDIANLENGTH', 'EX: longer upstream introns') +
-  feature_distribution('spire', 'INTRON_GCC', 'IR: higher whole-intron GC') + motif_main() +
-  plot_layout(design = 'AB\nCC', heights = c(1.2, .85)), 'SPIRE_Figure_2',
-  'SPIRE: sequence context and exact regional motif associations', 160)
-save_figure(polish(pca_plot('Expression_PCA', ''), 'Expression PCA') + polish(pca_plot('Splicing_PCA', ''), 'Splicing PCA') +
-  polish(p1a, 'Target-gene RNA abundance') +
-  (polish(ps1d, 'VAST junction support at target exons') + heat_theme +
-    scale_x_discrete(labels = function(s) sub('SPIRE_(Cont|DKO)_', '', s)) +
-    labs(x = 'Sample ID: controls 1/2/7; DKO 4/5/6') + theme(axis.text.x = element_text(angle = 0))),
-  'SPIRE_S1', 'SPIRE quality control and targeted-locus RNA support', 185)
-# Cluster expression rows too, while preserving sample order.
+save_figure(free(go_dotplot(), side = 'l') +
+  feature_distribution('spire', 'UPINTRON_MEDIANLENGTH', 'EX: longer upstream introns') +
+  feature_distribution('spire', 'INTRON_GCC', 'IR: higher whole-intron GC') + p_spire_rbp +
+  plot_layout(design = 'AA\nBC\nDD', heights = c(1.1, 1, 1.65)), 'SPIRE_Figure_2',
+  'SPIRE: functional context, sequence architecture and regional RBP motifs', 270)
+save_figure(event_counts('fmn2') + p_fmn2_psi +
+  feature_distribution('fmn2', 'UPINTRON_MEDIANLENGTH', 'EX: upstream intron length') +
+  feature_distribution('fmn2', 'DOINTRON_MEDIANLENGTH', 'EX: downstream intron length') + p_fmn2_rbp +
+  plot_layout(design = 'AB\nCD\nEE', heights = c(1, .9, 1.6)), 'FMN2_Figure_1',
+  'FMN2: splicing profiles, exon-flanking architecture and regional RBP motifs', 245)
+save_figure(polish(p2a, 'Overlap on the common tested universe') + polish(p2b, 'Global effect comparison') +
+  free(polish(p2c, 'Effects at the 11 shared events'), side = 'l') +
+  plot_layout(design = 'AB\nCC', heights = c(1, 1.05)), 'Convergence_Figure_1',
+  'Limited shared targeting without a global concordant splicing response', 170)
+
+# Three shared supplements: essential QC, complementary features, and intron sequence context.
 expr_m <- as.matrix(expr[, names(groups$spire)]); rownames(expr_m) <- expr$gene_id
 expr_tree <- row_clustering(expr_m - rowMeans(expr_m))
 expr_long$gene_id <- factor(expr_long$gene_id, rev(rownames(expr_m)[expr_tree$order]))
@@ -415,43 +308,25 @@ export(expr_long, 'SPIRE_clustered_DEG_VST', 'source_data')
 p_expr <- ggplot(expr_long, aes(sample, gene_id, fill = centered)) + geom_raster() +
   scale_fill_gradient2(low = signed_colors[1], mid = signed_colors[2], high = signed_colors[3],
     limits = c(-3, 3), oob = scales::squish, name = 'Centered VST') +
-  scale_x_discrete(labels = function(s) sub('SPIRE_', '', s)) + labs(x = NULL, y = NULL, title = 'Clustered expression profiles') +
-  heat_theme + theme(axis.text.y = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
-save_figure(polish(ps2a, 'Fitted and observed PSI effects') + polish(ps2b, 'Leave-one-sample sensitivity') +
-  polish(ps2c, 'Selection thresholds') + p_expr, 'SPIRE_S2', 'SPIRE sensitivity and expression profiles', 180)
-save_figure(go_diagnostics(), 'SPIRE_S7', 'SPIRE background, opportunity, selection sensitivity and division-event audit', 265)
-for (ds in names(studies)) {
-  name <- toupper(ds)
-  save_figure(wrap_plots(lapply(seq_len(nrow(feature_spec)), function(i)
-    feature_distribution(ds, feature_spec$feature[i], paste(feature_spec$event_type[i], feature_spec$label[i], sep = ' · '))), ncol = 2),
-    paste0(name, if (ds == 'spire') '_S3' else '_S2'), paste(name, 'full reference feature distributions'), 235)
-  save_figure(gc_plot(ds, 'EX') + gc_plot(ds, 'EX', TRUE) + gc_plot(ds, 'IR') + gc_plot(ds, 'IR', TRUE) +
-    plot_layout(ncol = 2), paste0(name, if (ds == 'spire') '_S4' else '_S3'),
-    paste(name, 'absolute and background-relative GC profiles'), 180)
-  save_figure(rbp_heatmap(ds, 'EX') / rbp_heatmap(ds, 'IR') / (motif_distribution(ds, 'EX') + motif_distribution(ds, 'IR')) +
-    plot_layout(heights = c(1.9, 1.1, 1)), paste0(name, if (ds == 'spire') '_S5' else '_S4'),
-    paste(name, 'exact regional RBP motif effects and BH results'), 270)
-  save_figure(go_panels(ds), paste0(name, if (ds == 'spire') '_S6' else '_S5'),
-    paste(name, 'GO ontologies, top terms and manuscript processes under two backgrounds'), 270)
-}
-save_figure(event_counts('fmn2') + p_fmn2_psi +
-  feature_distribution('fmn2', 'UPINTRON_MEDIANLENGTH', 'EX: upstream intron length') +
-  feature_distribution('fmn2', 'DOINTRON_MEDIANLENGTH', 'EX: downstream intron length') +
-  plot_layout(design = 'AB\nCD', heights = c(1, .9)), 'FMN2_Figure_1',
-  'FMN2: splicing profiles and exon-flanking architecture', 175)
-f_sens <- sensitivity$fmn2
-p_f_sens <- ggplot(f_sens, aes(100*deltapsi, raw_delta_pp, color = direction)) +
-  geom_abline(slope = 1, intercept = 0, color = '#999999', linewidth = .3) + geom_point(size = 1, alpha = .6) +
-  direction_scale() + labs(x = 'Fitted ΔPSI (pp)', y = 'Raw mean ΔPSI (pp)', title = 'Fitted and observed effects')
-f_stability <- f_sens %>% group_by(event_type) %>% summarise(`Same direction` = mean(loo_same_direction),
-  `At least 10 pp` = mean(loo_min_signed_pp >= 10), .groups = 'drop') %>% pivot_longer(-event_type)
-f_stability$event_type <- factor(f_stability$event_type, c('EX', 'IR', 'Alt5', 'Alt3'))
-p_f_stability <- ggplot(f_stability, aes(event_type, value, fill = name)) + geom_col(position = 'dodge', width = .65) +
-  scale_y_continuous(limits = c(0, 1), labels = scales::label_percent()) +
-  scale_fill_manual(values = c('#999999', '#222222'), name = NULL) +
-  labs(x = 'Event class', y = 'Selected events', title = 'Leave-one-sample sensitivity')
-save_figure(p_f_sens + p_f_stability, 'FMN2_S1', 'FMN2 sensitivity across biological replicate pools', 95)
-save_figure(polish(p2a, 'Overlap on the common tested universe') + polish(p2b, 'Global effect comparison') +
-  free(polish(p2c, 'Effects at the 11 shared events'), side = 'l') +
-  plot_layout(design = 'AB\nCC', heights = c(1, 1.05)), 'Convergence_Figure_1',
-  'Limited shared targeting without a global concordant splicing response', 170)
+  scale_x_discrete(labels = function(s) sub('SPIRE_', '', s)) +
+  labs(x = NULL, y = NULL, title = 'Expression of 111 selected genes') + heat_theme +
+  theme(axis.text.y = element_blank(), axis.text.x = element_text(angle = 45, hjust = 1))
+save_figure(polish(pca_plot('Expression_PCA', ''), 'SPIRE expression PCA') +
+  polish(pca_plot('Splicing_PCA', ''), 'SPIRE splicing PCA') +
+  (polish(ps1d, 'VAST support at target exons') + heat_theme +
+    scale_x_discrete(labels = function(s) sub('SPIRE_(Cont|DKO)_', '', s)) +
+    labs(x = 'Controls 1/2/7; DKO 4/5/6') + theme(axis.text.x = element_text(angle = 0))) +
+  p_expr + stability_plot('spire') + stability_plot('fmn2') + plot_layout(ncol = 2),
+  'Figure_S1', 'Sample quality, target-exon support, expression and splicing stability', 240)
+save_figure(feature_distribution('spire', 'MEDIAN_EXON_NUMBER', 'SPIRE · EX exon number') +
+  feature_distribution('fmn2', 'MEDIAN_EXON_NUMBER', 'FMN2 · EX exon number') +
+  feature_distribution('spire', 'MAXENTSCR_HSAMODEL_5SS', 'SPIRE · IR 5′ splice-site strength') +
+  feature_distribution('fmn2', 'MAXENTSCR_HSAMODEL_5SS', 'FMN2 · IR 5′ splice-site strength') +
+  plot_layout(ncol = 2), 'Figure_S2', 'Additional exon architecture and intron splice-site context', 180)
+save_figure(rbp_heatmap('spire', 'IR') + rbp_heatmap('fmn2', 'IR') +
+  gc_plot('spire', 'IR', TRUE) + labs(title = 'SPIRE · IR GC profile') +
+  gc_plot('fmn2', 'IR', TRUE) + labs(title = 'FMN2 · IR GC profile') +
+  plot_layout(design = 'AA\nBB\nCD', heights = c(1.1, 1.1, 1)),
+  'Figure_S3', 'Intron motif effects and GC profiles in SPIRE and FMN2', 230)
+# Reference profiles remain in source tables without additional figures.
+for (ds in names(studies)) { invisible(gc_plot(ds, 'EX')); invisible(gc_plot(ds, 'EX', TRUE)) }

@@ -172,3 +172,24 @@ family ledger, complete tests, mapping/alias candidates, null draws and
 FPR calibration diagnostics accompany the package. Previous package and
 review proofs are preserved under `audit/inference_revision_2026-11-03/`.
 No alignment, DESeq2 fit, betAS fit or Matt run was repeated.
+
+## Compact publication revision after figure review
+
+The current package supersedes the figure counts and presentation choices
+above. It contains two SPIRE main figures, one FMN2 main figure, one compact
+convergence figure and exactly three shared supplementary figures total.
+SPIRE 1D restores all 127 division-annotated events in 79 genes. SPIRE 2A is a
+standard GO dot plot: top three terms per ontology, gene ratio, count and q
+from the full tested-background BH family. EX RBP matrices return to both
+studies' main figures, with hidden dendrograms and exact-test BH dots.
+
+S1 retains sample quality, target-exon support, clustered expression and both
+studies' omission checks; S2 adds exon number and IR splice-site strength;
+S3 retains IR RBP matrices and background-relative IR GC. GO background and
+selection diagnostics, full features and omitted profiles remain in tables
+and the inference review. No correction family or primary selection changes.
+The previous package and render proofs are preserved under
+`audit/compact_publication_2026-11-03/`. Source checks, complete-family BH,
+plotted values, archives, local links, embedded fonts and seven final layouts
+are checked before promotion. No upstream fit, alignment or remote push is
+part of this presentation revision.

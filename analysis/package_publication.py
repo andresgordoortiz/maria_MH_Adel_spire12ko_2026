@@ -18,8 +18,8 @@ def package(root):
     if not (root / 'COMPLETE').is_file():
         raise ValueError('Publication R assembly must complete before packaging')
     figures = list(csv.DictReader((root / 'tables/figure_manifest.csv').open()))
-    if {r['figure'] for r in figures} != {'SPIRE_Figure_1', 'SPIRE_Figure_2', *(f'SPIRE_S{i}' for i in range(1, 8)), 'FMN2_Figure_1', *(f'FMN2_S{i}' for i in range(1, 6)), 'Convergence_Figure_1'}:
-        raise ValueError('Expected separate SPIRE, FMN2 and convergence figure sets')
+    if {r['figure'] for r in figures} != {'SPIRE_Figure_1', 'SPIRE_Figure_2', 'FMN2_Figure_1', 'Convergence_Figure_1', 'Figure_S1', 'Figure_S2', 'Figure_S3'}:
+        raise ValueError('Expected four main figures and three shared supplementary figures')
     for row in figures:
         for extension in ('pdf', 'png'):
             path = root / 'figures' / (row['figure'] + '.' + extension)
@@ -51,6 +51,7 @@ def package(root):
         ('Supplementary_tables.zip', [*root.glob('tables/*.csv'), *root.glob('source_data/*.csv'),
                                       *root.glob('text/*.md'), root / 'sessionInfo.txt']),
         ('Figures.zip', list(root.glob('figures/*'))),
+        ('Figures_Supplementary.zip', list(root.glob('figures/Figure_S*'))),
         *((f'Figures_{group}.zip', list(root.glob(f'figures/{group}_*')))
           for group in ('SPIRE', 'FMN2', 'Convergence')),
     ):
@@ -79,13 +80,15 @@ def package(root):
     page.append('<p>Final-size layouts: 180 mm wide; embedded-font PDFs and 450 dpi PNGs. '
                 'Figure numbering is local to the RNA analysis and can be changed when integrated with microscopy.</p>')
     for group, description in (
-        ('SPIRE', 'Primary manuscript set: two main figures and seven supplements.'),
-        ('FMN2', 'Independent comparison set: one main figure and five supplements.'),
+        ('SPIRE', 'Primary manuscript set: two main figures.'),
+        ('FMN2', 'Independent comparison set: one main figure.'),
         ('Convergence', 'Common-universe overlap and directional agreement.'),
+        ('Supplementary', 'Three shared supplementary figures: quality and stability, additional sequence features, and intron motifs/GC.'),
     ):
         page.append(f'<h2 id="{group}">{group}</h2><p>{description} '
                     f'<a href="Figures_{group}.zip">Download this set</a></p>')
-        for row in sorted((r for r in figures if r['figure'].startswith(group + '_')), key=lambda r: r['figure']):
+        prefix = 'Figure_S' if group == 'Supplementary' else group + '_'
+        for row in sorted((r for r in figures if r['figure'].startswith(prefix)), key=lambda r: r['figure']):
             name, title = escape(row['figure']), escape(row['title'])
             page.append(f'<article><h3>{name.replace("_", " ")} · {title}</h3>'
                         f'<p><a href="figures/{name}.pdf">PDF</a> · <a href="figures/{name}.png">PNG</a></p>'

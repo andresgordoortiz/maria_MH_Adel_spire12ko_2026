@@ -467,7 +467,7 @@ writeLines(c('# Supplementary tables and source data', '',
   '- Overlap legacy `p.BH` covers the original seven tests. Primary S5_overlap_inference_BH `q_BH` covers all nine Fisher/direction/matched-gene tests. Permutation `pvalue` is (1+exceedances)/(1+iterations), not zero.',
   '- Matt `group1/group2`: comparison categories; `median1/median2`, `n1/n2`: actual group medians and event counts; `p.BH`: existing feature-family BH correction. Lengths are nucleotides.',
   '- Primary S8 regional-presence `pvalue` is an exact Fisher/hypergeometric tail; `q_BH` covers all 5278 tests per study. `positive/n` and `background_positive/background_n` are motif-positive/total event counts. `log2_OR` adds 0.5 only for display; tests use integer counts. Original minimum-window `pvalue` fields are reference outputs, not the primary test.',
-  '- GO `odds_ratio`, `CI_low/CI_high` are conditional odds ratios and pointwise two-sided 95% exact intervals; they are not simultaneous FDR intervals. The main panel displays observed and expected counts instead.',
+  '- GO `odds_ratio`, `CI_low/CI_high` are conditional odds ratios and pointwise two-sided 95% exact intervals; they are not simultaneous FDR intervals. The main GO dot plot displays GeneRatio=Count/query_genes, count and complete-family q_BH.',
   '- `centered_PSI`: within-event median-centered PSI; `centered`: within-gene mean-centered VST. Plot saturation does not alter exported values.', ''), file.path(out, 'text/TABLES.md'))
 writeLines(capture.output(sessionInfo()), file.path(out, 'sessionInfo.txt'))
 export(AnnotationDbi::metadata(org.Mm.eg.db), 'annotation_metadata')
@@ -483,6 +483,6 @@ export(data.frame(file = input_files, sha256 = vapply(input_files, function(path
 stopifnot(nrow(robust) == sum(selected_counts$n), sum(counts$n) == nrow(spire),
   sum(dge$selected) == summary_dge$padj005, nrow(shared) == 11,
   all(division_tests$padj > .05), all(robust_summary$leave_one_min_10pp <= robust_summary$leave_one_direction_agrees),
-  nrow(figures) == 16, all(file.exists(file.path(out, 'figures', paste0(figures$figure, '.pdf')))))
+  nrow(figures) == 7, all(file.exists(file.path(out, 'figures', paste0(figures$figure, '.pdf')))))
 writeLines('Validated publication assembly; figures and manuscript tables generated.', file.path(out, 'COMPLETE'))
 cat('Publication assembly complete:', out, '\n')

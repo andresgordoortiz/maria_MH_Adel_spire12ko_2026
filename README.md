@@ -1,16 +1,17 @@
 # Spire1/2 knockout oocytes: RNA expression and splicing
 
 Start with the **[publication package](results/publication/index.html)**:
-two SPIRE main figures and seven supplements, a separate FMN2 main figure
-and five supplements, and a compact convergence figure. The package includes
+two SPIRE main figures, a separate FMN2 main figure, a compact convergence
+figure, and **three shared supplementary figures in total**. The package includes
 methods, results, legends, editable manuscript text and supplementary tables
 S1–S8. Outputs are local and intentionally excluded from Git.
 
 The [figure-selection rationale](docs/PUBLICATION_STORY.md) explains the
 main/supplement boundary. SPIRE expression/splicing is the primary story;
-main GO panels compare observed with expected gene counts; all 127 mapped
-division events are supplemental. Sequence contexts and two exact, BH-supported
-regional motif associations provide a second layer. FMN2 is presented independently because study design and
+all 127 mapped division events are in the main figure, alongside a standard
+GO gene-ratio dot plot of the top-ranked terms. Sequence distributions and
+clustered RBP motif heatmaps provide a second layer. Supplemental figures
+cover QC/stability, complementary features and intron motifs/GC. FMN2 is presented independently because study design and
 responses differ. Shared targets do not establish global molecular phenocopy. The
 [inference/background audit](docs/PUBLICATION_INFERENCE_REVIEW.md) explains
 the primary tested-gene background, alias rescue and complete BH families.

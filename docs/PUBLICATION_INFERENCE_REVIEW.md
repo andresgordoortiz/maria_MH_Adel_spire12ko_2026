@@ -65,7 +65,7 @@ coverage, expression, gene-length and annotation biases still possible.
   terms in the full-annotation comparison and all selection sensitivities.
   This removes the previous background-dependent size-filter exclusions.
 - Apply BH once across BP + CC + MF for each study/background/selection
-  analysis. Main question-driven terms retain q from the entire family;
+  analysis. Main displayed terms retain q from the entire family;
   no favorable correction restricted to the displayed terms is used.
 - Keep the original event selection as primary. Report leave-one-sample
   ≥10 pp and strict separation as sensitivities; do not promote the threshold
@@ -77,11 +77,13 @@ not establish the requested division/speckle phenotype. A separate GO
 analysis of BH-selected expression genes also has no BH-significant term.
 It uses the finite-padj DESeq2 universe rather than a splicing universe.
 
-The compact main GO panel therefore shows selected processes, gene counts,
-tested-background expectations, with full-family q values. It is
-functional context, not a claim of enriched pathways. Full ontologies,
-background comparisons, alternative selections, matched nulls and the
-individual division events are supplemental.
+The main GO panel is a standard gene-ratio dot plot of the three top-ranked
+terms per ontology, with gene count and complete-family BH q. It does not force
+division terms into the ranking or imply significance. The restored division
+panel separately shows all 127 events in 79 annotated genes. Full ontologies,
+background comparisons, alternative selections and matched nulls remain in
+Tables S4/S6 and this audit. They do not add supplementary figures: the complete
+figure package has only S1–S3, shared between studies.
 
 ## One correction policy, with explicit test families
 
@@ -95,7 +97,7 @@ do not become hypothesis tests and do not receive decorative P values.
 
 For GO, all three ontologies are pooled. Matt retains its complete feature
 family, including all three contrasts, rather than correcting just the
-six displayed features. Cross-study overlap now corrects all nine reported
+displayed feature subset. Cross-study overlap now corrects all nine reported
 tests together, including the direction and matched-gene sensitivities.
 
 The betAS column named FDR is a simulation-tail estimate, as verified in
@@ -132,10 +134,11 @@ the long exon (16/83 versus 1,530/27,506; q≈0.0337). None pass in FMN2.
 These are regional sequence associations under the stated event-level
 model. Correlated events from a gene, GC/length composition and catalogue
 specificity remain limitations; BH does not fix them. The results do not
-measure protein abundance, binding or causality. The two supported
-associations enter the main figure. Clustered effect-size heatmaps and
-regional distributions move to supplements, with corrected significance
-indicated separately. Original window scans remain reference data.
+measure protein abundance, binding or causality. Clustered EX effect-size
+heatmaps are in the main figures, with IR heatmaps in S3 and corrected
+significance indicated separately. The complete table retains both supported
+associations, including Alt5, without a separate two-hit main panel. Original
+window scans remain reference data.
 
 ## Sources and interpretation
 

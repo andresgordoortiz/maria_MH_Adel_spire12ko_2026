@@ -169,8 +169,10 @@ por evento de betAS y la calibración de los motivos limitan la inferencia.
 ## Figuras para el manuscrito
 
 La versión actual está en `results/publication/index.html`: dos figuras SPIRE
-y siete suplementos; una figura FMN2 y cinco suplementos; una comparación
-compacta. GO usa genes evaluables, mapeo directo/alias único, exclusión de
+principales, una figura FMN2, una comparación compacta y solo tres figuras
+suplementarias compartidas: QC/estabilidad, características complementarias
+y motivos/GC de intrones. División vuelve a la figura principal, junto con
+un dot plot GO estándar y heatmaps EX de RBP. GO usa genes evaluables, mapeo directo/alias único, exclusión de
 los loci manipulados y BH sobre BP/CC/MF. La unión de división contiene 127
 eventos en 79 genes, sin sobrerrepresentación: 47 genes de división frente
 a 47,4 esperados. La presencia regional exacta de motivos pasa BH para
