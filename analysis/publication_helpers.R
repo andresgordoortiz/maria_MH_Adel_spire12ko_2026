@@ -34,6 +34,31 @@ degree_matched_overlap <- function(spire_selected, fmn2_selected, tested_events,
     pvalue = (1 + sum(null >= observed)) / (iterations + 1))
 }
 
+sequence_gc <- function(x) {
+  stopifnot(is.character(x), !anyNA(x))
+  clean <- gsub('[^ACGT]', '', toupper(x))
+  stopifnot(all(nchar(clean) > 0))
+  (nchar(clean) - nchar(gsub('[GC]', '', clean))) / nchar(clean)
+}
+
+# Numeric leaf positions let dendrograms and heatmaps share exactly the same y axis.
+row_clustering <- function(m) {
+  stopifnot(is.matrix(m), nrow(m) >= 2, all(is.finite(m)), !anyDuplicated(rownames(m)))
+  hc <- hclust(dist(m), method = 'complete')
+  n <- nrow(m)
+  y <- numeric(n - 1L); segments <- list()
+  leaf_y <- numeric(n); leaf_y[hc$order] <- rev(seq_len(n))
+  for (i in seq_len(n - 1L)) {
+    children <- hc$merge[i, ]
+    cy <- vapply(children, function(j) if (j < 0) leaf_y[-j] else y[j], numeric(1))
+    cx <- vapply(children, function(j) if (j < 0) 0 else hc$height[j], numeric(1))
+    y[i] <- mean(cy)
+    segments[[i]] <- data.frame(x = c(cx, hc$height[i]), xend = rep(hc$height[i], 3),
+      y = c(cy, cy[1]), yend = c(cy, cy[2]))
+  }
+  list(order = hc$order, y = leaf_y, segments = do.call(rbind, segments))
+}
+
 publication_theme <- function() {
   ggplot2::theme_bw(base_size = 8, base_family = 'Liberation Sans') +
     ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),

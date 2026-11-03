@@ -51,3 +51,9 @@ and the q7/q8 plotting scripts at commit
 on the Lena repository. Theme and compositions live in
 `analysis/publication_helpers.R` and `analysis/publication_panels.R`.
 Earlier exploratory reports retain their existing palette and layouts.
+
+The study-separated revision clusters all selected PSI rows with visible
+dendrograms. RBP labels are selected within study and clustered using
+row-standardized regional profiles; cells retain raw scores. The shared
+plotting code emits distinct SPIRE/FMN2 sets and a compact convergence
+figure. Full rationale is in PUBLICATION_STORY.md.

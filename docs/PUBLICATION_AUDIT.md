@@ -99,3 +99,26 @@ The requested Lena visual style is documented in COLOURS.md; no dependency
 was installed and the reference repository was read only. Fontconfig emits
 compatibility warnings from the installed runtime; PDF font inspection
 verifies the explicitly chosen embedded Liberation Sans face.
+
+## Study-separated revision after manuscript review
+
+The latest package supersedes the nine-figure composition above: two SPIRE
+main figures/five supplements, one FMN2 main figure/four supplements, and
+one compact convergence figure. Sample terminology replaces animal labels
+in the deliverable. All 119 selected events in division-annotated genes
+replace the ranked gene examples. STAR mapping QC stays in Table S1.
+
+Main feature selection now has an explicit editorial rationale rather
+than inheriting six reference features as a discovery ranking. All six
+remain in supplements. MaxEnt ECDFs retain all observations and report
+values outside the labelled view. Visible dendrograms document PSI and
+RBP row clustering. RBP ranking/clustering is performed independently
+within each study.
+
+Sequence-level reconciliation reproduced Matt intron GC within 1e−12.
+SPIRE selected IR mean GC is 48.01/48.10% versus 45.27% background; the
+spatial-profile background subset is 45.41%. Separate absolute and
+background-relative metaplots expose the modest shifts without imputing
+the SPIRE effect to FMN2. Per-event checks and subset membership are
+exported in S7. The prior release is preserved under
+`audit/publication_restructure_2026-11-03/previous_publication/`.

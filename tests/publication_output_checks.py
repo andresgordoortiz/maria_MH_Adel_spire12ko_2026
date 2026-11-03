@@ -14,42 +14,45 @@ for row in csv.DictReader((root / 'output_checksums.csv').open()):
     with path.open('rb') as handle:
         assert hashlib.file_digest(handle, 'sha256').hexdigest() == row['sha256'], path
     assert path.stat().st_size == int(row['bytes'])
-for name in ('Supplementary_tables.zip', 'Figures.zip'):
+for name in ('Supplementary_tables.zip', 'Figures.zip', 'Figures_SPIRE.zip', 'Figures_FMN2.zip', 'Figures_Convergence.zip'):
     with zipfile.ZipFile(root / name) as archive:
         assert archive.testzip() is None
         assert all(not p.startswith('/') and '..' not in Path(p).parts for p in archive.namelist())
 rows = list(csv.DictReader((root / 'tables/S1_SPIRE_samples.csv').open()))
 assert [r['sample'] for r in rows] == ['SPIRE_Cont_1', 'SPIRE_Cont_2', 'SPIRE_Cont_7',
                                       'SPIRE_DKO_4', 'SPIRE_DKO_5', 'SPIRE_DKO_6']
-assert {r['experimental_unit'] for r in rows} == {'independent animal'}
-rows = list(csv.DictReader((root / 'source_data/FigureS3D_shared_sample_PSI.csv').open()))
+assert {r['experimental_unit'] for r in rows} == {'independent biological replicate'}
+rows = list(csv.DictReader((root / 'source_data/Convergence_shared_sample_PSI.csv').open()))
 assert len(rows) == 110
 assert {r['sample'] for r in rows if r['dataset'].startswith('SPIRE')} == {
     'Cont_1', 'Cont_2', 'Cont_7', 'DKO_4', 'DKO_5', 'DKO_6'}
-rows = list(csv.DictReader((root / 'source_data/Figure1E_event_selection.csv').open()))
-assert [r['GENE'] for r in rows] == ['Cit', 'Gen1', 'Nek4']
-assert all(float(r['loo_min_signed_pp']) >= 10 for r in rows)
-assert all(r['GENE'] not in ('Spire1', 'Spire2') for r in rows)
-
-
 rows = list(csv.DictReader((root / 'tables/figure_manifest.csv').open()))
-assert {r['figure'] for r in rows} == {'Figure_1', 'Figure_2', *(f'Figure_S{i}' for i in range(1, 8))}
-rows = list(csv.DictReader((root / 'source_data/Figure1D_division_PSI.csv').open()))
-assert len(rows) == 90 and len({r['GENE'] for r in rows}) == 15
-assert all(0 <= float(r['PSI']) <= 100 for r in rows)
-rows = list(csv.DictReader((root / 'source_data/Figure2A_feature_effects.csv').open()))
-assert len(rows) == 24 and len({r['feature'] for r in rows}) == 6
-assert {r['group1'] for r in rows} == {'up', 'down'}
-for kind, labels, regions, bins in [('EX', 30, 8, 68), ('IR', 15, 5, 88)]:
-    rows = list(csv.DictReader((root / f'source_data/RBP_{kind}_heatmap.csv').open()))
-    assert len(rows) == labels * regions * 4
-    assert len({r['RBP'] for r in rows}) == labels
-    positions = {('spire', 'up'): '1', ('spire', 'down'): '2', ('fmn2', 'up'): '3', ('fmn2', 'down'): '4'}
-    assert all(r['position'] == positions[(r['dataset'], r['direction'])] for r in rows)
-    assert {r['dataset'] for r in rows} == {'spire', 'fmn2'}
-    rows = list(csv.DictReader((root / f'source_data/GC_{kind}_profiles.csv').open()))
-    assert len(rows) == bins * 6
-    assert {r['category'] for r in rows} == {'up', 'down', 'ndiff'}
+assert len(rows) == 13
+assert {r['figure'] for r in rows} == {'SPIRE_Figure_1', 'SPIRE_Figure_2', *(f'SPIRE_S{i}' for i in range(1, 6)),
+                                     'FMN2_Figure_1', *(f'FMN2_S{i}' for i in range(1, 5)), 'Convergence_Figure_1'}
+rows = list(csv.DictReader((root / 'source_data/SPIRE_division_event_annotations.csv').open()))
+assert len({r['EVENT'] for r in rows}) == 119 and len({r['GENE'] for r in rows}) == 75
+assert len({r['GOALL'] for r in rows}) == 4
+assert all(r['GENE'] not in ('Spire1', 'Spire2') for r in rows)
+for study, events, samples in [('SPIRE', 1547, 6), ('FMN2', 275, 4)]:
+    rows = list(csv.DictReader((root / f'source_data/{study}_clustered_PSI.csv').open()))
+    assert len(rows) == events * samples
+    assert len({r['EVENT'] for r in rows}) == events
+    assert {int(r['row']) for r in rows} == set(range(1, events + 1))
+    for kind, labels, regions, bins in [('EX', 30, 8, 68), ('IR', 15, 5, 88)]:
+        rows = list(csv.DictReader((root / f'source_data/{study}_RBP_{kind}_heatmap.csv').open()))
+        assert len(rows) == labels * regions * 2
+        assert len({r['RBP'] for r in rows}) == labels
+        assert all(r['position'] == {'up': '1', 'down': '2'}[r['direction']] for r in rows)
+        assert {int(r['row']) for r in rows} == set(range(1, labels + 1))
+        rows = list(csv.DictReader((root / f'source_data/{study}_GC_{kind}_profiles.csv').open()))
+        assert len(rows) == bins * 3
+        rows = list(csv.DictReader((root / f'source_data/{study}_GC_{kind}_difference.csv').open()))
+        assert len(rows) == bins * 2 and all(float(r['se']) >= 0 for r in rows)
+rows = list(csv.DictReader((root / 'tables/S7_intron_GC_audit_summary.csv').open()))
+assert len(rows) == 6 and all(float(r['max_absolute_disagreement']) < 1e-12 for r in rows)
+for path in (root / 'text').glob('*.md'):
+    assert 'animal' not in path.read_text().lower(), path
 
 
 class Links(HTMLParser):
@@ -60,4 +63,4 @@ class Links(HTMLParser):
 
 
 Links().feed((root / 'index.html').read_text())
-print('PASS: output hashes, ZIP integrity, sample labels, candidate ranking, feature/RBP/GC coverage and gallery links.')
+print('PASS: output hashes, ZIP integrity, sample labels, all division events, row clustering and sequence GC reconciliation and gallery links.')

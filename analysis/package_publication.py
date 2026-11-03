@@ -18,8 +18,8 @@ def package(root):
     if not (root / 'COMPLETE').is_file():
         raise ValueError('Publication R assembly must complete before packaging')
     figures = list(csv.DictReader((root / 'tables/figure_manifest.csv').open()))
-    if {r['figure'] for r in figures} != {'Figure_1', 'Figure_2', *(f'Figure_S{i}' for i in range(1, 8))}:
-        raise ValueError('Expected two main and seven supplementary figures')
+    if {r['figure'] for r in figures} != {'SPIRE_Figure_1', 'SPIRE_Figure_2', *(f'SPIRE_S{i}' for i in range(1, 6)), 'FMN2_Figure_1', *(f'FMN2_S{i}' for i in range(1, 5)), 'Convergence_Figure_1'}:
+        raise ValueError('Expected separate SPIRE, FMN2 and convergence figure sets')
     for row in figures:
         for extension in ('pdf', 'png'):
             path = root / 'figures' / (row['figure'] + '.' + extension)
@@ -51,6 +51,8 @@ def package(root):
         ('Supplementary_tables.zip', [*root.glob('tables/*.csv'), *root.glob('source_data/*.csv'),
                                       *root.glob('text/*.md'), root / 'sessionInfo.txt']),
         ('Figures.zip', list(root.glob('figures/*'))),
+        *((f'Figures_{group}.zip', list(root.glob(f'figures/{group}_*')))
+          for group in ('SPIRE', 'FMN2', 'Convergence')),
     ):
         temporary = root / (name + '.tmp')
         with zipfile.ZipFile(temporary, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
@@ -67,20 +69,27 @@ def package(root):
             'a{color:#235887}img{width:100%;height:auto}article{border-top:1px solid #ddd;margin:40px 0;padding-top:22px}'
             '.note{background:#f3f2f5;padding:16px 22px}h1{font-size:30px}h2{font-size:23px}nav{display:flex;gap:18px;flex-wrap:wrap}</style>',
             '<h1>SPIRE loss: expression and splicing</h1>',
-            '<p class="note">Three independent animals per condition. Selective RNA changes and division-associated '
-            'candidates, distinctive sequence architecture and regional RBP motif patterns. Motif evidence is exploratory.</p>',
+            '<p class="note">SPIRE: three independent biological replicates per condition. Expression and splicing changes, '
+            'annotated division events and sequence context. FMN2 is presented separately; a compact figure assesses convergence. Motif evidence is exploratory.</p>',
             '<nav><a href="Figures.zip">Download all figures</a><a href="Supplementary_tables.zip">Supplementary tables and source data</a>'
-            '<a href="text/RESULTS.md">Results</a><a href="text/METHODS.md">Methods</a><a href="text/LEGENDS.md">Legends</a></nav>']
+            '<a href="text/STORY.md">Why these panels?</a><a href="text/RESULTS.md">Results</a><a href="text/METHODS.md">Methods</a><a href="text/LEGENDS.md">Legends</a></nav>']
     if pandoc:
         page.append('<p><a href="Manuscript.docx">Editable manuscript (Word)</a> · '
                     '<a href="Manuscript.html">Read the manuscript</a></p>')
     page.append('<p>Final-size layouts: 180 mm wide; embedded-font PDFs and 450 dpi PNGs. '
                 'Figure numbering is local to the RNA analysis and can be changed when integrated with microscopy.</p>')
-    for row in figures:
-        name, title = escape(row['figure']), escape(row['title'])
-        page.append(f'<article><h2>{name.replace("_", " ")} · {title}</h2>'
-                    f'<p><a href="figures/{name}.pdf">PDF</a> · <a href="figures/{name}.png">PNG</a></p>'
-                    f'<a href="figures/{name}.png"><img src="figures/{name}.png" alt="{title}" loading="lazy"></a></article>')
+    for group, description in (
+        ('SPIRE', 'Primary manuscript set: two main figures and five supplements.'),
+        ('FMN2', 'Independent comparison set: one main figure and four supplements.'),
+        ('Convergence', 'Common-universe overlap and directional agreement.'),
+    ):
+        page.append(f'<h2 id="{group}">{group}</h2><p>{description} '
+                    f'<a href="Figures_{group}.zip">Download this set</a></p>')
+        for row in sorted((r for r in figures if r['figure'].startswith(group + '_')), key=lambda r: r['figure']):
+            name, title = escape(row['figure']), escape(row['title'])
+            page.append(f'<article><h3>{name.replace("_", " ")} · {title}</h3>'
+                        f'<p><a href="figures/{name}.pdf">PDF</a> · <a href="figures/{name}.png">PNG</a></p>'
+                        f'<a href="figures/{name}.png"><img src="figures/{name}.png" alt="{title}" loading="lazy"></a></article>')
     page.extend(['<h2>Tables and provenance</h2><p><a href="text/TABLES.md">Table guide and field definitions</a> · '
                  '<a href="tables/table_inventory.csv">File inventory and SHA-256</a> · '
                  '<a href="tables/input_checksums.csv">Input checksums</a> · '

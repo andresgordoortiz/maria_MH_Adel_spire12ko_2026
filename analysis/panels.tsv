@@ -1,16 +1,19 @@
-figure_panel	analysis	Dataset_adaptation	status_or_requirement
-1A	Target gene expression	Spire Cont_1/2/7 versus DKO_4/5/6; three independent animals per condition	Normalized counts; interpret retained Spire1 RNA with exon support
-1B	Gene expression MA plot	DESeq2 condition-only design; DKO minus Cont	111 genes at BH P <=0.05; all positive-mean finite effects shown
-1C	Splicing event counts	EX, IR, Alt5 and Alt3 by direction	Empirical per-event FPR <=0.05 and absolute fitted delta >=10 pp; all-sample N10
-1D-E	Division candidates	15 ranked genes in raw-PSI heatmap; three individual-animal profiles	Four GO categories; one event per gene; rank by minimum signed omission effect; exclude engineered loci
-2A	Sequence-feature effect matrix	Same six reference features; SPIRE and FMN2 versus their own backgrounds	Median shift divided by background IQR; dots use existing feature-family BH correction
-2B-C	Sequence-feature distributions	EX upstream intron length and IR 5-prime strength	Actual Matt populations; q versus background; all finite values retained
-2D	Regional exon RBP heatmap	Both studies and both directions; top 30 RBP labels	Minimum raw motif score; exploratory; regional study/usage strips and complete-linkage clustering
-S1A-D	Quality control	Expression/splicing PCA, alignment and target exon support	All six animals; no inferred batch or exclusion
-S2A-D	Splicing sensitivity	Fitted/raw effects, omission stability, thresholds and all selected PSI	Descriptive sensitivity without refitting betAS
-S3A-D	FMN2 comparison	48,323 common tested events; FMN2 two Het/two KO pools	Shared targets, global raw effects, fitted effects and individual PSI; unequal controls and sampling units
-S4A-F	All six feature distributions	EX/IR; each study's own Matt background	Includes nonsignificant features; exact sample sizes and medians checked
-S5A-B	GC gradients	Exon and fine intron sequence profiles in both studies	Reference binning; mean +/-1.96 event SE; capped unselected background
-S6A-C	RBP supplementary analysis	IR top-15 heatmap; EX/IR regional motif-score distributions	No causal inference or tests comparing preselected motif distributions
-S7A-F	Expression/function supplements	Volcano, VST, gene overlap, protein-impact annotations and GO	Tested-background GO and focused division tests do not establish enrichment
-Cellular phenotype	Actin, nucleus, nuclear envelope, chromatin, speckles and division	No matching imaging/functional measurements in this repository	RNA figures support integration with independently measured cellular outcomes
+figure_panel	analysis	rationale_or_limit
+SPIRE_1A	DESeq2 MA plot	Primary expression result; 111 BH-selected genes
+SPIRE_1B-C	Splicing classes and all 1547 selected PSI profiles	Primary splicing result; row dendrogram; biological-replicate columns
+SPIRE_1D	All 119 selected events in division-annotated genes	Addresses email; named GO categories; event is unit; no top-gene ranking or enrichment claim
+SPIRE_2A-B	EX upstream intron length and IR GC ECDFs	Interpretable sequence contexts; not selected by minimum P alone
+SPIRE_2C	Within-SPIRE EX RBP motif profiles	Exploratory hypothesis panel; profile-based row clustering and dendrogram
+SPIRE_S1	Expression/PSI PCA and target-gene/exon support	Target validation and heterogeneity; STAR mapping QC remains table-only
+SPIRE_S2	Splicing sensitivity and clustered expression	Robustness; no refitting or biological-replicate exclusions
+SPIRE_S3	All six reference Matt feature distributions	Includes nonsignificant results; labelled MaxEnt view and outside-range counts
+SPIRE_S4	EX/IR absolute and background-relative GC profiles	Same original bin data; separate within-study comparisons; sequence-level GC audit in S7
+SPIRE_S5	IR RBP heatmap and EX/IR score distributions	Additional exploratory motifs; no tests between preselected motif-score distributions
+FMN2_1	Splicing counts/profiles, EX flank lengths and EX RBP motifs	Independent study set; two biological pools per condition; no invented expression analysis
+FMN2_S1	Omission sensitivity	Descriptive checks with two pools per condition
+FMN2_S2	Six reference features	Small IR groups; all tests retained
+FMN2_S3	Absolute/relative GC profiles	Does not establish the SPIRE GC effect in FMN2
+FMN2_S4	IR motifs and score distributions	Selected and clustered independently within FMN2
+Convergence_1	Common-universe overlap and raw/shared fitted effects	Limited shared targeting; weak overall directional agreement
+Tables_S1-S8	Complete results, annotations, tests and individual measurements	Preserve nonsignificant results, all features, GO, transcript impact and source data
+Cellular_phenotype	Actin, nucleus, nuclear envelope, chromatin, speckles and division	Requires independent imaging or functional measurements

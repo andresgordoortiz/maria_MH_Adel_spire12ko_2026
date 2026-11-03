@@ -1,19 +1,20 @@
 # Spire1/2 knockout oocytes: RNA expression and splicing
 
 Start with the **[publication package](results/publication/index.html)**:
-two main figures, seven supplementary figures, methods, results, legends,
-editable manuscript text and complete supplementary tables S1–S8.
-These outputs are generated locally and intentionally excluded from Git.
+two SPIRE main figures and five supplements, a separate FMN2 main figure
+and four supplements, and a compact convergence figure. The package includes
+methods, results, legends, editable manuscript text and supplementary tables
+S1–S8. Outputs are local and intentionally excluded from Git.
 
-The computational result is selective, bidirectional RNA change, including
-division-associated splicing candidates, shared sequence contexts with FMN2
-and regional RBP motif hypotheses.
-The data do not establish a global molecular phenocopy, a division-pathway
-enrichment or a causal RBP mechanism. Microscopy and functional measurements
-are needed for those parts of the manuscript.
+The [figure-selection rationale](docs/PUBLICATION_STORY.md) explains the
+main/supplement boundary. SPIRE expression/splicing is the primary story;
+all 119 selected events in division-annotated genes are shown without a
+favored-gene ranking. Sequence context and exploratory motifs provide a
+second layer. FMN2 is presented independently because study design and
+responses differ. Shared targets do not establish global molecular phenocopy.
 
 SPIRE uses the original FASTQ groups: **Cont_1/2/7 versus DKO_4/5/6**, with
-three independent animals per condition (investigator-confirmed). Historical
+three independent biological replicates per condition (investigator-confirmed). Historical
 condition labels are superseded. FMN2 has two biological pools per condition
 and heterozygous controls. betAS's `FDR` column is an empirical per-event
 false-positive rate, not a multiple-testing-adjusted FDR.

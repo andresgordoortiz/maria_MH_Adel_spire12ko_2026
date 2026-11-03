@@ -2,12 +2,12 @@
 
 ## Samples and processing
 
-SPIRE RNA-seq comprised three independent control animals (Cont_1, Cont_2,
-Cont_7) and three independent Spire1/2 double-knockout animals (DKO_4, DKO_5,
+SPIRE RNA-seq comprised three independent control biological replicates (Cont_1, Cont_2,
+Cont_7) and three independent Spire1/2 double-knockout biological replicates (DKO_4, DKO_5,
 DKO_6). Independence was confirmed by the investigator on 2 November 2026.
 The original FASTQ manifest defined the groups. Historical tables contained
 inconsistent condition labels and were excluded from the manuscript analyses.
-All six animals were retained. Filename date labels were not treated as a
+All six samples were retained. Filename date labels were not treated as a
 verified batch, and no batch or pairing term was fitted.
 
 The completed single-end RNA-seq workflow used nf-core/rnaseq 3.27.0,
@@ -55,7 +55,7 @@ excluding Spire1/2, with centered, unscaled variables.
 The completed betAS 1.2.1 analysis (revision
 cd37737c75ab17a64652baf2fdb00d1b7c67c294) required corrected inclusion plus
 exclusion support ≥10 and finite PSI in every sample, using six SPIRE
-animals or four FMN2 pools. The run used 500 fitting points, 1,000
+samples or four FMN2 pools. The run used 500 fitting points, 1,000
 simulations, the package's fixed seed (`seed=TRUE`, internal seed 21122023)
 and `CoverageWeight=FALSE`. All event IDs, sample PSI and exported
 statistics were checked against the completed SPIRE export; ingest tests
@@ -78,7 +78,7 @@ the fitted effect's sign after each omission; a stricter descriptive
 criterion required ≥10 percentage points in that direction after every
 omission. Complete separation required every knockout PSI to lie strictly
 beyond every control PSI in the fitted direction. These checks do not
-refit betAS, provide new significance tests or remove any animal. Threshold
+refit betAS, provide new significance tests or remove any sample. Threshold
 sensitivity used FPR cutoffs 0.01/0.025/0.05 and fitted-effect cutoffs
 10/15/20 percentage points. Splicing PCA used only the current SPIRE PSI:
 variance ≥25 percentage-points squared, one highest-variance event per
@@ -91,11 +91,11 @@ Division relevance was defined by membership in GO:0051301 (cell division),
 GO:0051321 (meiotic cell cycle), GO:0007051 (spindle organization) or
 GO:0007059 (chromosome segregation), including inherited GOALL membership
 in the pinned mouse OrgDb. Evidence codes and all matching genes were
-exported. Fifteen heatmap genes and three illustrative profiles were selected by descending minimum
-signed leave-one-animal raw PSI change, then absolute full-sample raw
-change and event ID, retaining one event per gene. Spire1/2 were excluded
-from example selection because they are the engineered loci. This
-post-selection ranking is descriptive. Four targeted one-sided Fisher
+exported. All selected events in genes annotated to these categories are
+shown, excluding the engineered Spire1/2 loci. No top-gene ranking or
+extreme-profile selection is used. The units are splicing events; one gene
+can contain multiple events and one event can belong to multiple categories.
+Four targeted one-sided Fisher
 tests used all tested named SPIRE genes as background, with BH adjustment
 across these four tests. GO membership is not evidence that an isoform
 change impairs division.
@@ -143,31 +143,53 @@ PDFs embed the resolved fonts (explicit family selection avoids the R
 runtime’s generic Helvetica alias to DejaVu). Direction uses blue (#2166AC) and red
 (#B2182B); study identity uses purple (#6A3D9A) and green (#33A02C).
 Fine borders, restrained horizontal grids and explicit facet labels follow
-the Lena visual reference. The RBP matrices retain Cividis, regional
-organization, study/usage annotation strips and Euclidean/complete-linkage
-row clustering of unsaturated scores. Thirty EX and fifteen IR labels are
-ranked by maximum raw score; color saturates at 8. Missing combinations
-among eligible motifs are displayed as zero, not as independent tests.
-No claim about RBP expression is inferred from motif scores.
+the Lena visual reference. The RBP matrices retain Cividis and regional usage annotation strips.
+Thirty EX and fifteen IR labels are selected independently within each
+study by maximum raw score across eligible motifs, directions and regions.
+Motif eligibility requires raw P ≤0.05 somewhere within study/direction.
+Each label/region/direction cell retains the maximum −log10 raw P across
+eligible variants; absent combinations are displayed as zero. Unsaturated
+row profiles are standardized to mean zero and unit SD for Euclidean,
+complete-linkage clustering; constant rows are centered without division
+by zero. Dendrograms show this ordering, while cell colors show unscaled
+scores saturated at 8. This separates regional profile similarity from
+absolute score magnitude. No RBP expression or binding is inferred.
 
-The six Matt features were fixed by the reference analysis, not selected
-by current significance. Displayed median differences are divided by the
-background IQR. Individual feature populations are checked against saved
-group sizes and medians. Violins have equal maximum widths and boxplots
-show quartiles/median and 1.5-IQR whiskers. The existing feature-family BH
-correction supplies all q labels; outliers remain in distributions/tests.
-GC profiles retain reference bins (EX 68, IR fine 88) and the 1,500-event
-unselected background; ribbons show event mean ±1.96 SE, not uncertainty
-across animals. Regional motif boxes are descriptive; no inferential
-comparison of preselected motif-score distributions is made.
+The six reference Matt features are all retained in study-specific
+supplements. Main sequence panels focus on directly interpretable
+associations: SPIRE EX upstream-intron length and IR whole-intron GC;
+FMN2 EX upstream/downstream-intron lengths. This editorial selection is
+post-analysis, not a new hypothesis-testing family. Annotation-dependent
+co-occurrence counts and all other feature tests remain in Table S7.
+Empirical cumulative distribution functions (ECDFs) show overlapping
+populations without smoothing choices. Group sizes and medians are checked
+against the saved tests. Feature-family BH-adjusted P values are labelled
+q. Length/number axes are logarithmic; GC is shown in percent. MaxEnt
+ECDFs use a −2 to 12 display window, with counts outside that window
+reported on the plot and in source data. All values contribute to the
+ECDF and tests; negative MaxEnt scores are retained.
+
+Whole-intron GC was recalculated as (G+C)/(A+C+G+T) from each Matt
+SEQ_INTRON and checked against INTRON_GCC at tolerance 1e−12. The audit
+exports each event, its GC values and membership in the spatial-profile
+subset. GC profiles retain reference bins (EX 68, IR fine 88) and the
+1,500-event unselected background. Absolute plots and difference-from-
+background plots are shown separately for each study. For each bin,
+ΔGC is the selected-group mean minus background mean, and descriptive SE
+is sqrt(SE_selected² + SE_background²). Ribbons are ±1.96 SE across
+events, not biological-replicate uncertainty or multiplicity-adjusted
+positional tests. Whole-intron GC and scaled local bins are different
+summaries. Regional motif boxes are descriptive only.
 
 All figures are 180 mm wide, with vector PDF layouts and 450 dpi PNGs.
-The selected-splicing supplement is row-median centered, ordered by event
-type, effect and ID, and saturated at ±50 pp. The expression supplement
-is gene-mean-centered VST, ordered by log2FC and saturated at ±3. The
-main division-candidate heatmap shows raw PSI on a fixed 0–100% scale.
-Individual values remain in source tables. Samples retain manifest order;
-no sample clustering or unreported sample exclusion is applied.
+Every selected PSI row is retained and centered on its sample median,
+then clustered using Euclidean distance and complete linkage. The
+splicing heatmaps show dendrograms and saturate at ±50 pp. The expression
+supplement is gene-mean-centered VST, clustered with the same distance
+and linkage, and saturated at ±3. Sample columns retain manifest order;
+no sample clustering or unreported exclusion is applied. Row orders and
+individual measurements are exported. Main figure sets are separate for
+SPIRE and FMN2, with a compact common-universe convergence figure.
 
 ## References and author completion
 
@@ -183,7 +205,7 @@ no sample clustering or unreported sample exclusion is applied.
   and [RMAPS3.md](../analysis/RMAPS3.md).
 
 Before submission, authors must supply the mouse allele/genotyping details,
-animal ages, oocyte collection/stage, RNA isolation/library preparation,
+donor ages, oocyte collection/stage, RNA isolation/library preparation,
 sequencer details and the SPIRE data-accession statement. These details
 cannot be reconstructed from the analysis tables. No microscopy or
 protein measurements were available for this computational figure set.

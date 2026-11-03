@@ -44,7 +44,7 @@ for (ds in names(studies)) {
 }
 sheet <- read_input('config/spire_fastq.tsv')
 stopifnot(identical(sheet$sample, names(groups$spire)), identical(sheet$condition, unname(groups$spire)))
-sheet$experimental_unit <- 'independent animal'
+sheet$experimental_unit <- 'independent biological replicate'
 sheet$metadata_source <- 'Investigator confirmation, 2026-11-02'
 export(sheet, 'S1_SPIRE_samples')
 spire <- events$spire; fmn2 <- events$fmn2
@@ -96,7 +96,7 @@ export(dge, 'S2_SPIRE_all_gene_expression')
 export(dge[dge$selected, ], 'S2_SPIRE_selected_gene_expression')
 export(common, 'S5_common_tested_events')
 
-# Define division relevance using ontology membership, before ranking examples.
+# Define division relevance from the question in the email; retain every matching event.
 suppressPackageStartupMessages(library(org.Mm.eg.db))
 division_terms <- c('GO:0051301' = 'cell division', 'GO:0051321' = 'meiotic cell cycle',
   'GO:0007051' = 'spindle organization', 'GO:0007059' = 'chromosome segregation')
@@ -111,15 +111,9 @@ division_selected <- division_selected[order(-division_selected$loo_min_signed_p
   -abs(division_selected$raw_delta_pp), division_selected$EVENT), ]
 export(division_selected, 'S4_division_selected_splicing')
 export(dge[dge$gene_name %in% division_genes, ], 'S4_division_gene_expression')
-eligible_examples <- division_selected[!division_selected$GENE %in% c('Spire1', 'Spire2'), ]
-examples <- head(eligible_examples[!duplicated(eligible_examples$GENE), ], 3)
-stopifnot(nrow(examples) == 3)
-export(examples, 'Figure1E_event_selection', 'source_data')
-print(examples[, c('GENE', 'EVENT', 'deltapsi', 'raw_delta_pp', 'loo_min_signed_pp', 'complete_separation')])
-
 counts <- spire %>% count(event_type, direction) %>% mutate(event_type = factor(event_type, c('EX', 'IR', 'Alt5', 'Alt3')))
 totals <- spire %>% count(event_type, name = 'tested')
-export(counts, 'Figure1C_event_counts', 'source_data')
+export(counts, 'SPIRE_event_counts', 'source_data')
 robust_summary <- bind_rows(lapply(names(sensitivity), function(ds) {
   x <- sensitivity[[ds]]
   data.frame(dataset = ds, selected = nrow(x), raw_direction_agrees = sum(x$raw_agrees_with_fit),
@@ -162,7 +156,7 @@ pca_plot <- function(name, title) {
     ggrepel::geom_text_repel(aes(label = sub('SPIRE_', '', sample)), size = 2.3,
       seed = 42, max.overlaps = Inf, family = 'Liberation Sans', min.segment.length = 0, show.legend = FALSE) +
     scale_color_manual(values = condition_colors) + scale_shape_manual(values = c(Cont = 1, DKO = 16)) +
-    labs(title = title, subtitle = '3 independent animals / condition; Spire1/2 excluded',
+    labs(title = title, subtitle = '3 independent biological replicates / condition; Spire1/2 excluded',
       x = sprintf('PC1 (%.1f%%)', 100*v$fraction[1]), y = sprintf('PC2 (%.1f%%)', 100*v$fraction[2]),
       shape = NULL, color = NULL)
 }
@@ -185,13 +179,13 @@ psi_points <- function(x, title, subtitle) {
 target <- tab('spire_review', 'Target_gene_expression')
 target <- target[target$gene_name %in% c('Spire1', 'Spire2'), ]
 target$group <- factor(target$group, c('Cont', 'DKO'))
-export(target, 'Figure1A_target_expression', 'source_data')
+export(target, 'SPIRE_target_expression', 'source_data')
 p1a <- ggplot(target, aes(group, normalized_count + 1, color = group)) +
   geom_point(aes(group = sample), position = position_dodge(width = .6), size = 2) +
   facet_wrap(~gene_name, nrow = 1) + scale_y_log10() +
   scale_color_manual(values = condition_colors, guide = 'none') +
   labs(x = NULL, y = 'Normalized counts + 1', title = 'Target-gene expression',
-    subtitle = 'Each point is one animal; logarithmic scale')
+    subtitle = 'Each point is one sample; logarithmic scale')
 volcano <- dge[is.finite(dge$padj) & is.finite(dge$log2FoldChange), ]
 volcano <- volcano[order(volcano$selected), ]
 label_genes <- unique(c('Spire1', 'Spire2', head(dge$gene_name[order(dge$padj)], 3)))
@@ -215,16 +209,14 @@ heat <- sample_psi(robust[order(robust$event_type, robust$deltapsi, robust$EVENT
 heat$centered_PSI <- heat$PSI - ave(heat$PSI, heat$EVENT, FUN = median)
 heat$sample <- factor(heat$sample, names(groups$spire))
 heat$EVENT <- factor(heat$EVENT, rev(unique(heat$EVENT)))
-export(heat, 'FigureS2D_selected_sample_PSI', 'source_data')
+export(heat, 'SPIRE_selected_PSI_original_order', 'source_data')
 p1d <- ggplot(heat, aes(sample, EVENT, fill = centered_PSI)) + geom_raster() +
   scale_fill_gradient2(low = signed_colors[1], mid = signed_colors[2], high = signed_colors[3],
     limits = c(-50, 50), oob = scales::squish, name = 'PSI − median (pp)', breaks = c(-50, 0, 50)) +
   scale_x_discrete(labels = function(s) sub('SPIRE_', '', s)) +
-  labs(x = NULL, y = NULL, title = 'Individual-animal splicing profiles', subtitle = 'All selected events; row median centered') +
+  labs(x = NULL, y = NULL, title = 'Individual-sample splicing profiles', subtitle = 'All selected events; row median centered') +
   theme(axis.text.y = element_blank(), axis.ticks.y = element_blank(), axis.line = element_blank(),
     axis.text.x = element_text(angle = 45, hjust = 1))
-example_psi <- sample_psi(examples, 'spire')
-export(example_psi, 'Figure1E_division_candidate_PSI', 'source_data')
 overlap <- tab('comparison', 'shared_and_dataset_specific_counts')
 overlap_long <- pivot_longer(overlap, c(events, genes), names_to = 'unit', values_to = 'n')
 overlap_long$category <- factor(overlap_long$category, c('Spire only', 'Shared', 'FMN2 only'))
@@ -236,7 +228,7 @@ p2a <- ggplot(overlap_long, aes(category, n, fill = category)) + geom_col(width 
   labs(x = NULL, y = 'Selected', title = 'A restricted set of shared targets',
     subtitle = '48,323 common events in 4,229 genes')
 shared <- common[common$spire_selected & common$fmn2_selected, ]
-export(shared, 'FigureS3_shared_events', 'source_data')
+export(shared, 'Convergence_shared_events', 'source_data')
 p2b <- ggplot(common, aes(100*spire_raw_mean_deltapsi, 100*fmn2_raw_mean_deltapsi)) +
   geom_bin_2d(bins = 45) + scale_fill_gradient(low = '#E8E8E8', high = '#333333', trans = 'log10', name = 'Events / bin') +
   geom_hline(yintercept = 0, linewidth = .25, color = '#999999') +
@@ -254,7 +246,7 @@ effect <- bind_rows(lapply(c('spire', 'fmn2'), function(ds)
   data.frame(EVENT = shared$EVENT, label = shared$label, dataset = ds,
     fitted_pp = shared[[paste0(ds, '_deltapsi')]]*100, comparison = shared$comparison)))
 effect$label <- factor(effect$label, rev(shared$label))
-export(effect, 'FigureS3C_shared_fitted_effects', 'source_data')
+export(effect, 'Convergence_shared_fitted_effects', 'source_data')
 p2c <- ggplot(effect, aes(fitted_pp, label, color = dataset)) +
   geom_vline(xintercept = 0, linewidth = .3, color = '#999999') +
   geom_line(aes(group = EVENT), color = '#BBBBBB', linewidth = .4, orientation = 'y') +
@@ -265,15 +257,15 @@ p2c <- ggplot(effect, aes(fitted_pp, label, color = dataset)) +
     title = 'Shared targets do not imply matching direction', subtitle = '7 concordant and 4 opposing events; exploratory sign test P = 0.549')
 shared_psi <- bind_rows(lapply(names(events), function(ds) {
   x <- sample_psi(events[[ds]][match(shared$EVENT, events[[ds]]$EVENT), ], ds)
-  x$dataset <- if (ds == 'spire') 'SPIRE · 3 animals / group' else 'FMN2 · 2 pools / group'
+  x$dataset <- if (ds == 'spire') 'SPIRE · 3 samples / group' else 'FMN2 · 2 pools / group'
   x$sample <- if (ds == 'spire') sub('SPIRE_', '', x$sample) else
     unname(setNames(c('Het_1', 'Het_2', 'KO_1', 'KO_2'), names(groups$fmn2))[x$sample])
   x
 }))
 shared_psi$sample <- factor(shared_psi$sample, c(sub('SPIRE_', '', names(groups$spire)), 'Het_1', 'Het_2', 'KO_1', 'KO_2'))
-shared_psi$dataset <- factor(shared_psi$dataset, c('SPIRE · 3 animals / group', 'FMN2 · 2 pools / group'))
+shared_psi$dataset <- factor(shared_psi$dataset, c('SPIRE · 3 samples / group', 'FMN2 · 2 pools / group'))
 shared_psi$label <- factor(gsub('\n', ' ', shared_psi$label), rev(shared$label))
-export(shared_psi, 'FigureS3D_shared_sample_PSI', 'source_data')
+export(shared_psi, 'Convergence_shared_sample_PSI', 'source_data')
 p2d <- ggplot(shared_psi, aes(sample, label, fill = PSI)) + geom_tile(color = 'white', linewidth = .2) +
   facet_grid(~dataset, scales = 'free_x', space = 'free_x') +
   scale_fill_viridis_c(option = 'cividis', direction = -1, limits = c(0, 100), name = 'PSI (%)') +
@@ -288,7 +280,7 @@ ps1c <- ggplot(qc, aes(factor(Sample, names(groups$spire)), uniquely_mapped_perc
   geom_col(width = .65) + geom_text(aes(label = sprintf('%.1f', uniquely_mapped_percent)), vjust = -.4) +
   scale_fill_manual(values = condition_colors, guide = 'none') + scale_y_continuous(limits = c(0, 100)) +
   scale_x_discrete(labels = function(s) sub('SPIRE_', '', s)) +
-  labs(x = NULL, y = 'Uniquely mapped reads (%)', title = 'Alignment quality is similar across animals') +
+  labs(x = NULL, y = 'Uniquely mapped reads (%)', title = 'Alignment quality is similar across samples') +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 exons <- tab('spire_review', 'Target_exon_support_all_samples')
 exons <- exons[exons$GENE %in% c('Spire1', 'Spire2'), ]
@@ -302,7 +294,7 @@ ps1d <- ggplot(exons, aes(sample, EVENT, fill = log10(corrected_total + 1))) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1), axis.text.y = element_text(size = 6), axis.line = element_blank(), axis.ticks = element_blank())
 
 export(robust[, c('GENE', 'EVENT', 'event_type', 'deltapsi', 'direction', 'raw_delta_pp', 'loo_min_pp', 'loo_max_pp', 'loo_same_direction')],
-  'FigureS2_sensitivity', 'source_data')
+  'SPIRE_sensitivity', 'source_data')
 ps2a <- ggplot(robust, aes(100*deltapsi, raw_delta_pp, color = direction)) +
   geom_abline(slope = 1, intercept = 0, linewidth = .3, color = '#999999') +
   geom_hline(yintercept = 0, linewidth = .25, color = '#BBBBBB') +
@@ -313,13 +305,13 @@ stability <- robust %>% group_by(event_type) %>% summarise(selected = n(),
   `Same sign after each omission` = mean(loo_same_direction)*100,
   `At least 10 pp after each omission` = mean(loo_min_signed_pp >= 10)*100, .groups = 'drop') %>%
   pivot_longer(c(`Same sign after each omission`, `At least 10 pp after each omission`), names_to = 'criterion', values_to = 'percent')
-export(stability, 'FigureS2B_stability', 'source_data')
+export(stability, 'SPIRE_stability', 'source_data')
 stability$event_type <- factor(stability$event_type, c('EX', 'IR', 'Alt5', 'Alt3'))
 ps2b <- ggplot(stability, aes(event_type, percent, fill = criterion)) +
   geom_col(position = position_dodge(.75), width = .65) +
   scale_fill_manual(values = c('#999999', '#222222'), name = NULL) +
   scale_y_continuous(limits = c(0, 100)) + guides(fill = guide_legend(nrow = 2)) +
-  labs(x = NULL, y = '% of selected events', title = 'Leave-one-animal sensitivity',
+  labs(x = NULL, y = '% of selected events', title = 'Leave-one-sample sensitivity',
     subtitle = 'Raw PSI means; descriptive, without refitting betAS')
 thresholds <- expand.grid(FPR = c(.01, .025, .05), delta_pp = c(10, 15, 20))
 thresholds$events <- vapply(seq_len(nrow(thresholds)), function(i)
@@ -344,7 +336,7 @@ expr_long <- pivot_longer(expr[, c('gene_id', names(groups$spire))], all_of(name
 expr_long$centered <- expr_long$VST - ave(expr_long$VST, expr_long$gene_id, FUN = mean)
 expr_long$gene_id <- factor(expr_long$gene_id, rev(expr$gene_id))
 expr_long$sample <- factor(expr_long$sample, names(groups$spire))
-export(expr_long, 'FigureS7B_DEG_VST', 'source_data')
+export(expr_long, 'SPIRE_DEG_VST', 'source_data')
 ps3a <- ggplot(expr_long, aes(sample, gene_id, fill = centered)) + geom_raster() +
   scale_fill_gradient2(low = signed_colors[1], mid = signed_colors[2], high = signed_colors[3],
     limits = c(-3, 3), oob = scales::squish, name = 'VST − gene mean') +
@@ -433,36 +425,11 @@ overlap_tests <- tab('comparison', 'overlap_enrichment')
 gene_test <- overlap_tests[overlap_tests$unit == 'genes', ]
 target_dge <- tab('spire_review', 'Target_gene_DGE')
 division_non_target <- division_selected[!division_selected$GENE %in% c('Spire1', 'Spire2'), ]
-results_text <- c('# Results: RNA expression and splicing in Spire1/2 DKO oocytes', '',
-  '## SPIRE loss alters expression and alternative splicing', '',
-  sprintf('We analyzed three independent control and three independent Spire1/2 DKO animals using the original FASTQ condition assignments. Spire2 expression was strongly reduced (shrunken log2FC %.2f, BH-adjusted P=%.3g), whereas gene-level Spire1 expression was not selected (log2FC %.2f, adjusted P=%.3g; Fig. 1A). Exon-level support showed loss of 9 of 13 observed Spire1 exon events and all 6 observed Spire2 exon events in DKO, while some Spire1 exons retained signal (Fig. S1D). Thus, total Spire1 counts alone do not measure successful deletion of the targeted exons.',
-    target_dge$log2FoldChange[target_dge$gene_name == 'Spire2'], target_dge$padj[target_dge$gene_name == 'Spire2'],
-    target_dge$log2FoldChange[target_dge$gene_name == 'Spire1'], target_dge$padj[target_dge$gene_name == 'Spire1']), '',
-  sprintf('Among %s input genes, %s had finite adjusted P. At BH-adjusted P ≤0.05, %s genes were selected (%s increased and %s decreased); %s also had |shrunken log2FC| ≥1 (Fig. 1B; Table S2). Expression PCA showed substantial animal-to-animal heterogeneity, including separation of Cont_7 and DKO_4 (Fig. S1A), despite similar uniquely aligned read percentages (%.2f–%.2f%%; Fig. S1C). All animals were retained. No verified batch variable was available.',
-    summary_dge$input_genes, summary_dge$finite_padj, summary_dge$padj005, summary_dge$up,
-    summary_dge$down, summary_dge$padj005_abs_log2FC_ge1, min(qc$uniquely_mapped_percent), max(qc$uniquely_mapped_percent)), '',
-  sprintf('Of %s events passing all-sample N10 and complete PSI, %s events in %s named genes met the betAS per-event empirical-FPR and fitted-effect criteria (Fig. 1C; Table S3): 551 EX, 271 IR, 330 Alt5 and 395 Alt3 events. Changes were bidirectional (%s increased and %s decreased), including 139 increases and 132 decreases in intron retention. There was therefore no overall predominance of increased intron retention. These selections are not controlled at 5%% multiple-testing FDR.',
-    format(nrow(spire), big.mark = ','), nrow(robust), length(valid_genes(robust$GENE)), sum(robust$direction == 'up'), sum(robust$direction == 'down')), '',
-  sprintf('The fitted direction agreed with the full-sample raw mean difference for %s/%s selected events. After each one-animal omission, %s/%s retained that direction and %s/%s retained a raw change of at least 10 percentage points in that direction (Fig. S2A,B). Strict complete raw-PSI group separation occurred for %s/%s selected events. These descriptive sensitivity checks qualify candidate prioritization without supplying new calibrated significance tests.',
-    sum(robust$raw_agrees_with_fit), nrow(robust), sum(robust$loo_same_direction), nrow(robust),
-    sum(robust$loo_min_signed_pp >= 10), nrow(robust), sum(robust$complete_separation), nrow(robust)), '',
-  sprintf('Four explicit division-related GO categories identified %s selected events in %s genes after excluding the engineered Spire1/2 loci. Ranking these candidates by their minimum signed leave-one-animal raw effect selected %s for illustration (Fig. 1E; Table S4); Figure 1D shows the top 15 genes under the same ranking. Their fitted changes were %s percentage points, respectively. The examples support specific division-associated splicing candidates, not impaired division: none of the four targeted categories was enriched after BH correction (all adjusted P=%.3f; Fig. S7F). Likewise, the broader GO results depended on background choice: 106 BP terms were enriched against the full OrgDb background, whereas none passed with the tested-N10 background (Fig. S7E).',
-    nrow(division_non_target), length(valid_genes(division_non_target$GENE)), paste(examples$GENE, collapse = ', '),
-    paste(sprintf('%+.1f', 100*examples$deltapsi), collapse = ', '), division_tests$padj[1]), '',
-  '## Shared sequence contexts identify susceptible event classes', '',
-  'The six reference sequence features were compared with each study’s unselected-event background (Fig. 2A; Table S7). Exons with increased inclusion had longer upstream introns in both SPIRE (median 2,118 versus 1,444 nt; BH-adjusted P=0.000625) and FMN2 (3,311 versus 1,509 nt; P=0.00102; Fig. 2B). Downstream introns were also longer (SPIRE, 1,838 versus 1,376.5 nt; P=0.00271; FMN2, 2,321 versus 1,416 nt; P=0.00219). These associations describe the genomic architecture of affected events, not changes in intron length caused by knockout.', '',
-  'Events with decreased intron retention had weaker predicted 5′ splice sites in both studies: median MaxEnt scores were 8.21 versus 8.85 in SPIRE (BH-adjusted P=0.000645) and 7.64 versus 8.84 in FMN2 (P=0.0242; Fig. 2C). Full distributions for all six features, including nonsignificant comparisons, are shown in Fig. S4. GC profiles across exons, introns and flanking sequences provide complementary descriptive context (Fig. S5). Shared sequence contexts among affected subsets are compatible with partially overlapping RNA-processing responses, without requiring an identical global splicing program.', '',
-  '## Regional RBP motifs nominate regulatory hypotheses', '',
-  'The regional motif landscape reveals study- and direction-dependent patterns across exon neighborhoods (Fig. 2D; Table S8). RBM4-labelled motifs show strong raw scores in the downstream-intron 3′ region of decreased-inclusion events in both studies. FUS-labelled motifs in the upstream-intron 3′ region are prominent for increased-inclusion events in SPIRE and decreased-inclusion events in FMN2. Intron landscapes and regional motif-score distributions extend this comparison (Fig. S6). These patterns nominate sequence regions and motif families for follow-up.', '',
-  'Motif scores are exploratory minima over variants and windows, not calibrated RBP-level tests or measurements of RBP activity. Broad motif overlap, correlated sequence preferences and sparse motif-hit counts limit specificity; some extreme SPIRE scores derive from only a few motif-positive events. The results do not establish RBM4, FUS or another RBP as a causal regulator.', '',
-  '## Partially overlapping RNA-processing targets in SPIRE and FMN2', '',
-  sprintf('Restricting comparison to %s identically annotated events in %s genes yielded 98 selected SPIRE events and 263 selected FMN2 events. Eleven events and 22 affected genes were shared (Fig. S3A; Table S5). The gene overlap exceeded a uniform-gene expectation (%.2f expected; one-sided Fisher P=%.3g). A sensitivity analysis preserving FMN2 selection counts within tested-event-count strata gave %.2f shared genes on average and Monte Carlo P=%.4g (10,000 permutations). This controls coarsely for event opportunity but does not remove all gene-length, coverage or expression biases.',
-    format(nrow(common), big.mark = ','), length(valid_genes(common$GENE)), gene_test$expected, gene_test$p.value,
-    degree_overlap$expected, degree_overlap$pvalue), '',
-  sprintf('Shared events comprised seven concordant and four opposing fitted changes (exploratory sign-test P=0.549; Fig. S3C). Across all common tested events, raw mean changes had Spearman correlation %.4f (Fig. S3B). None of the seven concordant events had complete raw-PSI group separation in both studies (Fig. S3D). These data support limited shared targeting, while providing little evidence for a globally concordant splicing response. Unequal detection opportunities, heterozygous FMN2 controls and its two pools per condition further limit equivalence claims.',
-    cor(common$spire_raw_mean_deltapsi, common$fmn2_raw_mean_deltapsi, method = 'spearman')), '',
-  'Together, the RNA analysis supplies expression changes, division-associated splicing candidates and sequence/motif hypotheses for integration with the cellular phenotype. Predicted transcript consequences are annotations rather than measurements of protein loss (Fig. S7D). Cytoplasmic actin, nuclear positioning, nuclear-envelope forces, chromatin, speckles and division outcomes require the independent imaging and functional measurements; they were not measured here.', '')
-writeLines(results_text, file.path(out, 'text/RESULTS.md'))
+for (name in c('RESULTS', 'STORY')) {
+  path <- paste0('docs/PUBLICATION_', name, '.md')
+  input_files <- union(input_files, path)
+  file.copy(path, file.path(out, 'text', paste0(name, '.md')))
+}
 for (name in c('METHODS', 'LEGENDS')) {
   path <- paste0('docs/PUBLICATION_', name, '.md')
   input_files <- c(input_files, path)
@@ -475,15 +442,15 @@ for (name in c('METHODS', 'LEGENDS')) {
 writeLines(c('# Supplementary tables and source data', '',
   'CSV files use comma separators, UTF-8, a header row and NA for missing values. Open them as data, preserving event/gene IDs as text. Tables are grouped by S1–S8 prefixes; split files are parts of the same logical table. Full tested universes and nonsignificant results are retained.', '',
   '| Table | Contents |', '|---|---|',
-  '| S1 | Sample groups, independent-animal confirmation, saved DESeq2 design, alignment QC, target loci, historical-label correspondence and PCA feature IDs |',
+  '| S1 | Sample groups, independent-sample confirmation, saved DESeq2 design, alignment QC, target loci, historical-label correspondence and PCA feature IDs |',
   '| S2 | All and selected gene-expression statistics; normalized counts and VST values |',
   '| S3 | Every tested SPIRE event, selected events with raw-PSI sensitivity, and threshold sensitivity |',
   '| S4 | Division GO membership/evidence, all division candidates, targeted enrichment, expression/splicing gene intersection |',
   '| S5 | FMN2 universe, common universe, shared targets, overlap tests and event-count-stratified permutation sensitivity |',
   '| S6 | GO summaries and all tested-term results for full, tested and common backgrounds |',
-  '| S7 | All Matt feature tests, individual measurements for six reference features, and predicted transcript consequences |',
+  '| S7 | All Matt feature tests, individual feature measurements, a sequence-level GC audit, and predicted transcript consequences |',
   '| S8 | Exploratory motif-region minima, paired RBP-region results and shared-label counts; native window-level scans remain in the source analysis |', '',
-  '`source_data/` contains individual plotted measurements, candidate rankings, feature effects, GC profiles and RBP matrices. The complete expression volcano comes from S2; counts and effects can be reconstructed from S3/S5; exploratory panels use S6–S8. All source input files and generated table checksums are listed separately.', '',
+  '`source_data/` contains individual plotted measurements, division-event annotations, feature effects, GC profiles and RBP matrices. The complete expression volcano comes from S2; counts and effects can be reconstructed from S3/S5; exploratory panels use S6–S8. All source input files and generated table checksums are listed separately.', '',
   '## Field definitions', '',
   '- `FDR`, `spire_FDR`, `fmn2_FDR`: upstream betAS empirical per-event FPR, **not** BH-adjusted FDR. `invertedFDR` is 1−FPR. Zero has finite simulation resolution.',
   '- `deltapsi`, `spire_deltapsi`, `fmn2_deltapsi`, `betasPsiA/B`: fractions on 0–1 (signed for delta). Delta is knockout minus respective control. Multiply by 100 for percentage points.',
@@ -513,8 +480,7 @@ export(data.frame(file = input_files, sha256 = vapply(input_files, function(path
   digest::digest(file = path, algo = 'sha256'), character(1))), 'input_checksums')
 stopifnot(nrow(robust) == sum(selected_counts$n), sum(counts$n) == nrow(spire),
   sum(dge$selected) == summary_dge$padj005, nrow(shared) == 11,
-  identical(as.character(examples$GENE), c('Cit', 'Gen1', 'Nek4')),
   all(division_tests$padj > .05), all(robust_summary$leave_one_min_10pp <= robust_summary$leave_one_direction_agrees),
-  nrow(figures) == 9, all(file.exists(file.path(out, 'figures', paste0(figures$figure, '.pdf')))))
+  nrow(figures) == 13, all(file.exists(file.path(out, 'figures', paste0(figures$figure, '.pdf')))))
 writeLines('Validated publication assembly; figures and manuscript tables generated.', file.path(out, 'COMPLETE'))
 cat('Publication assembly complete:', out, '\n')
