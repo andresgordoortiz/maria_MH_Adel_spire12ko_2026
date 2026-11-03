@@ -57,3 +57,11 @@ dendrograms. RBP labels are selected within study and clustered using
 row-standardized regional profiles; cells retain raw scores. The shared
 plotting code emits distinct SPIRE/FMN2 sets and a compact convergence
 figure. Full rationale is in PUBLICATION_STORY.md.
+
+The subsequent feature/GO revision uses boxplots with individual selected
+event measurements in the same palette. RBP trees are hidden while row
+clustering is retained; PSI dendrograms remain visible. GO facets name the
+three ontologies and both backgrounds; grey-to-purple encodes the original
+BH-adjusted P and point size gives contributing genes. The oocyte project's
+feature scripts were read as visual references only; no source was executed
+or modified there and no runtime dependency was added.

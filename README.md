@@ -1,8 +1,8 @@
 # Spire1/2 knockout oocytes: RNA expression and splicing
 
 Start with the **[publication package](results/publication/index.html)**:
-two SPIRE main figures and five supplements, a separate FMN2 main figure
-and four supplements, and a compact convergence figure. The package includes
+two SPIRE main figures and six supplements, a separate FMN2 main figure
+and five supplements, and a compact convergence figure. The package includes
 methods, results, legends, editable manuscript text and supplementary tables
 S1–S8. Outputs are local and intentionally excluded from Git.
 

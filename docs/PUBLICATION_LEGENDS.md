@@ -23,12 +23,15 @@ union comprises 119 events in 75 genes. Gene annotation does not establish
 pathway enrichment or an isoform's function. Tables S2–S4 retain every
 measurement, event ID and event-to-gene-to-GO assignment.
 
-## SPIRE Figure 2. Sequence context and exploratory regional RBP motifs
+## SPIRE Figure 2. Sequence context and regional RBP motif enrichment
 
 **A**, Upstream intron length for selected EX events and the unselected
-Matt background. **B**, Whole-intron GC for IR events. ECDFs show the
-cumulative fraction of events, retaining every finite value; length uses
-a logarithmic axis. Down/Up denote decreased/increased exon inclusion or
+Matt background. **B**, Whole-intron GC for IR events. Boxes show
+quartiles and 1.5-IQR whiskers; individual selected events are points with
+horizontal jitter only. Background events are summarized by their box;
+separate outlier symbols are suppressed. White points are raw-scale medians;
+the dotted line marks the background median. All finite measurements enter
+summaries and tests; length uses a logarithmic axis. Down/Up denote decreased/increased exon inclusion or
 intron retention. Labels give existing feature-family BH-adjusted P (q)
 against background; events are not biological replicates. These are genomic
 features of affected events, not changes to DNA sequence after knockout.
@@ -36,9 +39,9 @@ features of affected events, not changes to DNA sequence after knockout.
 Columns proceed through the annotated regions, increased then decreased
 usage within each region. Cells are the maximum −log10 raw window P over
 eligible motif variants; eligibility requires P ≤0.05 somewhere in that
-study/direction. Absent combinations display zero. Dendrograms use
-Euclidean/complete linkage on row-standardized unsaturated score profiles;
-cell colors retain raw scores and saturate at 8. Regions are schematic,
+study/direction. Absent combinations display zero. Rows use Euclidean/complete-linkage clustering of row-standardized
+unsaturated score profiles; the tree is hidden. Cell colors retain raw
+scores and saturate at 8. Regions are schematic,
 not nucleotide-scaled. Searching variants/windows and sparse-hit asymptotic
 tests make these scores exploratory. They do not measure RBP expression,
 binding or causality. Tables S7–S8 retain complete results.
@@ -68,12 +71,12 @@ Columns retain sample order. Raw measurements and row order are exported.
 
 ## SPIRE Figure S3. All six reference sequence features
 
-**A–F**, ECDFs of EX upstream/downstream intron lengths and median exon
+**A–F**, Boxplots and individual selected measurements for EX upstream/downstream intron lengths and median exon
 number; IR length, GC and 5′ splice-site MaxEnt score. The reference feature
 set includes nonsignificant results. Group populations match the saved
 Matt tests. Length/number axes are logarithmic; GC is percent. MaxEnt scores
 are displayed from −2 to 12; the caption and source data report values
-outside that view. All values contribute to ECDFs and tests. Negative
+outside that view. All values contribute to box summaries and tests; plotting conventions follow SPIRE Fig. 2A,B. Negative
 MaxEnt scores are valid and are not truncated in the data. q denotes
 existing BH adjustment across the study's full feature-test family.
 
@@ -95,10 +98,29 @@ sequence audit and profile-subset membership.
 
 **A**, Top 15 IR RBP labels using the within-study selection and clustering
 rules of SPIRE Fig. 2C. **B,C**, EX and IR motif-score distributions across
-regions R1–R8 and R1–R5 in heatmap order. Boxes show median/quartiles and
+the named exon/intron regions in heatmap order, with angled axis labels. Boxes show median/quartiles and
 1.5-IQR whiskers, with outliers retained as points. The dotted line marks
 raw P=0.05. Motif variants and regions are correlated and are not biological
 replicates; no tests between the preselected score distributions are inferred.
+
+## SPIRE Figure S6. GO ontologies and processes raised in the manuscript
+
+**A**, Union of the three smallest raw-P GO terms in each ontology and
+background for genes with selected splicing events. BP, CC and MF are
+shown separately; terms are selected by rank, including nonsignificant
+results. Related parent/child terms are retained. **B**, Nine explicit
+terms motivated by division, actin, nuclear-envelope, chromatin, speckle
+and splicing questions in the email. Each panel compares the tested-gene
+and full-annotation backgrounds. The x axis is observed/expected gene
+enrichment, point size is contributing genes, and color gives the original
+ontology/background-specific BH-adjusted P. Grey points can have large
+enrichment with nonsignificant adjusted P. “Not tested” means the term
+falls outside the 10–500 background-gene size filter; no P is imputed.
+All SPIRE tested-background terms have adjusted P >0.05. Gene annotation
+does not measure the corresponding cellular phenotype. The GO analysis
+retains engineered loci and uses Entrez mapping, so counts differ slightly
+from the event-level panel that excludes Spire1/2. Source data include
+GO IDs, gene lists, ranks, exact P values and background-term sizes.
 
 ## FMN2 Figure 1. Independent FMN2 splicing and sequence-context analysis
 
@@ -106,7 +128,7 @@ replicates; no tests between the preselected score distributions are inferred.
 for SPIRE. **B**, All 275 selected events, row-centered PSI and visible
 Euclidean/complete-linkage dendrogram. Replicates 1–2 are Fmn2 heterozygous
 controls and 3–4 knockout; each biological replicate is a pool of 50 oocytes,
-with technical sequencing runs merged upstream. **C,D**, ECDFs of EX
+with technical sequencing runs merged upstream. **C,D**, Boxplots and individual selected measurements of EX
 upstream/downstream intron lengths, with study-specific background and
 feature-family q values. **E**, Top 30 EX RBP labels selected and clustered
 within FMN2, following SPIRE Fig. 2C. There is no gene-expression panel
@@ -122,7 +144,7 @@ betAS or provide calibrated significance tests.
 
 ## FMN2 Figure S2. Reference sequence-feature distributions
 
-**A–F**, The same six features and ECDF conventions as SPIRE Fig. S3, using
+**A–F**, The same six features and boxplot/point conventions as SPIRE Fig. S3, using
 FMN2 populations and its own background and BH family. All observations
 remain in the calculations, including MaxEnt values outside the labelled
 view. Small IR groups limit the interpretation of overlapping distributions.
@@ -137,8 +159,16 @@ in FMN2. Sequence-level checks and subset summaries accompany Table S7.
 ## FMN2 Figure S4. Intron motifs and regional score distributions
 
 **A**, Top 15 IR labels ranked and clustered within FMN2. **B,C**, EX and IR
-regional motif-score distributions. Selection, dendrogram, saturation and
-exploratory interpretation follow SPIRE Fig. S5.
+regional motif-score distributions. Selection, clustered row order with hidden tree, saturation and
+statistical interpretation follow SPIRE Fig. S5.
+
+## FMN2 Figure S5. GO ontologies and manuscript processes
+
+**A,B**, Top-ranked GO terms and the same nine question-driven terms,
+using the rules and visual encodings of SPIRE Fig. S6. Each result is
+computed within FMN2's own tested or full-annotation background. No
+FMN2 tested-background term has BH-adjusted P ≤0.05. Missing full-background
+tests are labelled explicitly rather than treated as nonsignificant.
 
 ## Convergence Figure 1. Shared targeting and directional concordance
 

@@ -18,7 +18,7 @@ def package(root):
     if not (root / 'COMPLETE').is_file():
         raise ValueError('Publication R assembly must complete before packaging')
     figures = list(csv.DictReader((root / 'tables/figure_manifest.csv').open()))
-    if {r['figure'] for r in figures} != {'SPIRE_Figure_1', 'SPIRE_Figure_2', *(f'SPIRE_S{i}' for i in range(1, 6)), 'FMN2_Figure_1', *(f'FMN2_S{i}' for i in range(1, 5)), 'Convergence_Figure_1'}:
+    if {r['figure'] for r in figures} != {'SPIRE_Figure_1', 'SPIRE_Figure_2', *(f'SPIRE_S{i}' for i in range(1, 7)), 'FMN2_Figure_1', *(f'FMN2_S{i}' for i in range(1, 6)), 'Convergence_Figure_1'}:
         raise ValueError('Expected separate SPIRE, FMN2 and convergence figure sets')
     for row in figures:
         for extension in ('pdf', 'png'):
@@ -79,8 +79,8 @@ def package(root):
     page.append('<p>Final-size layouts: 180 mm wide; embedded-font PDFs and 450 dpi PNGs. '
                 'Figure numbering is local to the RNA analysis and can be changed when integrated with microscopy.</p>')
     for group, description in (
-        ('SPIRE', 'Primary manuscript set: two main figures and five supplements.'),
-        ('FMN2', 'Independent comparison set: one main figure and four supplements.'),
+        ('SPIRE', 'Primary manuscript set: two main figures and six supplements.'),
+        ('FMN2', 'Independent comparison set: one main figure and five supplements.'),
         ('Convergence', 'Common-universe overlap and directional agreement.'),
     ):
         page.append(f'<h2 id="{group}">{group}</h2><p>{description} '

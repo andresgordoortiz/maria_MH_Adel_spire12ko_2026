@@ -481,6 +481,6 @@ export(data.frame(file = input_files, sha256 = vapply(input_files, function(path
 stopifnot(nrow(robust) == sum(selected_counts$n), sum(counts$n) == nrow(spire),
   sum(dge$selected) == summary_dge$padj005, nrow(shared) == 11,
   all(division_tests$padj > .05), all(robust_summary$leave_one_min_10pp <= robust_summary$leave_one_direction_agrees),
-  nrow(figures) == 13, all(file.exists(file.path(out, 'figures', paste0(figures$figure, '.pdf')))))
+  nrow(figures) == 15, all(file.exists(file.path(out, 'figures', paste0(figures$figure, '.pdf')))))
 writeLines('Validated publication assembly; figures and manuscript tables generated.', file.path(out, 'COMPLETE'))
 cat('Publication assembly complete:', out, '\n')

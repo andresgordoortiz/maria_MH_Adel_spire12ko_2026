@@ -122,3 +122,26 @@ background-relative metaplots expose the modest shifts without imputing
 the SPIRE effect to FMN2. Per-event checks and subset membership are
 exported in S7. The prior release is preserved under
 `audit/publication_restructure_2026-11-03/previous_publication/`.
+
+## Feature displays, GO figures and RBP presentation
+
+Compared box/point, violin/box/point and median/quantile displays against
+the local oocyte project. Chose boxplots with selected measurements, group
+sizes and raw medians for all six reference features, retaining all values
+in summaries/tests and labelled MaxEnt limits. Proofs and the previous
+publication package are preserved under
+`audit/feature_go_revision_2026-11-03/`.
+
+RBP trees are hidden while clustering and exported row orders are retained.
+EX/IR regional distributions use the actual region names at 50 degrees.
+The plot title describes motif enrichment; methods identify the exact
+statistical limit: raw selected minima over overlapping windows and motif
+variants have no final RBP-level multiplicity calibration.
+
+Added SPIRE S6 and FMN2 S5 for GO: top-three-term unions in BP/CC/MF under
+each background, plus nine separate manuscript-driven themes. No selection
+requires significance. Saved gene-set sizes validate all “Not tested”
+labels as exclusions by the original 10–500 size filter. Tested-background
+GO remains nonsignificant; full-background results include terms relevant
+to spindle, chromosome segregation and nuclear specks. These results are
+shown together rather than suppressing either background.

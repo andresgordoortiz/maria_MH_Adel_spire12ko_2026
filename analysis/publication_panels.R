@@ -136,24 +136,37 @@ export(gc_audit %>% group_by(dataset, DATASET) %>% summarise(n = n(),
   profile_subset_mean_percent = 100*mean(sequence_GC[in_spatial_profile]),
   max_absolute_disagreement = max(abs(INTRON_GCC - sequence_GC)), .groups = 'drop'), 'S7_intron_GC_audit_summary')
 
-feature_ecdf <- function(ds, feature, title) {
+feature_distribution <- function(ds, feature, title) {
   x <- feature_values[feature_values$dataset == ds & feature_values$feature == feature, ]
   stats <- feature_tests[feature_tests$dataset == ds & feature_tests$feature == feature, ]
   sizes <- table(x$DATASET)
-  legend_labels <- setNames(paste0(usage_labels[names(sizes)], '\nn=', sizes), names(sizes))
+  group_labels <- setNames(paste0(usage_labels[names(sizes)], '\nn=', format(sizes, big.mark = ',', trim = TRUE)), names(sizes))
   q <- paste0(ifelse(stats$group1 == 'down', 'Down', 'Up'), ': q=', formatC(stats$p.BH, format = 'g', digits = 2))
-  p <- ggplot(x, aes(value, color = DATASET)) + stat_ecdf(geom = 'step', linewidth = .65) +
-    scale_color_manual(values = direction_colors, labels = legend_labels, name = NULL) +
-    scale_y_continuous(limits = c(0, 1), breaks = c(0, .5, 1), labels = scales::label_percent()) +
-    labs(x = feature_spec$axis[match(feature, feature_spec$feature)], y = 'Cumulative events', title = title,
+  summary <- x %>% group_by(DATASET) %>% summarise(n = n(), median = median(value),
+    q25 = quantile(value, .25), q75 = quantile(value, .75), mean = mean(value),
+    minimum = min(value), maximum = max(value), .groups = 'drop')
+  stopifnot(sum(summary$n) == nrow(x), all(summary$q25 <= summary$median & summary$median <= summary$q75))
+  summary$dataset <- ds; summary$feature <- feature
+  export(summary, paste0(toupper(ds), '_', feature, '_display_summary'), 'source_data')
+  p <- ggplot(x, aes(DATASET, value, fill = DATASET, color = DATASET)) +
+    geom_hline(yintercept = summary$median[summary$DATASET == 'ndiff'], linewidth = .3,
+      linetype = 'dotted', color = '#999999') +
+    geom_point(data = x[x$DATASET != 'ndiff', ],
+      position = position_jitter(width = .14, height = 0, seed = 42), size = .6, alpha = .25) +
+    geom_boxplot(width = .48, alpha = .22, outlier.shape = NA, linewidth = .4) +
+    geom_point(data = summary, aes(y = median), shape = 21, fill = 'white', size = 1.8, stroke = .5) +
+    scale_x_discrete(limits = names(sizes), labels = group_labels) +
+    scale_color_manual(values = direction_colors, guide = 'none') +
+    scale_fill_manual(values = direction_colors, guide = 'none') +
+    labs(x = NULL, y = feature_spec$axis[match(feature, feature_spec$feature)], title = title,
       subtitle = paste(q, collapse = '   '))
-  if (grepl('LENGTH|NUMBER', feature)) p <- p + scale_x_log10(labels = scales::label_number(scale_cut = scales::cut_short_scale()))
-  if (feature == 'INTRON_GCC') p <- p + scale_x_continuous(labels = scales::label_number(scale = 100))
+  if (grepl('LENGTH|NUMBER', feature)) p <- p + scale_y_log10(labels = scales::label_number(scale_cut = scales::cut_short_scale()))
+  if (feature == 'INTRON_GCC') p <- p + scale_y_continuous(labels = scales::label_number(scale = 100))
   if (feature == 'MAXENTSCR_HSAMODEL_5SS') {
     tail <- x %>% group_by(DATASET) %>% summarise(n = n(), below = sum(value < -2), above = sum(value > 12), .groups = 'drop')
     export(tail, paste0(toupper(ds), '_splice_site_display_tails'), 'source_data')
-    p <- p + coord_cartesian(xlim = c(-2, 12)) + labs(caption = paste0('Display −2 to 12; ', sum(tail$below + tail$above),
-      ' values outside view retained in ECDF and tests.')) + theme(plot.caption = element_text(size = 6))
+    p <- p + coord_cartesian(ylim = c(-2, 12)) + labs(caption = paste0('Display −2 to 12; ', sum(tail$below + tail$above),
+      ' values outside view retained in summaries and tests.')) + theme(plot.caption = element_text(size = 6))
   }
   p
 }
@@ -185,7 +198,7 @@ rbp_heatmap <- function(ds, kind) {
     facet_grid(~region, labeller = as_labeller(setNames(labs_region, regions$region))) +
     scale_x_continuous(limits = c(.5, 2.5), expand = c(0, 0)) +
     scale_fill_manual(values = direction_colors, labels = usage_labels, name = NULL) +
-    labs(title = paste(kind, 'RBP motif patterns'), subtitle = 'Exploratory raw scores; clustering by regional profile') +
+    labs(title = paste(kind, 'RBP motif enrichment'), subtitle = 'Rows clustered by regional profile') +
     theme_void(base_family = 'Liberation Sans', base_size = 7) +
     theme(strip.text = element_text(size = 6.5), panel.spacing.x = grid::unit(.7, 'mm'),
       legend.position = 'top', legend.key.size = grid::unit(2.5, 'mm'),
@@ -199,8 +212,9 @@ rbp_heatmap <- function(ds, kind) {
     theme(axis.text.x = element_blank(), axis.text.y = element_text(size = 6.5),
       strip.text = element_blank(), strip.background = element_blank(), legend.position = 'right',
       panel.spacing.x = grid::unit(.7, 'mm'), plot.margin = margin(0, 7, 0, 6))
-  wrap_elements(full = annotation + tree_plot(tree, length(top)) + heat +
-    plot_layout(design = '#A\nBC', widths = c(.13, 1), heights = c(.35, if (kind == 'EX') 6 else 3.5)))
+  wrap_elements(full = annotation / heat +
+    plot_layout(heights = grid::unit(c(3, 1), c('mm', 'null')))) +
+    theme(plot.margin = margin(10, 0, 0, 0))
 }
 
 # Profiles keep their original background; delta views make modest shifts visible.
@@ -231,13 +245,90 @@ gc_plot <- function(ds, kind, difference = FALSE) {
 }
 motif_distribution <- function(ds, kind) {
   x <- tab('rbp', paste0('RBP_', kind, '_paper_motif_scores')); x <- x[x$dataset == ds, ]
-  x$direction <- factor(x$direction, c('down', 'up')); x$region <- factor(x$region, rbp_regions(kind)$region)
+  regions <- rbp_regions(kind)
+  x$direction <- factor(x$direction, c('down', 'up')); x$region <- factor(x$region, regions$region)
+  x$region_label <- regions$label[match(x$region, regions$region)]
   export(x, paste0(toupper(ds), '_RBP_', kind, '_regional_scores'), 'source_data')
   ggplot(x, aes(region, score, fill = direction)) +
     geom_boxplot(width = .65, outlier.size = .45, alpha = .7, linewidth = .25, position = position_dodge(.7)) +
     geom_hline(yintercept = -log10(.05), linetype = 'dotted', color = '#555555', linewidth = .3) +
+    scale_x_discrete(labels = setNames(regions$label, regions$region)) +
     scale_fill_manual(values = direction_colors, labels = usage_labels, name = NULL) +
-    labs(x = 'Region in heatmap order', y = '−log10 raw P', title = paste(kind, 'regional motif-score distributions'))
+    labs(x = NULL, y = '−log10 raw P', title = paste(kind, 'regional motif-score distributions')) +
+    theme(axis.text.x = element_text(angle = 50, hjust = 1, size = 6))
+}
+
+go_panels <- function(ds) {
+  themes <- c('GO:0051301', 'GO:0051321', 'GO:0007059', 'GO:0007051', 'GO:0030036',
+    'GO:0005635', 'GO:0006338', 'GO:0016607', 'GO:0008380')
+  term_sizes <- list()
+  all_go <- bind_rows(lapply(c('BP', 'CC', 'MF'), function(ont)
+    bind_rows(lapply(c('tested_N10', 'paper_OrgDb'), function(bg) {
+      path <- file.path('reports', studies[[ds]], 'tables', paste0('GO_', bg, '_all_', ont, '.rds'))
+      input_files <<- union(input_files, path)
+      object <- readRDS(path)
+      ids <- names(object@geneSets)
+      term_sizes[[paste(ont, bg)]] <<- data.frame(ID = ids, background = rep(bg, length(ids)),
+        background_term_genes = lengths(object@geneSets[ids]))
+      x <- as.data.frame(object@result)
+      stopifnot(nrow(x) > 0, !anyDuplicated(x$ID), all(is.finite(x$p.adjust)),
+        all(x$p.adjust >= 0 & x$p.adjust <= 1), all(x$FoldEnrichment > 0))
+      x$ontology <- ont; x$background <- bg
+      x <- x[order(x$pvalue, x$ID), ]; x$rank_in_background <- seq_len(nrow(x))
+      x
+    }))))
+  # The top terms and the email's themes are separate selections; neither is filtered for significance.
+  top_ids <- unique(all_go$ID[all_go$rank_in_background <= 3])
+  selected_ids <- union(top_ids, themes)
+  term_names <- unique(all_go[all_go$ID %in% selected_ids, c('ID', 'Description', 'ontology')])
+  stopifnot(setequal(term_names$ID, selected_ids))
+  displayed <- expand_grid(ID = selected_ids, background = c('tested_N10', 'paper_OrgDb')) %>%
+    left_join(term_names, by = 'ID') %>%
+    left_join(all_go[, !names(all_go) %in% c('Description', 'ontology')], by = c('ID', 'background')) %>%
+    left_join(bind_rows(term_sizes), by = c('ID', 'background'))
+  displayed$tested <- !is.na(displayed$p.adjust)
+  displayed$testing_status <- ifelse(displayed$tested, 'Tested', 'Outside 10–500 background-gene size filter')
+  stopifnot(nrow(displayed) == length(selected_ids)*2,
+    all(displayed$tested | displayed$background_term_genes < 10 | displayed$background_term_genes > 500))
+  top <- displayed[displayed$ID %in% top_ids, ]
+  top <- top[order(match(top$ontology, c('BP', 'CC', 'MF')), top$pvalue, top$ID), ]
+  focus <- displayed[displayed$ID %in% themes, ]
+  export(top, paste0(toupper(ds), '_GO_top_terms'), 'source_data')
+  export(focus, paste0(toupper(ds), '_GO_manuscript_themes'), 'source_data')
+  max_count <- max(c(top$Count, focus$Count), na.rm = TRUE)
+  draw_go <- function(x, ids, title, subtitle) {
+    names_by_id <- setNames(x$Description, x$ID)
+    x$term <- factor(x$ID, rev(ids))
+    x$background <- factor(x$background, c('tested_N10', 'paper_OrgDb'), c('Tested genes', 'Full annotation'))
+    x$ontology <- factor(x$ontology, c('BP', 'CC', 'MF'),
+      c('Biological\nprocess', 'Cellular\ncomponent', 'Molecular\nfunction'))
+    x$score <- -log10(pmax(x$p.adjust, 1e-300))
+    ggplot(x, aes(FoldEnrichment, term)) +
+      geom_vline(xintercept = 1, linetype = 'dotted', linewidth = .3, color = '#999999') +
+      geom_point(data = x[!is.na(x$p.adjust), ], aes(size = Count, color = score)) +
+      geom_text(data = x[is.na(x$p.adjust), ], aes(x = 1, label = 'Not tested'),
+        hjust = 0, size = 2, color = '#777777', family = 'Liberation Sans') +
+      facet_grid(ontology~background, scales = 'free_y', space = 'free_y') +
+      scale_y_discrete(labels = function(ids) vapply(names_by_id[ids], function(s)
+        paste(strwrap(s, width = 43), collapse = '\n'), character(1))) +
+      scale_x_log10(breaks = c(.5, 1, 2, 4, 8, 16)) +
+      scale_color_gradientn(colors = c('#B8B8B8', '#969696', '#7B60A5', '#3F2368'),
+        values = scales::rescale(c(0, -log10(.05), 3, 7)), limits = c(0, 7), oob = scales::squish,
+        breaks = c(0, -log10(.05), 3, 6), labels = c('1', '0.05', '0.001', '10⁻⁶'), name = 'BH-adjusted P') +
+      scale_size_continuous(range = c(1.2, 3.8), limits = c(0, max_count), name = 'Genes') +
+      guides(color = guide_colorbar(order = 1, barwidth = grid::unit(40, 'mm'), barheight = grid::unit(2, 'mm')),
+        size = guide_legend(order = 2, nrow = 1)) +
+      labs(x = 'Gene enrichment (observed / expected)', y = NULL, title = title, subtitle = subtitle) +
+      theme(panel.grid.major.y = element_line(color = '#F0F0F0'),
+        axis.text.y = element_text(size = 6.5), strip.text.y = element_text(size = 6.5, angle = 0),
+        panel.spacing.y = grid::unit(2, 'mm'))
+  }
+  draw_go(top, unique(top$ID), 'Top-ranked GO terms across all three ontologies',
+    'Union of the top 3 terms per ontology and background; selected splicing genes') /
+    draw_go(focus, themes, 'Processes raised in the manuscript',
+      'Question-driven terms; not selected by their P values') +
+    plot_layout(heights = c(length(unique(top$ID)) + 3, length(themes) + 2), guides = 'collect') &
+    theme(legend.position = 'bottom')
 }
 
 p_spire_psi <- psi_heatmap('spire'); p_fmn2_psi <- psi_heatmap('fmn2')
@@ -245,10 +336,10 @@ p_spire_rbp <- rbp_heatmap('spire', 'EX'); p_fmn2_rbp <- rbp_heatmap('fmn2', 'EX
 save_figure(p_ma + event_counts('spire') + p_spire_psi + free(p_division, side = 'l') +
   plot_layout(design = 'AB\nCC\nDD', heights = c(1, 1.35, .85)), 'SPIRE_Figure_1',
   'SPIRE: expression and splicing changes, including events in division-annotated genes', 225)
-save_figure(feature_ecdf('spire', 'UPINTRON_MEDIANLENGTH', 'EX: longer upstream introns') +
-  feature_ecdf('spire', 'INTRON_GCC', 'IR: higher whole-intron GC') + p_spire_rbp +
+save_figure(feature_distribution('spire', 'UPINTRON_MEDIANLENGTH', 'EX: longer upstream introns') +
+  feature_distribution('spire', 'INTRON_GCC', 'IR: higher whole-intron GC') + p_spire_rbp +
   plot_layout(design = 'AB\nCC', heights = c(1, 1.8)), 'SPIRE_Figure_2',
-  'SPIRE: sequence context and exploratory regional RBP motifs', 205)
+  'SPIRE: sequence context and regional RBP motif enrichment', 205)
 save_figure(polish(pca_plot('Expression_PCA', ''), 'Expression PCA') + polish(pca_plot('Splicing_PCA', ''), 'Splicing PCA') +
   polish(p1a, 'Target-gene RNA abundance') +
   (polish(ps1d, 'VAST junction support at target exons') + heat_theme +
@@ -270,18 +361,20 @@ save_figure(polish(ps2a, 'Fitted and observed PSI effects') + polish(ps2b, 'Leav
 for (ds in names(studies)) {
   name <- toupper(ds)
   save_figure(wrap_plots(lapply(seq_len(nrow(feature_spec)), function(i)
-    feature_ecdf(ds, feature_spec$feature[i], paste(feature_spec$event_type[i], feature_spec$label[i], sep = ' · '))), ncol = 2),
+    feature_distribution(ds, feature_spec$feature[i], paste(feature_spec$event_type[i], feature_spec$label[i], sep = ' · '))), ncol = 2),
     paste0(name, if (ds == 'spire') '_S3' else '_S2'), paste(name, 'full reference feature distributions'), 235)
   save_figure(gc_plot(ds, 'EX') + gc_plot(ds, 'EX', TRUE) + gc_plot(ds, 'IR') + gc_plot(ds, 'IR', TRUE) +
     plot_layout(ncol = 2), paste0(name, if (ds == 'spire') '_S4' else '_S3'),
     paste(name, 'absolute and background-relative GC profiles'), 180)
   save_figure(rbp_heatmap(ds, 'IR') / (motif_distribution(ds, 'EX') + motif_distribution(ds, 'IR')) +
     plot_layout(heights = c(1.4, 1)), paste0(name, if (ds == 'spire') '_S5' else '_S4'),
-    paste(name, 'intron RBP motifs and regional score distributions'), 190)
+    paste(name, 'intron RBP motifs and regional score distributions'), 205)
+  save_figure(go_panels(ds), paste0(name, if (ds == 'spire') '_S6' else '_S5'),
+    paste(name, 'GO ontologies, top terms and manuscript processes under two backgrounds'), 270)
 }
 save_figure(event_counts('fmn2') + p_fmn2_psi +
-  feature_ecdf('fmn2', 'UPINTRON_MEDIANLENGTH', 'EX: upstream intron length') +
-  feature_ecdf('fmn2', 'DOINTRON_MEDIANLENGTH', 'EX: downstream intron length') + p_fmn2_rbp +
+  feature_distribution('fmn2', 'UPINTRON_MEDIANLENGTH', 'EX: upstream intron length') +
+  feature_distribution('fmn2', 'DOINTRON_MEDIANLENGTH', 'EX: downstream intron length') + p_fmn2_rbp +
   plot_layout(design = 'AB\nCD\nEE', heights = c(1, .9, 1.6)), 'FMN2_Figure_1',
   'FMN2: splicing profiles, exon-flanking architecture and RBP motifs', 245)
 f_sens <- sensitivity$fmn2

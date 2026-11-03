@@ -105,7 +105,23 @@ org.Mm.eg.db, BH adjustment, p/adjusted-p cutoffs 0.05, q cutoff 0.2 and
 gene-set sizes 10–500. Both the full OrgDb and tested-N10 backgrounds were
 reported; comparison analyses use a common tested Entrez background.
 All tested-term results, including nonsignificant terms, accompany the
-selected results. Package versions and annotation metadata are exported.
+selected results. Study-specific GO figures show the union of the three
+smallest raw P values per ontology and background, with deterministic GO-ID
+tie breaking. This rank-based display includes nonsignificant terms and
+retains related parent/child terms; it is not a new significance test.
+A separate panel shows nine question-driven terms: division, meiotic cycle,
+chromosome segregation, spindle organization, actin cytoskeleton organization,
+nuclear envelope, chromatin remodeling, nuclear speck and RNA splicing.
+Both panels facet BP/CC/MF and compare the tested-gene and full-annotation
+backgrounds. Point size gives contributing genes, x is observed/expected
+gene enrichment, and color gives the original ontology-specific BH-adjusted
+P. A term absent from the saved tests is labelled “Not tested”; its
+background gene-set size is exported and checked against the 10–500 filter.
+GO panels concern genes with selected splicing events, not DESeq2-selected
+genes. The retained GO analysis includes the engineered loci and uses
+Entrez mapping, whereas the event-level division panel excludes Spire1/2;
+these two gene counts need not match. Package versions and annotation
+metadata are exported.
 
 Cross-study analysis required matching event IDs and gene/coordinate/event
 annotations and used only the common tested universe. Shared gene
@@ -133,9 +149,13 @@ VASTDB PROT_IMPACT v3 supplies predicted transcript consequences; it does
 not establish protein depletion. rMAPS3 scans used the corrected window
 counter, 114 motifs under 91 RBP labels, and directional Mann–Whitney
 window tests. Shared labels required raw P ≤0.05 in the same region and
-direction in each study. Searching motifs, variants and windows without
-family-wide calibration makes this exploratory; sparse-count asymptotic
-p-values can be optimistic. No causal regulator is inferred.
+direction in each study. The displayed RBP/region score is the strongest raw window P across
+eligible motif variants. That selected minimum is not a calibrated
+RBP-level P value: the search spans many overlapping windows and related
+motifs without correction for this final selection. This is the statistical
+reason for describing the RBP findings as exploratory. Sparse-count
+asymptotic P values can also be optimistic. Motif enrichment is measured;
+RBP abundance, binding and causal activity are not measured here.
 
 Figures were composed in R/ggplot2/patchwork using the requested hybrid
 of Lena QuantSeq styling and the reference RBP heatmaps. Liberation Sans provides the installed Helvetica/Arial-compatible face;
@@ -151,8 +171,8 @@ Each label/region/direction cell retains the maximum −log10 raw P across
 eligible variants; absent combinations are displayed as zero. Unsaturated
 row profiles are standardized to mean zero and unit SD for Euclidean,
 complete-linkage clustering; constant rows are centered without division
-by zero. Dendrograms show this ordering, while cell colors show unscaled
-scores saturated at 8. This separates regional profile similarity from
+by zero. The clustered ordering is retained with the dendrogram hidden, while
+cell colors show unscaled scores saturated at 8. This separates regional profile similarity from
 absolute score magnitude. No RBP expression or binding is inferred.
 
 The six reference Matt features are all retained in study-specific
@@ -161,13 +181,20 @@ associations: SPIRE EX upstream-intron length and IR whole-intron GC;
 FMN2 EX upstream/downstream-intron lengths. This editorial selection is
 post-analysis, not a new hypothesis-testing family. Annotation-dependent
 co-occurrence counts and all other feature tests remain in Table S7.
-Empirical cumulative distribution functions (ECDFs) show overlapping
-populations without smoothing choices. Group sizes and medians are checked
-against the saved tests. Feature-family BH-adjusted P values are labelled
-q. Length/number axes are logarithmic; GC is shown in percent. MaxEnt
-ECDFs use a −2 to 12 display window, with counts outside that window
-reported on the plot and in source data. All values contribute to the
-ECDF and tests; negative MaxEnt scores are retained.
+Three candidate displays were compared locally: boxplots with individual
+events, violins with boxes/events, and median/50%/90% intervals. Boxplots
+with individual selected-event points were chosen because they expose
+population overlap without kernel smoothing, including FMN2's small IR
+sets. All selected finite measurements are shown with horizontal jitter
+only; background events are summarized by a box. Boxes show quartiles and
+1.5-IQR whiskers, with separate outlier symbols suppressed; all observations
+remain in calculations. White points mark raw-scale medians; a dotted
+horizontal line marks the background median. Length/number axes are
+logarithmic; GC is percent. Group sizes and medians are checked against the
+saved tests; all six plotted summaries are exported. Feature-family
+BH-adjusted P values are labelled q. MaxEnt uses a −2 to 12 display window,
+with outside-view counts reported on the plot and in source data. All
+values contribute to summaries and tests; negative scores are retained.
 
 Whole-intron GC was recalculated as (G+C)/(A+C+G+T) from each Matt
 SEQ_INTRON and checked against INTRON_GCC at tolerance 1e−12. The audit
@@ -179,7 +206,8 @@ background plots are shown separately for each study. For each bin,
 is sqrt(SE_selected² + SE_background²). Ribbons are ±1.96 SE across
 events, not biological-replicate uncertainty or multiplicity-adjusted
 positional tests. Whole-intron GC and scaled local bins are different
-summaries. Regional motif boxes are descriptive only.
+summaries. Regional motif boxes are descriptive only; their axes use anatomical
+region names with angled labels, matching the region mapping in the heatmaps.
 
 All figures are 180 mm wide, with vector PDF layouts and 450 dpi PNGs.
 Every selected PSI row is retained and centered on its sample median,

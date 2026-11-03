@@ -35,6 +35,16 @@ This is functional annotation, not evidence of pathway enrichment or
 impaired division. The four focused overrepresentation tests were
 nonsignificant after BH correction (all adjusted P≈0.597), and broad GO
 enrichment did not persist with the tested-gene background (Tables S4,S6).
+SPIRE Fig. S6 now shows ranked BP, CC and MF terms under both backgrounds,
+and a separate set of nine terms motivated by the manuscript. With the
+full-annotation background, chromosome segregation (BH-adjusted P=0.00160),
+mitotic spindle (2.63×10⁻⁷) and nuclear speck (0.00978) were among the
+significant terms. Their tested-background adjusted P values were approximately
+1.00, 0.476 and 1.00. Thus the relevant annotations are present, while
+robust overrepresentation relative to genes testable in this assay is not
+established. The strongest tested-background BP terms were axon development
+and axonogenesis (both adjusted P=0.0643); these overlapping annotations do
+not demonstrate neuronal phenotypes in oocytes.
 The event list provides directly traceable hypotheses for integration with
 cellular measurements, without establishing isoform function.
 
@@ -65,7 +75,7 @@ visible without claiming uniform shifts at every sequence position
 
 EX RBP motif profiles provide exploratory regional hypotheses (SPIRE
 Fig. 2C). Rows are selected within SPIRE and clustered by standardized
-regional score patterns; dendrograms make the ordering explicit. The IR
+regional score patterns; the trees are hidden. The IR
 landscape and motif-score distributions are supplemental (SPIRE Fig. S5).
 Scores are minima over motif variants and windows, not calibrated RBP-level
 p-values, expression measurements or binding assays. Sparse-hit asymptotic
@@ -89,9 +99,16 @@ with Matt measurements). Intron GC was not significantly shifted. Predicted
 7.64 versus 8.84; BH-adjusted P=0.0242), but overlapping distributions and
 the small selected set argue against making this a principal mechanistic
 claim. It is retained alongside all six reference features in FMN2 Fig.
-S2; the MaxEnt ECDF shows −2 to 12 with explicit counts outside the view.
-Negative MaxEnt scores are valid model scores, not negative lengths or
-probabilities. All observations remain in calculations and source tables.
+S2; the MaxEnt box/point panel shows −2 to 12 with explicit counts outside the view.
+Negative MaxEnt scores are valid model scores. All observations remain
+in calculations and source tables. Across the six features, boxplots and
+individual selected-event points make the population spread and small
+FMN2 IR sets visible without density smoothing.
+
+FMN2 Fig. S5 presents its GO results separately. Full-background terms
+included nuclear speck (BH-adjusted P=0.0171) and actin binding (0.00845);
+tested-background values were 0.999 and 0.403. No BP, CC or MF term retained
+BH-adjusted P ≤0.05 with the FMN2 tested-gene background.
 
 ## Convergence is limited to selected targets and sequence contexts
 
