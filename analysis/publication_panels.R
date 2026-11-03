@@ -219,31 +219,56 @@ rbp_heatmap <- function(ds, kind) {
     theme(plot.margin = margin(10, 0, 0, 0))
 }
 
-# Profiles keep their original background; delta views make modest shifts visible.
+# Coarse IR bins and separate regions keep small event sets and mixed sequence scales readable.
 gc_plot <- function(ds, kind, difference = FALSE) {
-  x <- tab(studies[[ds]], paste0('GC_gradient_', kind, '_fine_directions'))
+  level <- if (kind == 'IR') 'coarse' else 'fine'
+  x <- tab(studies[[ds]], paste0('GC_gradient_', kind, '_', level, '_directions'))
+  stopifnot(!anyDuplicated(x[, c('category', 'bin')]), all(is.finite(x$mean_GC)),
+    all(is.finite(x$se) & x$se >= 0), all(x$n >= 2))
   regions <- x %>% group_by(region) %>% summarise(start = min(bin)-.5, end = max(bin)+.5, .groups = 'drop') %>% arrange(start)
-  regions$label <- if (kind == 'EX') c('Up exon', 'Up intron', 'Exon', 'Down intron', 'Down exon') else
-    c('Up exon', '5′ flank', 'Body', '3′ flank', 'Down exon')
+  regions$label <- if (kind == 'EX') c('Upstream exon\nlast ≤200 nt', 'Upstream intron\nscaled', 'Target exon\nscaled',
+    'Downstream intron\nscaled', 'Downstream exon\nfirst ≤200 nt') else
+    c('Upstream exon\nlast ≤150 nt', 'Intron 5′ end\nfirst ≤80 nt', 'Intron body\nscaled',
+      'Intron 3′ end\nlast ≤80 nt', 'Downstream exon\nfirst ≤150 nt')
+  i <- match(x$region, regions$region)
+  x$position <- (x$bin-regions$start[i])/(regions$end[i]-regions$start[i])
+  x$layout <- level
+  x$region <- factor(x$region, regions$region)
+  stopifnot(all(x$position > 0 & x$position < 1), nrow(regions) == 5)
   export(x, paste0(toupper(ds), '_GC_', kind, '_profiles'), 'source_data')
+  if (kind == 'IR') export(tab(studies[[ds]], 'GC_gradient_IR_fine_directions'),
+    paste0(toupper(ds), '_GC_IR_fine_reference'), 'source_data')
   if (difference) {
     bg <- x[x$category == 'ndiff', c('bin', 'mean_GC', 'se')]; names(bg)[-1] <- c('background', 'background_se')
     x <- merge(x[x$category != 'ndiff', ], bg, by = 'bin')
     x$mean_GC <- x$mean_GC - x$background; x$se <- sqrt(x$se^2 + x$background_se^2)
     export(x, paste0(toupper(ds), '_GC_', kind, '_difference'), 'source_data')
   }
-  ggplot(x, aes(bin, mean_GC, color = category, fill = category)) +
-    geom_rect(data = regions[grepl('exon', regions$label, ignore.case = TRUE), ],
-      aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf), inherit.aes = FALSE, fill = '#EEEEEE') +
-    geom_hline(yintercept = if (difference) 0 else numeric(), linewidth = .3, color = '#555555') +
-    geom_vline(xintercept = head(regions$end, -1), linetype = 'dotted', color = '#AAAAAA', linewidth = .3) +
-    geom_ribbon(aes(ymin = mean_GC - 1.96*se, ymax = mean_GC + 1.96*se), alpha = .14, color = NA) +
-    geom_line(linewidth = .55) + scale_color_manual(values = direction_colors, labels = usage_labels, name = NULL) +
-    scale_fill_manual(values = direction_colors, labels = usage_labels, name = NULL) +
-    scale_x_continuous(breaks = (regions$start + regions$end)/2, labels = regions$label, expand = c(0, 0)) +
-    labs(x = 'Scaled sequence region', y = if (difference) 'ΔGC versus background (pp)' else 'GC (%)',
-      title = paste(kind, if (difference) 'difference from background' else 'sequence profile')) +
-    theme(axis.text.x = element_text(size = 6))
+  sizes <- x %>% group_by(category) %>% summarise(low = min(n), high = max(n), .groups = 'drop')
+  breaks <- intersect(c('ndiff', 'down', 'up'), sizes$category)
+  labels <- setNames(paste0(usage_labels[sizes$category], ' (n=',
+    format(sizes$low, big.mark = ',', trim = TRUE), '–', format(sizes$high, big.mark = ',', trim = TRUE), ')'), sizes$category)
+  colors <- direction_colors; colors['ndiff'] <- '#555555'
+  p <- ggplot(x, aes(position, mean_GC, color = category, fill = category)) +
+    facet_grid(~region, labeller = as_labeller(setNames(regions$label, regions$region))) +
+    geom_hline(yintercept = if (difference) 0 else numeric(), linewidth = .3, color = '#777777') +
+    geom_ribbon(aes(ymin = mean_GC - 1.96*se, ymax = mean_GC + 1.96*se), alpha = .12, color = NA) +
+    geom_line(aes(linetype = category), linewidth = .6) +
+    scale_color_manual(values = colors, breaks = breaks, labels = labels[breaks], name = NULL) +
+    scale_fill_manual(values = colors, breaks = breaks, labels = labels[breaks], name = NULL) +
+    scale_linetype_manual(values = c(ndiff = 'dashed', down = 'solid', up = 'solid'),
+      breaks = breaks, labels = labels[breaks], name = NULL) +
+    scale_x_continuous(limits = c(0, 1), breaks = c(0, .5, 1), labels = c('0', '50', '100'), expand = c(0, 0)) +
+    labs(x = 'Position within region (%)', y = if (difference) 'ΔGC versus background (pp)' else 'GC (%)',
+      title = paste(toupper(ds), '·', kind, 'GC profile'),
+      subtitle = 'Mean ±1.96 SE across events; n gives the range across bins') +
+    theme(axis.text.x = element_text(size = 6), strip.text = element_text(size = 6.5),
+      panel.spacing.x = grid::unit(4, 'mm'), legend.key.width = grid::unit(5, 'mm'))
+  if (kind == 'IR' && !difference) {
+    stopifnot(all(x$mean_GC - 1.96*x$se >= 25), all(x$mean_GC + 1.96*x$se <= 65))
+    p <- p + scale_y_continuous(limits = c(25, 65), breaks = c(30, 40, 50, 60))
+  }
+  p
 }
 go_dotplot <- function() {
   x <- go_revised %>% filter(dataset == 'spire', background == 'tested_N10', selection == 'selected') %>%
@@ -326,9 +351,8 @@ save_figure(feature_distribution('spire', 'MEDIAN_EXON_NUMBER', 'SPIRE · EX exo
   feature_distribution('fmn2', 'MAXENTSCR_HSAMODEL_5SS', 'FMN2 · IR 5′ splice-site strength') +
   plot_layout(ncol = 2), 'Figure_S2', 'Additional exon architecture and intron splice-site context', 180)
 save_figure(rbp_heatmap('spire', 'IR') + rbp_heatmap('fmn2', 'IR') +
-  gc_plot('spire', 'IR', TRUE) + labs(title = 'SPIRE · IR GC profile') +
-  gc_plot('fmn2', 'IR', TRUE) + labs(title = 'FMN2 · IR GC profile') +
-  plot_layout(design = 'AA\nBB\nCD', heights = c(1.1, 1.1, 1)),
-  'Figure_S3', 'Intron rMAPS3 motif P values and GC profiles in SPIRE and FMN2', 230)
+  gc_plot('spire', 'IR') + gc_plot('fmn2', 'IR') +
+  plot_layout(ncol = 1, heights = c(1, 1, .8, .8)),
+  'Figure_S3', 'Intron rMAPS3 motif P values and GC profiles in SPIRE and FMN2', 270)
 # Reference profiles remain in source tables without additional figures.
-for (ds in names(studies)) { invisible(gc_plot(ds, 'EX')); invisible(gc_plot(ds, 'EX', TRUE)) }
+for (ds in names(studies)) for (kind in c('EX', 'IR')) invisible(gc_plot(ds, kind, TRUE))

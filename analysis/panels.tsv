@@ -12,6 +12,6 @@ S1A-D	SPIRE expression/PSI PCA, target-exon support and clustered expression	Ess
 S1E-F	SPIRE/FMN2 leave-one-sample stability	Descriptive raw-PSI checks; no refitting or exclusions
 S2A-D	SPIRE/FMN2 exon number and IR 5-prime splice-site strength	Complementary features; includes nonsignificant results and labelled MaxEnt display limits
 S3A-B	SPIRE/FMN2 IR rMAPS3 P-value heatmaps	Complements main EX matrices; native raw P and original ranking; hidden trees
-S3C-D	SPIRE/FMN2 IR GC difference from background	Descriptive pointwise event-level uncertainty; independent sequence-level audit in S7
+S3C-D	SPIRE/FMN2 full-width regional GC profiles	Saved coarse 30-bin layout; separate regions; common GC axis; visible background; event-level ribbons and per-bin n; fine/reference differences in source data
 Tables_S1-S8	Complete results, annotation, families and individual measurements	All features, backgrounds, sensitivities, absolute/EX profiles and nonsignificant tests retained
 Cellular_phenotype	Actin, nucleus, nuclear envelope, chromatin, speckles and division	Requires independent imaging or functional measurements
