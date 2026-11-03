@@ -35,15 +35,19 @@ degree_matched_overlap <- function(spire_selected, fmn2_selected, tested_events,
 }
 
 publication_theme <- function() {
-  ggplot2::theme_classic(base_size = 8, base_family = 'Liberation Sans') +
-    ggplot2::theme(plot.title = ggplot2::element_text(size = 9, face = 'bold'),
+  ggplot2::theme_bw(base_size = 8, base_family = 'Liberation Sans') +
+    ggplot2::theme(panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major.x = ggplot2::element_blank(),
+      panel.grid.major.y = ggplot2::element_line(color = '#EBEBEB', linewidth = .25),
+      panel.border = ggplot2::element_rect(color = '#777777', linewidth = .35),
+      plot.title = ggplot2::element_text(size = 9, face = 'bold', margin = ggplot2::margin(b = 7)),
       plot.subtitle = ggplot2::element_text(size = 7, color = '#555555', margin = ggplot2::margin(b = 5)),
       plot.tag = ggplot2::element_text(size = 12, face = 'bold'),
       axis.text = ggplot2::element_text(size = 7, color = '#222222'),
-      axis.title = ggplot2::element_text(size = 8),
-      axis.line = ggplot2::element_line(linewidth = .3),
+      axis.title = ggplot2::element_text(size = 8, face = 'bold'),
+      axis.line = ggplot2::element_blank(),
       axis.ticks = ggplot2::element_line(linewidth = .3),
-      strip.background = ggplot2::element_blank(),
+      strip.background = ggplot2::element_rect(fill = '#F5F5F5', color = NA),
       strip.text = ggplot2::element_text(size = 7, face = 'bold'),
       legend.position = 'bottom', legend.title = ggplot2::element_text(size = 7),
       legend.text = ggplot2::element_text(size = 7),

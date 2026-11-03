@@ -1,4 +1,4 @@
-# Publication audit — 2 November 2026
+# Publication audit — updated 3 November 2026
 
 ## Scope and evidence
 
@@ -9,7 +9,7 @@ worktree already contained an uncommitted FASTQ reanalysis and relocation
 of figures/reports. Those changes were preserved; the initial diff/status
 is recorded locally under `audit/publication_2026-11-02/`.
 
-The new publication assembly consumes the current analyses and adds six
+The new publication assembly consumes the current analyses and adds nine
 composed figures, individual-animal effect sensitivity, explicit division
 annotation/ranking, a gene event-count-matched overlap sensitivity analysis,
 complete tables and manuscript text. It does not replace the upstream
@@ -26,7 +26,7 @@ statistical methods or manufacture evidence for the requested phenotype.
 | Splicing figures | Current all-sample N10 universe, unchanged effect/FPR selection, all individual PSI retained |
 | Comparison | Common tested events only; shared events, genes and directional agreement distinguished; corrected FASTQ labels retained |
 | Sequence/motif analysis | Completed Matt and corrected rMAPS3 outputs retained, with exploratory limits visible |
-| Publication graphics | Two main plus four supplementary figures, 180 mm width, embedded-font PDF and 450 dpi PNG, fixed color meanings |
+| Publication graphics | Two main plus seven supplementary figures, 180 mm width, embedded-font PDF and 450 dpi PNG, fixed color meanings |
 | Release artifacts | Full CSV tables, source data, field definitions, input/output hashes, session and annotation metadata, tested ZIP packages |
 
 ## Findings that constrain the paper
@@ -50,7 +50,7 @@ statistical methods or manufacture evidence for the requested phenotype.
   event separates every raw sample in both experiments. Different controls,
   coverage and sampling units limit phenocopy claims.
 - Raw motif-window minima and sparse-count asymptotic p-values do not identify
-  a common causal RBP. These panels remain supplementary/exploratory.
+  a common causal RBP. The main motif landscape remains exploratory.
 - RNAmotifs is an optional historical handoff. Its revised container recipe
   has not been built/validated and contributes no publication result.
 
@@ -80,3 +80,22 @@ reachable Git history contains source-sized blobs, not the local data
 directories. Local Git storage also contains old temporary pack files;
 these are not reachable objects and are not part of a push. They were not
 deleted or used as a reason to rewrite history. No remote push is performed.
+
+## Publication redesign, 3 November
+
+The two main figures now cover (1) target RNA, expression, splicing burden
+and ranked division-candidate profiles; (2) six reference sequence features,
+full distributions for two shared associations and the regional EX RBP
+heatmap. Seven supplements retain QC, sensitivity, the full FMN2 comparison,
+all six feature distributions, GC profiles, IR/regional motif results and
+functional interpretation. Methods, results, legends and panel map were
+updated together. The previous package is preserved under
+`audit/publication_redesign_2026-11-02/previous_publication/`.
+
+Rendering checks additionally compare each feature population's group size
+and median with the saved tests, validate complete RBP-region matrices and
+GC bins, and check candidate rankings, source data, embedded fonts and ZIPs.
+The requested Lena visual style is documented in COLOURS.md; no dependency
+was installed and the reference repository was read only. Fontconfig emits
+compatibility warnings from the installed runtime; PDF font inspection
+verifies the explicitly chosen embedded Liberation Sans face.

@@ -18,8 +18,8 @@ def package(root):
     if not (root / 'COMPLETE').is_file():
         raise ValueError('Publication R assembly must complete before packaging')
     figures = list(csv.DictReader((root / 'tables/figure_manifest.csv').open()))
-    if {r['figure'] for r in figures} != {'Figure_1', 'Figure_2', 'Figure_S1', 'Figure_S2', 'Figure_S3', 'Figure_S4'}:
-        raise ValueError('Expected two main and four supplementary figures')
+    if {r['figure'] for r in figures} != {'Figure_1', 'Figure_2', *(f'Figure_S{i}' for i in range(1, 8))}:
+        raise ValueError('Expected two main and seven supplementary figures')
     for row in figures:
         for extension in ('pdf', 'png'):
             path = root / 'figures' / (row['figure'] + '.' + extension)
@@ -68,7 +68,7 @@ def package(root):
             '.note{background:#f3f2f5;padding:16px 22px}h1{font-size:30px}h2{font-size:23px}nav{display:flex;gap:18px;flex-wrap:wrap}</style>',
             '<h1>SPIRE loss: expression and splicing</h1>',
             '<p class="note">Three independent animals per condition. Selective RNA changes and division-associated '
-            'candidates; limited shared FMN2 targeting. The RNA results do not establish a global molecular phenocopy.</p>',
+            'candidates, distinctive sequence architecture and regional RBP motif patterns. Motif evidence is exploratory.</p>',
             '<nav><a href="Figures.zip">Download all figures</a><a href="Supplementary_tables.zip">Supplementary tables and source data</a>'
             '<a href="text/RESULTS.md">Results</a><a href="text/METHODS.md">Methods</a><a href="text/LEGENDS.md">Legends</a></nav>']
     if pandoc:

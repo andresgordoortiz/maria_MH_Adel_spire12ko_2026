@@ -91,7 +91,7 @@ Division relevance was defined by membership in GO:0051301 (cell division),
 GO:0051321 (meiotic cell cycle), GO:0007051 (spindle organization) or
 GO:0007059 (chromosome segregation), including inherited GOALL membership
 in the pinned mouse OrgDb. Evidence codes and all matching genes were
-exported. Three illustrative genes were selected by descending minimum
+exported. Fifteen heatmap genes and three illustrative profiles were selected by descending minimum
 signed leave-one-animal raw PSI change, then absolute full-sample raw
 change and event ID, retaining one event per gene. Spire1/2 were excluded
 from example selection because they are the engineered loci. This
@@ -137,14 +137,37 @@ direction in each study. Searching motifs, variants and windows without
 family-wide calibration makes this exploratory; sparse-count asymptotic
 p-values can be optimistic. No causal regulator is inferred.
 
-Figures use Liberation Sans, a shared Okabe–Ito categorical palette,
-blue/orange signed effects and Cividis PSI magnitudes. PDFs embed fonts;
-heatmaps are raster layers within vector layouts. PNGs are 450 dpi at
-180 mm width. The splicing heatmap is row-median centered, ordered by
-event type, fitted effect and event ID, with color saturation at ±50 pp.
-The expression heatmap is gene-mean-centered VST, ordered by log2FC and
-saturated at ±3; individual values remain in source tables. No sample
-clustering or unreported sample exclusion is applied to these heatmaps.
+Figures were composed in R/ggplot2/patchwork using the requested hybrid
+of Lena QuantSeq styling and the reference RBP heatmaps. Liberation Sans provides the installed Helvetica/Arial-compatible face;
+PDFs embed the resolved fonts (explicit family selection avoids the R
+runtime’s generic Helvetica alias to DejaVu). Direction uses blue (#2166AC) and red
+(#B2182B); study identity uses purple (#6A3D9A) and green (#33A02C).
+Fine borders, restrained horizontal grids and explicit facet labels follow
+the Lena visual reference. The RBP matrices retain Cividis, regional
+organization, study/usage annotation strips and Euclidean/complete-linkage
+row clustering of unsaturated scores. Thirty EX and fifteen IR labels are
+ranked by maximum raw score; color saturates at 8. Missing combinations
+among eligible motifs are displayed as zero, not as independent tests.
+No claim about RBP expression is inferred from motif scores.
+
+The six Matt features were fixed by the reference analysis, not selected
+by current significance. Displayed median differences are divided by the
+background IQR. Individual feature populations are checked against saved
+group sizes and medians. Violins have equal maximum widths and boxplots
+show quartiles/median and 1.5-IQR whiskers. The existing feature-family BH
+correction supplies all q labels; outliers remain in distributions/tests.
+GC profiles retain reference bins (EX 68, IR fine 88) and the 1,500-event
+unselected background; ribbons show event mean ±1.96 SE, not uncertainty
+across animals. Regional motif boxes are descriptive; no inferential
+comparison of preselected motif-score distributions is made.
+
+All figures are 180 mm wide, with vector PDF layouts and 450 dpi PNGs.
+The selected-splicing supplement is row-median centered, ordered by event
+type, effect and ID, and saturated at ±50 pp. The expression supplement
+is gene-mean-centered VST, ordered by log2FC and saturated at ±3. The
+main division-candidate heatmap shows raw PSI on a fixed 0–100% scale.
+Individual values remain in source tables. Samples retain manifest order;
+no sample clustering or unreported sample exclusion is applied.
 
 ## References and author completion
 

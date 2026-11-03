@@ -35,9 +35,19 @@ with their original rendering; their derived paper panels use this palette.
 Previous report figures and checksums are archived under
 `legacy/figures_before_palette_2026-10-17/` and `audit/palette_2026-10-17/`.
 
-The publication assembly reuses these colors with Liberation Sans, 8-point
-base text, 7-point tick/legend text, 9-point panel titles and 12-point panel
-letters at 180 mm figure width. PDFs embed fonts (with glyph fallback where
-needed); PNG exports are 450 dpi. Individual animals remain visible as separate
-points even when measurements coincide. Layout and font settings are in
-`analysis/publication_helpers.R`; earlier analysis reports retain their layouts.
+The publication assembly has a separate, user-requested Lena/RBP style.
+It uses the installed Helvetica/Arial-compatible Liberation Sans face, 8-point base
+text, 7-point ticks/legends, 9-point titles and 12-point panel letters.
+Direction is blue `#2166AC` / red `#B2182B`, background grey `#BDBDBD`;
+study is purple `#6A3D9A` / green `#33A02C`. Controls are grey and SPIRE DKO
+purple. The candidate PSI heatmap uses sequential blue; regional RBP scores
+use reversed Cividis. Labels, facet order and annotation tracks redundantly
+identify categories. Borders and horizontal grids follow the Lena reference.
+
+Style sources read locally: `lena_quantseq/R/go_analysis_publication_plot.R`
+and the q7/q8 plotting scripts at commit
+`7a84859bae1a1399606b5776a2dbed5a81fdf2ec`, plus this repository's
+`analysis/rbp_paper_figures.R`. The publication code has no runtime dependency
+on the Lena repository. Theme and compositions live in
+`analysis/publication_helpers.R` and `analysis/publication_panels.R`.
+Earlier exploratory reports retain their existing palette and layouts.

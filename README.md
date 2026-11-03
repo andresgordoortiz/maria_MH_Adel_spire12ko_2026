@@ -1,12 +1,13 @@
 # Spire1/2 knockout oocytes: RNA expression and splicing
 
 Start with the **[publication package](results/publication/index.html)**:
-two main figures, four supplementary figures, methods, results, legends,
+two main figures, seven supplementary figures, methods, results, legends,
 editable manuscript text and complete supplementary tables S1–S8.
 These outputs are generated locally and intentionally excluded from Git.
 
 The computational result is selective, bidirectional RNA change, including
-division-associated splicing candidates and limited shared FMN2 targets.
+division-associated splicing candidates, shared sequence contexts with FMN2
+and regional RBP motif hypotheses.
 The data do not establish a global molecular phenocopy, a division-pathway
 enrichment or a causal RBP mechanism. Microscopy and functional measurements
 are needed for those parts of the manuscript.
