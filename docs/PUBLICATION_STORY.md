@@ -12,7 +12,7 @@ agreement. There are exactly three shared supplementary figures in total.
 | Are division-related genes affected? | SPIRE 1D: all 127 splicing events in 79 division-annotated genes | Retain every matching event; no favored-gene ranking or claim of pathway enrichment |
 | What does GO rank highest? | SPIRE 2A: standard gene-ratio/count/BH-q dot plot, three top terms per ontology | Transparent ranking without forcing division terms; none passes primary BH |
 | What characterizes affected sequences? | SPIRE 2B,C: EX upstream intron length and IR GC | Distributions and individual measurements, with complete-family Matt q |
-| What regional motif patterns appear? | SPIRE 2D: clustered EX RBP effects | Effects and exact-test BH dots shown separately; hidden dendrogram |
+| What regional motif patterns appear? | SPIRE 2D: clustered EX rMAPS3 P values | Original raw-P scores and ranking; hidden dendrogram; separate exact inference in Table S8 |
 | What does FMN2 show independently? | FMN2 1: counts, PSI, EX flanks and RBP heatmap | Independent controls, replication and detection; no significant motif association promoted |
 | What converges? | Convergence 1: common-universe overlap and effect agreement | Limited shared targeting with weak global directional agreement |
 
@@ -25,15 +25,16 @@ claims. No primary GO term passes BH in either study. The main GO plot ranks
 all terms without requiring a connection to the manuscript; related parent/
 child terms remain visible. Its q values retain the full BP+CC+MF family.
 
-The motif heatmaps restore the regional overview, with row clustering and
-hidden trees. Colors encode log2 presence odds ratios, and dots indicate exact
-regional presence tests corrected across all 5,278 tests per study. Catalogue
-variants and fixed regional windows are unioned before counting each event
-once. PCBP2/EX and PPRC1/Alt5 pass in SPIRE, none in FMN2; the Alt5 result
-remains in the complete table rather than receiving a separate main panel.
-These associations measure sequence context, not RBP expression, binding
-or causal activity. Original asymptotic minimum-window scans remain reference
-outputs; they do not define publication significance.
+The motif heatmaps use the requested native rMAPS3 P values: the minimum
+raw P across searched windows and eligible motif variants in each regional
+profile, displayed as −log10 P with reversed Cividis and saturation at 8.
+The original top-30 EX/top-15 IR ranking is restored independently within
+study. Row clustering is retained and trees are hidden. Colors describe
+raw selected minima, with no BH significance dots or RBP-level discovery
+claim. The separate event-level regional-presence analysis and its complete
+5,278-test BH family remain in Table S8: PCBP2/EX and PPRC1/Alt5 pass in
+SPIRE, none in FMN2. Neither motif display nor sequence association measures
+RBP expression, physical binding or causal activity.
 
 The three supplements are selected for distinct supporting questions:
 

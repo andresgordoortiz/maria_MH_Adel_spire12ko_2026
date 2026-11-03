@@ -66,11 +66,11 @@ BH-adjusted P and point size gives contributing genes. The oocyte project's
 feature scripts were read as visual references only; no source was executed
 or modified there and no runtime dependency was added.
 
-The inference revision supersedes minimum-window motif scores in publication
-figures. Main EX and supplemental IR heatmaps encode continuity-corrected log2
-presence odds ratios with teal (#01665E), neutral white and brown (#8C510A),
-saturated at ±2. Black dots show complete-family BH significance from exact
-regional tests. Direction strips retain blue/red; trees remain hidden.
+The current main EX and supplemental IR RBP heatmaps restore native rMAPS3
+raw P values. Reversed Cividis encodes −log10 minimum raw P on 0–8, with
+values ≥8 saturated and explicitly labelled. Direction strips retain blue/red;
+row clustering remains and trees are hidden. Exact regional-presence tests
+and BH results stay in Table S8, separately from heatmap values.
 The main GO dot plot uses gene ratio on x, point area for gene count and
 purple-to-grey for complete-family BH q on a log scale from 0.05 to 1.
 Its subtitle explicitly states that none of the primary terms passes BH.

@@ -40,8 +40,8 @@ def package(root):
         writer.writeheader()
         writer.writerows(inventory)
     manuscript = [root / 'text' / (name + '.md') for name in ('RESULTS', 'METHODS', 'LEGENDS', 'TABLES')]
-    if not all(path.is_file() for path in manuscript):
-        raise ValueError('Incomplete manuscript text')
+    if not all(path.is_file() for path in [*manuscript, root / 'text/HANDOFF.md']):
+        raise ValueError('Incomplete manuscript text or SPIRE handoff; rerun the R assembly')
     pandoc = shutil.which('pandoc')
     if pandoc:
         for extension in ('docx', 'html'):
@@ -51,6 +51,8 @@ def package(root):
         ('Supplementary_tables.zip', [*root.glob('tables/*.csv'), *root.glob('source_data/*.csv'),
                                       *root.glob('text/*.md'), root / 'sessionInfo.txt']),
         ('Figures.zip', list(root.glob('figures/*'))),
+        ('SPIRE_handoff.zip', [*root.glob('figures/SPIRE_*'), *root.glob('text/*.md'),
+                               *root.glob('Manuscript.*')]),
         ('Figures_Supplementary.zip', list(root.glob('figures/Figure_S*'))),
         *((f'Figures_{group}.zip', list(root.glob(f'figures/{group}_*')))
           for group in ('SPIRE', 'FMN2', 'Convergence')),
@@ -70,8 +72,14 @@ def package(root):
             'a{color:#235887}img{width:100%;height:auto}article{border-top:1px solid #ddd;margin:40px 0;padding-top:22px}'
             '.note{background:#f3f2f5;padding:16px 22px}h1{font-size:30px}h2{font-size:23px}nav{display:flex;gap:18px;flex-wrap:wrap}</style>',
             '<h1>SPIRE loss: expression and splicing</h1>',
+            '<p class="note"><strong>For Marie-Hélène: the two final SPIRE figures, methods, results and legends.</strong> '
+            '<a href="SPIRE_handoff.zip">Download the SPIRE handoff</a> · '
+            '<a href="text/HANDOFF.md">Read first: conclusions, files and suggested email</a>. '
+            'GO detects no significant overrepresentation with the tested-gene background; '
+            'Figure 1 separately shows selected events in division-annotated genes. '
+            'Supplementary figures and the complete tables are available below.</p>',
             '<p class="note">SPIRE: three independent biological replicates per condition. Expression and splicing changes, '
-            'annotated division events and sequence context. FMN2 is presented separately; a compact figure assesses convergence. Regional motif presence uses exact tests and BH; GO uses the tested-gene background.</p>',
+            'annotated division events and sequence context. FMN2 is presented separately; a compact figure assesses convergence. RBP heatmaps show native rMAPS3 raw P values; separate exact regional-presence/BH results are in Table S8. GO uses the tested-gene background.</p>',
             '<nav><a href="Figures.zip">Download all figures</a><a href="Supplementary_tables.zip">Supplementary tables and source data</a>'
             '<a href="text/STORY.md">Why these panels?</a><a href="text/INFERENCE_REVIEW.md">Inference and background audit</a><a href="text/RESULTS.md">Results</a><a href="text/METHODS.md">Methods</a><a href="text/LEGENDS.md">Legends</a></nav>']
     if pandoc:

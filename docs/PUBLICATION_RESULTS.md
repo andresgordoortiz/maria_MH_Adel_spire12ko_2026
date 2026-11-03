@@ -31,6 +31,14 @@ A gene can contribute several events and belong to several GO categories.
 The union has 79 selected genes versus 76.36 expected from its 780
 testable annotated genes, so pooling the categories does not establish enrichment.
 
+Of the 127 division-annotated events, 116 retained the fitted direction
+after every one-sample omission, and 51 retained a raw change of at least
+10 percentage points in that direction after every omission. Forty-three
+showed strict separation of all control and DKO PSI values (Table S4).
+These descriptive checks identify stable candidates within the existing
+selection; they do not supply additional significance tests or independent
+validation.
+
 The standard GO dot plot shows the three top-ranked terms per ontology,
 with gene ratio, contributing genes and complete-family BH q (SPIRE Fig. 2A).
 Top-ranked terms include axon development, microtubule and GTPase regulator
@@ -81,7 +89,7 @@ visible without claiming uniform shifts at every sequence position
 (Fig. S3C,D; GC audit in Table S7).
 
 An exact regional presence analysis identifies two SPIRE motif associations
-after BH across all 5,278 tests (Table S8; EX effects in SPIRE Fig. 2D). PCBP2-labelled
+after BH across all 5,278 tests (Table S8). PCBP2-labelled
 motifs occur in 48/280 increased-use EX events in the upstream-exon 3′
 search region, versus 7,654/89,623 background events (17.14% versus 8.54%;
 q=0.0165). PPRC1-labelled motifs occur in 16/83 increased-use Alt5 events
@@ -91,11 +99,12 @@ variants combined and the regional search fixed before testing.
 
 These are regional sequence associations, with residual event dependence
 and sequence-composition confounding possible. They do not establish RBP
-binding, expression or causal activity. Clustered effects for all displayed
-EX labels are in SPIRE Fig. 2D, and IR labels in Fig. S3A; complete
-regional results remain in Table S8. The original
-minimum-window asymptotic scores remain reference data because sparse
-counts can give optimistic P values; they are not the primary motif test.
+binding, expression or causal activity. The clustered heatmaps separately
+display native rMAPS3 raw P values for EX motifs (SPIRE Fig. 2D) and IR
+motifs (Fig. S3A). These are selected minimum-window/variant P values,
+shown as −log10 P; they do not receive corrected-significance labels.
+Sparse asymptotic counts can give optimistic raw P values, so they are
+distinguished from the exact regional-presence inference in Table S8.
 
 ## FMN2 is presented as an independent comparison dataset
 
@@ -105,9 +114,10 @@ selection criteria. Its event counts and clustered PSI profiles are shown
 separately (FMN2 Fig. 1A,B). Increased-inclusion EX events had longer
 upstream and downstream introns than the FMN2 background (medians 3,311
 versus 1,509 nt and 2,321 versus 1,416 nt; BH-adjusted P=0.00102 and
-0.00219; FMN2 Fig. 1C,D). The regional RBP effects
-are shown in FMN2 Fig. 1E and Fig. S3B; no exact regional motif association
-passes the complete BH family.
+0.00219; FMN2 Fig. 1C,D). Native rMAPS3 motif P-value profiles
+are shown in FMN2 Fig. 1E and Fig. S3B. In the separate exact regional
+presence analysis, no FMN2 association passes the complete BH family
+(Table S8).
 
 The FMN2 IR sample sizes are smaller (29 decreased and 14 increased events
 with Matt measurements). Intron GC was not significantly shifted. Predicted

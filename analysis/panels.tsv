@@ -4,14 +4,14 @@ SPIRE_1B-C	Splicing classes and all 1547 selected PSI profiles	Primary event-lev
 SPIRE_1D	All 127 division-annotated splicing events in 79 genes	Answers the email; each point is an event; annotation does not imply enrichment
 SPIRE_2A	Standard GO gene-ratio dot plot	Top three terms per BP/CC/MF; count size and complete-family BH color; no forced division terms; none significant
 SPIRE_2B-C	EX upstream intron length and IR GC boxes/event points	Interpretable genomic contexts; complete Matt family retained
-SPIRE_2D	EX RBP regional-effect heatmap	Exact regional presence odds ratios; full-family BH dots; clustered rows with hidden tree
+SPIRE_2D	EX rMAPS3 P-value heatmap	Original regional raw P; minus-log10 scale saturated at 8; clustered rows with hidden tree
 FMN2_1A-B	Splicing classes and all 275 selected PSI profiles	Independent study; two biological pools per condition
-FMN2_1C-E	EX intron flank lengths and RBP heatmap	Study-specific background and correction; no significant regional motif association
+FMN2_1C-E	EX intron flank lengths and RBP heatmap	Study-specific feature background/correction; RBP heatmap shows native raw rMAPS3 P
 Convergence_1	Common-universe overlap and raw/shared fitted effects	Limited shared targeting; weak overall directional agreement
 S1A-D	SPIRE expression/PSI PCA, target-exon support and clustered expression	Essential sample QC; target panel is VAST junction support, not expression
 S1E-F	SPIRE/FMN2 leave-one-sample stability	Descriptive raw-PSI checks; no refitting or exclusions
 S2A-D	SPIRE/FMN2 exon number and IR 5-prime splice-site strength	Complementary features; includes nonsignificant results and labelled MaxEnt display limits
-S3A-B	SPIRE/FMN2 IR RBP regional-effect heatmaps	Complements main EX matrices; hidden trees; all tests corrected before display selection
+S3A-B	SPIRE/FMN2 IR rMAPS3 P-value heatmaps	Complements main EX matrices; native raw P and original ranking; hidden trees
 S3C-D	SPIRE/FMN2 IR GC difference from background	Descriptive pointwise event-level uncertainty; independent sequence-level audit in S7
 Tables_S1-S8	Complete results, annotation, families and individual measurements	All features, backgrounds, sensitivities, absolute/EX profiles and nonsignificant tests retained
 Cellular_phenotype	Actin, nucleus, nuclear envelope, chromatin, speckles and division	Requires independent imaging or functional measurements

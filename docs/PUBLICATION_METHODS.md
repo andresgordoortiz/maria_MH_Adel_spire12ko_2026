@@ -147,7 +147,7 @@ correlation of raw mean changes. These event/locus tests are limited by
 within-gene dependence and the independent studies' unequal controls,
 replication and detection opportunities. No factorial interaction is estimated.
 
-## Sequence features and exact regional motif presence
+## Sequence features and motif analyses
 
 Matt 1.3.2, GENCODE M10 and GRCm38 inputs are unchanged. Unselected Matt
 backgrounds are capped at 10,000 events with seed 42. Existing two-sided
@@ -155,10 +155,10 @@ Mann–Whitney tests retain BH across every exported EX/IR feature and all
 three contrasts within study; displayed feature choices do not define a smaller
 correction family. All six reference features remain in the exported measurements. VASTDB transcript consequences remain predictions.
 
-The primary RBP analysis now tests regional motif presence rather than a
-selected minimum window P. The original rMAPS3 asymptotic window tests and
-maps are reference outputs: sparse examples can have strongly optimistic
-P values, which BH alone cannot repair. The new standard-library Python
+The publication heatmaps display the native rMAPS3 regional raw P values.
+A separate regional-presence analysis accompanies them in Table S8, because
+sparse asymptotic window tests can give optimistic P values that BH alone
+cannot repair. The new standard-library Python
 counter reads the validated native FASTA and catalogue: 114 motif variants
 under 91 RBP labels. Variants of an RBP are unioned; each event contributes
 one positive/negative observation for presence in any window of the fixed
@@ -176,9 +176,9 @@ foreground/background event counts are checked against the prepared manifests.
 One-sided exact Fisher/hypergeometric tests compare motif-positive events
 in the selected direction versus its unselected background. BH is applied
 once across all 91 RBPs, 29 regions spanning EX/IR/Alt5/Alt3, and both
-directions: 5,278 tests per study. Main EX heatmaps and supplemental IR
-heatmaps show effects and corrected dots; complete Alt5/Alt3 results remain
-in Table S8, including the passing PPRC1/Alt5 association.
+directions: 5,278 tests per study. Complete exact-test results remain in
+Table S8, including the passing PCBP2/EX and PPRC1/Alt5 associations; they
+are distinct from the native rMAPS3 P values displayed in heatmaps.
 Event correlation, GC/length composition and catalogue specificity remain
 limitations of this sequence-level association analysis. It measures neither
 RBP expression nor binding or causal activity.
@@ -194,13 +194,20 @@ supplementary figures in total: QC/stability, additional features and IR
 sequence context.
 
 The EX RBP heatmaps are main panels and the IR heatmaps are supplemental.
-Thirty EX and fifteen IR labels per
-study are ordered by their smallest regional q, then largest absolute effect
-and label; all tests were corrected before this display selection. Cell
-color shows log2 odds ratio with a 0.5 continuity correction for display,
-saturated at ±2. Dots mark exact regional tests with BH q ≤0.05. Unsaturated
-row effects are standardized for Euclidean/complete-linkage clustering;
-constant rows are centered without division by zero. Trees are hidden.
+The original rMAPS3 panel selection is restored: retain a motif variant
+within study/direction if raw P ≤0.05 in any region, then take the smallest
+native P across eligible variants for each RBP/region/direction. rMAPS3
+regional P values already select their minimum across searched windows.
+Thirty EX and fifteen IR labels per study are ranked by largest −log10 P,
+with label tie breaking. Colors use reversed Cividis on −log10 raw P,
+saturated at 8; numerical zeros use a 1e−300 floor and missing eligible
+profiles use P=1/score=0. Raw P values and unsaturated scores are exported.
+Row-standardized unsaturated scores enter Euclidean/complete-linkage
+clustering; constant rows are centered without division by zero. Trees are
+hidden. There are no significance dots on these raw-P heatmaps. Selection
+and window/variant minimization mean these are not corrected RBP-level
+P values. Exact regional-presence BH results remain a separate table.
+
 Matt boxplots show quartiles/1.5-IQR whiskers and individual selected-event
 measurements with horizontal jitter. Background measurements are summarized
 by boxes; separate outlier symbols are suppressed, with all values retained

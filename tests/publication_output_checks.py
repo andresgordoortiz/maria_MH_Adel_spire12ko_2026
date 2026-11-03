@@ -16,10 +16,18 @@ for row in csv.DictReader((root / 'output_checksums.csv').open()):
     with path.open('rb') as handle:
         assert hashlib.file_digest(handle, 'sha256').hexdigest() == row['sha256'], path
     assert path.stat().st_size == int(row['bytes'])
-for name in ('Supplementary_tables.zip', 'Figures.zip', 'Figures_SPIRE.zip', 'Figures_FMN2.zip', 'Figures_Convergence.zip', 'Figures_Supplementary.zip'):
+for name in ('Supplementary_tables.zip', 'Figures.zip', 'Figures_SPIRE.zip', 'Figures_FMN2.zip', 'Figures_Convergence.zip', 'Figures_Supplementary.zip', 'SPIRE_handoff.zip'):
     with zipfile.ZipFile(root / name) as archive:
         assert archive.testzip() is None
         assert all(not p.startswith('/') and '..' not in Path(p).parts for p in archive.namelist())
+with zipfile.ZipFile(root / 'SPIRE_handoff.zip') as archive:
+    names = set(archive.namelist())
+    assert {name for name in names if name.startswith('figures/')} == {
+        f'figures/SPIRE_Figure_{i}.{ext}' for i in (1, 2) for ext in ('pdf', 'png')}
+    assert {f'text/{name}.md' for name in ('RESULTS', 'METHODS', 'LEGENDS', 'TABLES', 'HANDOFF')} <= names
+    assert all(archive.read(name) == (root / name).read_bytes() for name in names)
+for name in ('RESULTS', 'STORY', 'INFERENCE_REVIEW', 'HANDOFF'):
+    assert (root / f'text/{name}.md').read_bytes() == Path(f'docs/PUBLICATION_{name}.md').read_bytes()
 rows = list(csv.DictReader((root / 'tables/S1_SPIRE_samples.csv').open()))
 assert [r['sample'] for r in rows] == ['SPIRE_Cont_1', 'SPIRE_Cont_2', 'SPIRE_Cont_7',
                                       'SPIRE_DKO_4', 'SPIRE_DKO_5', 'SPIRE_DKO_6']
@@ -39,6 +47,18 @@ rows = list(csv.DictReader((root / 'source_data/SPIRE_division_event_annotations
 assert len({r['EVENT'] for r in rows}) == 127 and len({r['GENE'] for r in rows}) == 79
 assert len({r['GOALL'] for r in rows}) == 4
 assert all(r['GENE'] not in ('Spire1', 'Spire2') for r in rows)
+division = list(csv.DictReader((root / 'tables/S4_division_selected_splicing.csv').open()))
+assert len(division) == 127 and len({r['GENE'] for r in division}) == 79
+assert sum(r['loo_same_direction'] == 'TRUE' for r in division) == 116
+assert sum(float(r['loo_min_signed_pp']) >= 10 for r in division) == 51
+assert sum(r['complete_separation'] == 'TRUE' for r in division) == 43
+native = list(csv.DictReader((root / 'tables/S8_RBP_all_motif_pvalues.csv').open()))
+eligible = {(r['dataset'], r['type'], r['direction'], r['motif']) for r in native if float(r['pvalue']) <= .05}
+native_minima = {}
+for r in native:
+    if (r['dataset'], r['type'], r['direction'], r['motif']) in eligible:
+        key = (r['dataset'], r['type'], r['RBP'], r['direction'], r['region'])
+        native_minima[key] = min(native_minima.get(key, 1), float(r['pvalue']))
 for study, events, samples in [('SPIRE', 1547, 6), ('FMN2', 275, 4)]:
     rows = list(csv.DictReader((root / f'source_data/{study}_clustered_PSI.csv').open()))
     assert len(rows) == events * samples
@@ -50,6 +70,17 @@ for study, events, samples in [('SPIRE', 1547, 6), ('FMN2', 275, 4)]:
         assert len({r['RBP'] for r in rows}) == labels
         assert all(r['position'] == {'up': '1', 'down': '2'}[r['direction']] for r in rows)
         assert {int(r['row']) for r in rows} == set(range(1, labels + 1))
+        ranking = {}
+        for (dataset, event_type, rbp, direction, region), value in native_minima.items():
+            if (dataset, event_type) == (study.lower(), kind):
+                ranking[rbp] = max(ranking.get(rbp, 0), -math.log10(max(value, 1e-300)))
+        expected_labels = sorted(ranking, key=lambda rbp: (-ranking[rbp], rbp))[:labels]
+        assert {r['RBP'] for r in rows} == set(expected_labels)
+        assert all('q_BH' not in r and 'log2_OR' not in r for r in rows)
+        for r in rows:
+            expected_p = native_minima.get((study.lower(), kind, r['RBP'], r['direction'], r['region']), 1)
+            assert math.isclose(float(r['pvalue']), expected_p, rel_tol=1e-12, abs_tol=0)
+            assert math.isclose(float(r['score']), -math.log10(max(expected_p, 1e-300)), rel_tol=1e-12, abs_tol=1e-14)
         rows = list(csv.DictReader((root / f'source_data/{study}_GC_{kind}_profiles.csv').open()))
         assert len(rows) == bins * 3
         rows = list(csv.DictReader((root / f'source_data/{study}_GC_{kind}_difference.csv').open()))
@@ -143,4 +174,4 @@ class Links(HTMLParser):
 
 
 Links().feed((root / 'index.html').read_text())
-print('PASS: output integrity, sample/event labels, feature summaries, all BH families, GO mappings/backgrounds, exact motifs, clustering, GC and gallery links.')
+print('PASS: output integrity, sample/event labels, feature summaries, all BH families, GO mappings/backgrounds, exact motifs, native rMAPS3 heatmap P values, clustering, GC and gallery links.')

@@ -134,11 +134,14 @@ the long exon (16/83 versus 1,530/27,506; q≈0.0337). None pass in FMN2.
 These are regional sequence associations under the stated event-level
 model. Correlated events from a gene, GC/length composition and catalogue
 specificity remain limitations; BH does not fix them. The results do not
-measure protein abundance, binding or causality. Clustered EX effect-size
-heatmaps are in the main figures, with IR heatmaps in S3 and corrected
-significance indicated separately. The complete table retains both supported
-associations, including Alt5, without a separate two-hit main panel. Original
-window scans remain reference data.
+measure protein abundance, binding or causality. At the investigator's request,
+the main EX and supplemental IR heatmaps display the original native rMAPS3
+raw P values rather than these regional odds ratios. The original raw-P ranking
+and reversed Cividis scale are restored; clustering trees stay hidden. Heatmap
+colors are −log10 selected minimum P, saturated at 8, with no BH dots.
+The exact regional-presence analysis remains in Table S8 with its complete
+correction family. The two statistics are labelled separately; native selected
+minima are not presented as corrected RBP-level tests.
 
 ## Sources and interpretation
 

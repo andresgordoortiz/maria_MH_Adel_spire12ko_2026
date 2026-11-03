@@ -193,3 +193,17 @@ The previous package and render proofs are preserved under
 plotted values, archives, local links, embedded fonts and seven final layouts
 are checked before promotion. No upstream fit, alignment or remote push is
 part of this presentation revision.
+
+## rMAPS3 heatmap restoration
+
+At the investigator's request, SPIRE 2D, FMN2 1E and S3A/B again show native
+rMAPS3 regional raw P values. The original variant eligibility, minimum-P
+aggregation and top-30 EX/top-15 IR ranking are restored. Reversed Cividis
+encodes −log10 raw P, saturating at 8. Rows remain clustered with hidden
+trees; exact-test BH dots and odds-ratio colors are removed from heatmaps.
+Legends, results, methods, source matrices, gallery and output checks now
+identify the statistic explicitly. Each displayed P/score and selected RBP
+label is independently checked against the exported native rMAPS3 table.
+The complete exact regional-presence analysis remains in Table S8 unchanged.
+The seven-figure composition and three-supplement limit are unchanged. The
+previous package is preserved in `audit/rmaps_heatmaps_2026-11-03/`.

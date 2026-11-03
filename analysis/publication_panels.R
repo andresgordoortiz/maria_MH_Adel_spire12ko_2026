@@ -172,13 +172,15 @@ feature_distribution <- function(ds, feature, title) {
 }
 
 rbp_heatmap <- function(ds, kind) {
-  df <- motif_tests[motif_tests$dataset == ds & motif_tests$event_type == kind, ]
-  collapsed <- df %>% transmute(RBP, direction, region, score = log2_OR, q_BH)
-  top <- collapsed %>% group_by(RBP) %>% summarise(q = min(q_BH), effect = max(abs(score)), .groups = 'drop') %>%
-    arrange(q, desc(effect), RBP) %>% slice_head(n = if (kind == 'EX') 30 else 15) %>% pull(RBP)
+  all_motifs <- tab('rbp', 'RBP_all_motif_pvalues')
+  df <- rbp_panel_data(all_motifs[all_motifs$dataset == ds, ], kind)
+  collapsed <- df %>% group_by(RBP, direction, region) %>%
+    summarise(pvalue = min(pvalue), score = max(score), .groups = 'drop')
+  top <- collapsed %>% group_by(RBP) %>% summarise(score = max(score), .groups = 'drop') %>%
+    arrange(desc(score), RBP) %>% slice_head(n = if (kind == 'EX') 30 else 15) %>% pull(RBP)
   regions <- rbp_regions(kind)
   h <- expand_grid(RBP = top, direction = c('up', 'down'), region = regions$region) %>%
-    left_join(collapsed, by = c('RBP', 'direction', 'region')) %>% mutate(score = replace_na(score, 0),
+    left_join(collapsed, by = c('RBP', 'direction', 'region')) %>% mutate(score = replace_na(score, 0), pvalue = replace_na(pvalue, 1),
       column = paste(region, direction), position = match(direction, c('up', 'down')))
   columns <- as.vector(t(outer(regions$region, c('up', 'down'), paste)))
   wide <- h %>% dplyr::select(RBP, column, score) %>% pivot_wider(names_from = column, values_from = score)
@@ -186,7 +188,8 @@ rbp_heatmap <- function(ds, kind) {
   deviation <- apply(m, 1, sd); deviation[deviation == 0] <- 1
   tree <- row_clustering((m - rowMeans(m))/deviation)
   h$row <- tree$y[match(h$RBP, rownames(m))]; h$region <- factor(h$region, regions$region)
-  stopifnot(nrow(h) == length(top)*nrow(regions)*2, !anyNA(h$row), !anyNA(h$q_BH))
+  stopifnot(nrow(h) == length(top)*nrow(regions)*2, !anyNA(h$row),
+    all(h$pvalue >= 0 & h$pvalue <= 1), all(abs(h$score + log10(pmax(h$pvalue, 1e-300))) < 1e-12))
   export(h, paste0(toupper(ds), '_RBP_', kind, '_heatmap'), 'source_data')
   export(data.frame(RBP = rownames(m)[tree$order]), paste0(toupper(ds), '_RBP_', kind, '_row_order'), 'source_data')
   ann <- distinct(h, position, region, direction)
@@ -197,7 +200,7 @@ rbp_heatmap <- function(ds, kind) {
     facet_grid(~region, labeller = as_labeller(setNames(labs_region, regions$region))) +
     scale_x_continuous(limits = c(.5, 2.5), expand = c(0, 0)) +
     scale_fill_manual(values = direction_colors, labels = usage_labels, name = NULL) +
-    labs(title = paste(toupper(ds), kind, 'RBP motif effects'), subtitle = 'Regional presence; dot: BH q ≤ 0.05; rows clustered') +
+    labs(title = paste(toupper(ds), kind, 'rMAPS3 motif P values'), subtitle = 'Minimum raw P; rows clustered') +
     theme_void(base_family = 'Liberation Sans', base_size = 7) +
     theme(strip.text = element_text(size = 6.5), panel.spacing.x = grid::unit(.7, 'mm'),
       legend.position = 'top', legend.key.size = grid::unit(2.5, 'mm'),
@@ -206,9 +209,8 @@ rbp_heatmap <- function(ds, kind) {
     facet_grid(~region) + scale_x_continuous(limits = c(.5, 2.5), expand = c(0, 0)) +
     scale_y_continuous(limits = c(.5, length(top)+.5), expand = c(0, 0),
       breaks = tree$y, labels = rownames(m)) +
-    geom_point(data = h[h$q_BH <= .05, ], shape = 16, size = .8) +
-    scale_fill_gradient2(low = '#01665E', mid = '#F7F7F7', high = '#8C510A',
-      limits = c(-2, 2), oob = scales::squish, breaks = c(-2, 0, 2), name = 'log2 motif odds ratio') + labs(x = NULL, y = NULL) + heat_theme +
+    scale_fill_viridis_c(option = 'cividis', direction = -1, limits = c(0, 8), oob = scales::squish,
+      breaks = c(0, 4, 8), labels = c('0', '4', '≥8'), name = '−log10 raw P') + labs(x = NULL, y = NULL) + heat_theme +
     theme(axis.text.x = element_blank(), axis.text.y = element_text(size = 6.5),
       strip.text = element_blank(), strip.background = element_blank(), legend.position = 'right',
       panel.spacing.x = grid::unit(.7, 'mm'), plot.margin = margin(0, 7, 0, 6))
@@ -327,6 +329,6 @@ save_figure(rbp_heatmap('spire', 'IR') + rbp_heatmap('fmn2', 'IR') +
   gc_plot('spire', 'IR', TRUE) + labs(title = 'SPIRE · IR GC profile') +
   gc_plot('fmn2', 'IR', TRUE) + labs(title = 'FMN2 · IR GC profile') +
   plot_layout(design = 'AA\nBB\nCD', heights = c(1.1, 1.1, 1)),
-  'Figure_S3', 'Intron motif effects and GC profiles in SPIRE and FMN2', 230)
+  'Figure_S3', 'Intron rMAPS3 motif P values and GC profiles in SPIRE and FMN2', 230)
 # Reference profiles remain in source tables without additional figures.
 for (ds in names(studies)) { invisible(gc_plot(ds, 'EX')); invisible(gc_plot(ds, 'EX', TRUE)) }

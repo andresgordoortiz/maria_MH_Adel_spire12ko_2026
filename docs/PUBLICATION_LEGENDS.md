@@ -42,16 +42,20 @@ background median. All observations enter tests and summaries. Length uses
 a logarithmic axis. q is BH across all Matt feature tests and contrasts
 within study. These are genomic contexts of affected events, not DNA
 sequence changes; measurements are events, not biological replicates.
-**D**, Regional motif effects for 30 EX RBP labels. Colors show log2
-motif-presence odds ratios with a 0.5 display correction, saturated at ±2;
-dots show one-sided exact regional presence tests with BH q ≤0.05 across
-all 5,278 tests covering 91 RBPs, 29 regions and both directions. Rows are
-selected by smallest q, then largest absolute effect and label, and clustered
-using row-standardized unsaturated effects, Euclidean distance and complete
-linkage. Trees are hidden. Catalogue variants are unioned and each event
-contributes once to a fixed regional search. Direction refers to event use,
-not protein abundance. Sequence association does not establish RBP binding
-or causal activity. All counts and tests, including Alt5/Alt3, are in Table S8.
+**D**, rMAPS3 motif P-value heatmap for 30 EX RBP labels. Colors show
+−log10 of the minimum raw rMAPS3 P value across windows and eligible motif
+variants within each region/direction; colors saturate at 8. A motif variant
+is eligible within study/direction when its raw P ≤0.05 in at least one region,
+following the original rMAPS3 panel selection. Each RBP is ranked by its
+largest score across regions/directions, with label tie breaking; the top
+30 are retained. Rows are clustered on standardized unsaturated scores with
+Euclidean distance and complete linkage; trees are hidden. Scores use a
+1e−300 floor for numerical zeros; missing eligible profiles are shown as
+P=1/score=0. The displayed P values are unadjusted selected minima, not
+BH-adjusted RBP-level tests. Direction refers to event use, not protein
+abundance. Native P values and the separate exact regional-presence analysis
+with its complete BH correction are both retained in Table S8. Motif patterns
+do not establish physical binding or causal RBP activity.
 
 ## FMN2 Figure 1. Independent FMN2 splicing and sequence-context analysis
 
@@ -62,8 +66,9 @@ controls and 3–4 knockout; each biological replicate is a pool of 50 oocytes,
 with technical sequencing runs merged upstream. **C,D**, EX upstream and
 downstream intron lengths, with study-specific background and feature-family
 q values; display conventions follow SPIRE Fig. 2B,C. **E**, Regional EX
-motif effects for 30 RBP labels, with the same ranking, hidden-tree clustering
-and exact-test correction as SPIRE Fig. 2D. No FMN2 motif test passes BH.
+rMAPS3 P values for 30 RBP labels, using the same raw-P display, ranking
+and hidden-tree clustering as SPIRE Fig. 2D. The separate exact regional
+presence tests in Table S8 yield no BH-significant FMN2 association.
 A corresponding FMN2 expression analysis was not supplied here. The studies
 have different controls, replication and tested universes.
 
@@ -111,12 +116,12 @@ report observations outside that view. All values enter summaries and tests;
 negative scores are valid. Small FMN2 IR groups limit interpretation.
 All six reference features and every Matt test remain in Table S7.
 
-## Figure S3. Intron motif effects and background-relative GC profiles
+## Figure S3. Intron rMAPS3 motif P values and background-relative GC profiles
 
-**A,B**, IR regional motif-effect heatmaps for SPIRE and FMN2, respectively,
-with 15 RBP labels per study. Ranking, effect colors, exact tests, complete
-BH correction and hidden-tree row clustering follow SPIRE Fig. 2D.
-No displayed IR test passes BH. **C,D**, SPIRE and FMN2 IR-centered GC
+**A,B**, IR rMAPS3 P-value heatmaps for SPIRE and FMN2, respectively,
+with 15 RBP labels per study. Raw-P selection, −log10 color scale, ranking
+and hidden-tree row clustering follow SPIRE Fig. 2D. These colors do not
+encode odds ratios or adjusted P values. **C,D**, SPIRE and FMN2 IR-centered GC
 profiles after subtracting the corresponding background-bin mean. The 88
 bins scale different physical regions; grey shading marks exonic regions.
 The unselected background is capped at 1,500 events. Ribbons are ±1.96

@@ -426,7 +426,7 @@ overlap_tests <- tab('comparison', 'overlap_enrichment')
 gene_test <- overlap_tests[overlap_tests$unit == 'genes', ]
 target_dge <- tab('spire_review', 'Target_gene_DGE')
 division_non_target <- division_selected[!division_selected$GENE %in% c('Spire1', 'Spire2'), ]
-for (name in c('RESULTS', 'STORY', 'INFERENCE_REVIEW')) {
+for (name in c('RESULTS', 'STORY', 'INFERENCE_REVIEW', 'HANDOFF')) {
   path <- paste0('docs/PUBLICATION_', name, '.md')
   input_files <- union(input_files, path)
   file.copy(path, file.path(out, 'text', paste0(name, '.md')))
@@ -451,7 +451,7 @@ writeLines(c('# Supplementary tables and source data', '',
   '| S6 | Revised primary and reference GO, expression GO, all selection sensitivities, mapping/alias audits, event-opportunity matched tests/nulls, plus original GO objects exported as reference |',
   '| S7 | All Matt feature tests, individual feature measurements, a sequence-level GC audit, and predicted transcript consequences |',
   '| S8 | Primary exact regional RBP-presence counts/tests with full-family BH, plus original motif-window minima and shared-label summaries as reference only |', '',
-  '`source_data/` contains individual plotted measurements, division-event annotations, feature effects, GC profiles and RBP matrices. The expression MA measurements come from S2; counts and effects can be reconstructed from S3/S5; functional and regional sequence panels use S6–S8. Current inference is identified by `q_BH`; original ontology-specific `p.adjust` and minimum-window raw P columns are reference outputs. All source input files and generated table checksums are listed separately.', '',
+  '`source_data/` contains individual plotted measurements, division-event annotations, feature effects, GC profiles and RBP matrices. The expression MA measurements come from S2; counts and effects can be reconstructed from S3/S5; functional and regional sequence panels use S6–S8. Current exact-test inference is identified by `q_BH`; RBP heatmaps instead display native rMAPS3 raw P values from S8_RBP_all_motif_pvalues. Original ontology-specific `p.adjust` remains a reference output. All source input files and generated table checksums are listed separately.', '',
   '## Field definitions', '',
   '- `FDR`, `spire_FDR`, `fmn2_FDR`: upstream betAS empirical per-event FPR, **not** BH-adjusted FDR. `invertedFDR` is 1−FPR. Zero has finite simulation resolution.',
   '- `deltapsi`, `spire_deltapsi`, `fmn2_deltapsi`, `betasPsiA/B`: fractions on 0–1 (signed for delta). Delta is knockout minus respective control. Multiply by 100 for percentage points.',
@@ -466,7 +466,7 @@ writeLines(c('# Supplementary tables and source data', '',
   '- GO `p.adjust`: BH within the corresponding ontology/background/gene-set analysis; `qvalue`: exported q-value; `geneID`: contributing genes. Legacy focused `padj` is the historical four-term reference only. Current GO `q_BH` pools BP+CC+MF in the stated study/background/selection; `family_tests` gives its denominator. GOALL/EVIDENCEALL preserve inherited membership and evidence codes.',
   '- Overlap legacy `p.BH` covers the original seven tests. Primary S5_overlap_inference_BH `q_BH` covers all nine Fisher/direction/matched-gene tests. Permutation `pvalue` is (1+exceedances)/(1+iterations), not zero.',
   '- Matt `group1/group2`: comparison categories; `median1/median2`, `n1/n2`: actual group medians and event counts; `p.BH`: existing feature-family BH correction. Lengths are nucleotides.',
-  '- Primary S8 regional-presence `pvalue` is an exact Fisher/hypergeometric tail; `q_BH` covers all 5278 tests per study. `positive/n` and `background_positive/background_n` are motif-positive/total event counts. `log2_OR` adds 0.5 only for display; tests use integer counts. Original minimum-window `pvalue` fields are reference outputs, not the primary test.',
+  '- Primary S8 regional-presence `pvalue` is an exact Fisher/hypergeometric tail; `q_BH` covers all 5278 tests per study. `positive/n` and `background_positive/background_n` are motif-positive/total event counts. `log2_OR` adds 0.5 only for display; tests use integer counts. Native rMAPS3 minimum-window `pvalue` fields supply the heatmaps; their raw P values are distinct from exact regional-presence tests.',
   '- GO `odds_ratio`, `CI_low/CI_high` are conditional odds ratios and pointwise two-sided 95% exact intervals; they are not simultaneous FDR intervals. The main GO dot plot displays GeneRatio=Count/query_genes, count and complete-family q_BH.',
   '- `centered_PSI`: within-event median-centered PSI; `centered`: within-gene mean-centered VST. Plot saturation does not alter exported values.', ''), file.path(out, 'text/TABLES.md'))
 writeLines(capture.output(sessionInfo()), file.path(out, 'sessionInfo.txt'))
