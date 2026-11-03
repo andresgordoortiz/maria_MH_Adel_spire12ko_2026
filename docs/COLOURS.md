@@ -65,3 +65,12 @@ three ontologies and both backgrounds; grey-to-purple encodes the original
 BH-adjusted P and point size gives contributing genes. The oocyte project's
 feature scripts were read as visual references only; no source was executed
 or modified there and no runtime dependency was added.
+
+The inference revision supersedes minimum-window motif scores in publication
+figures. Supplemental RBP heatmaps now encode continuity-corrected log2
+presence odds ratios with teal (#01665E), neutral white and brown (#8C510A),
+saturated at ±2. Black dots show complete-family BH significance from exact
+regional tests. Direction strips retain blue/red. Main motif bars show
+actual positive-event fractions in background grey and increased-use red.
+The main GO panel uses open grey expected counts and filled purple observed
+counts; q comes from the full tested-background BP+CC+MF family.

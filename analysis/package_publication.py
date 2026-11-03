@@ -18,7 +18,7 @@ def package(root):
     if not (root / 'COMPLETE').is_file():
         raise ValueError('Publication R assembly must complete before packaging')
     figures = list(csv.DictReader((root / 'tables/figure_manifest.csv').open()))
-    if {r['figure'] for r in figures} != {'SPIRE_Figure_1', 'SPIRE_Figure_2', *(f'SPIRE_S{i}' for i in range(1, 7)), 'FMN2_Figure_1', *(f'FMN2_S{i}' for i in range(1, 6)), 'Convergence_Figure_1'}:
+    if {r['figure'] for r in figures} != {'SPIRE_Figure_1', 'SPIRE_Figure_2', *(f'SPIRE_S{i}' for i in range(1, 8)), 'FMN2_Figure_1', *(f'FMN2_S{i}' for i in range(1, 6)), 'Convergence_Figure_1'}:
         raise ValueError('Expected separate SPIRE, FMN2 and convergence figure sets')
     for row in figures:
         for extension in ('pdf', 'png'):
@@ -70,16 +70,16 @@ def package(root):
             '.note{background:#f3f2f5;padding:16px 22px}h1{font-size:30px}h2{font-size:23px}nav{display:flex;gap:18px;flex-wrap:wrap}</style>',
             '<h1>SPIRE loss: expression and splicing</h1>',
             '<p class="note">SPIRE: three independent biological replicates per condition. Expression and splicing changes, '
-            'annotated division events and sequence context. FMN2 is presented separately; a compact figure assesses convergence. Motif evidence is exploratory.</p>',
+            'annotated division events and sequence context. FMN2 is presented separately; a compact figure assesses convergence. Regional motif presence uses exact tests and BH; GO uses the tested-gene background.</p>',
             '<nav><a href="Figures.zip">Download all figures</a><a href="Supplementary_tables.zip">Supplementary tables and source data</a>'
-            '<a href="text/STORY.md">Why these panels?</a><a href="text/RESULTS.md">Results</a><a href="text/METHODS.md">Methods</a><a href="text/LEGENDS.md">Legends</a></nav>']
+            '<a href="text/STORY.md">Why these panels?</a><a href="text/INFERENCE_REVIEW.md">Inference and background audit</a><a href="text/RESULTS.md">Results</a><a href="text/METHODS.md">Methods</a><a href="text/LEGENDS.md">Legends</a></nav>']
     if pandoc:
         page.append('<p><a href="Manuscript.docx">Editable manuscript (Word)</a> · '
                     '<a href="Manuscript.html">Read the manuscript</a></p>')
     page.append('<p>Final-size layouts: 180 mm wide; embedded-font PDFs and 450 dpi PNGs. '
                 'Figure numbering is local to the RNA analysis and can be changed when integrated with microscopy.</p>')
     for group, description in (
-        ('SPIRE', 'Primary manuscript set: two main figures and six supplements.'),
+        ('SPIRE', 'Primary manuscript set: two main figures and seven supplements.'),
         ('FMN2', 'Independent comparison set: one main figure and five supplements.'),
         ('Convergence', 'Common-universe overlap and directional agreement.'),
     ):
@@ -99,7 +99,7 @@ def package(root):
             page.append(f'<li><a href="{escape(row["file"])}">{escape(Path(row["file"]).stem)}</a> '
                         f'({row["rows"]:,} rows)</li>')
     page.append('</ul><p>Experimental methods and the SPIRE data accession still require author completion. '
-                'Per-event betAS FPR and exploratory motif p-values must not be described as multiple-testing FDR.</p></html>')
+                'Splicing FPR/effect selection is descriptive. Primary inferential panels use their documented full BH families.</p></html>')
     (root / 'index.html').write_text('\n'.join(page))
     outputs = sorted(p for p in root.rglob('*') if p.is_file() and p.name not in ('output_checksums.csv', 'PACKAGE_COMPLETE'))
     with (root / 'output_checksums.csv').open('w', newline='') as handle:

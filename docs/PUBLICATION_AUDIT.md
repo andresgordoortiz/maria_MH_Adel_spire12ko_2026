@@ -145,3 +145,30 @@ labels as exclusions by the original 10–500 size filter. Tested-background
 GO remains nonsignificant; full-background results include terms relevant
 to spindle, chromosome segregation and nuclear specks. These results are
 shown together rather than suppressing either background.
+
+## Inference and background audit after scientific review
+
+The current revision supersedes earlier figure selections and raw motif
+interpretations. Direct symbols plus unique-alias rescue raise SPIRE mapping
+to 971/999 non-target selected symbols. The division annotation contains
+127 events/79 names. All original GO tails were independently reproduced
+before rebuilding backgrounds. Testable genes are primary; all GO
+ontologies share a BH family. Term eligibility is fixed by that background
+and reused across full-annotation and event-selection sensitivities. The
+18 event-count-matched question tests are corrected together. Expression GO
+uses the separate DESeq2 universe; no term passes BH.
+
+The new standard-library motif counter unions catalogue variants and the
+fixed native regional search, counting each event once. Explicit-window
+fixtures verify geometry. Exact Fisher tests replace sparse asymptotic
+minimum-window scores as primary evidence. BH covers 5278 tests/study;
+PCBP2/EX and PPRC1/Alt5 pass in SPIRE, none in FMN2. Native scans are
+retained. All complete families are checked independently in Python.
+
+Main GO now shows observed/expected gene counts, and the main motif panel
+shows the two supported regional associations. Full heatmaps, GO,
+background diagnostics and all division events are supplemental. The
+family ledger, complete tests, mapping/alias candidates, null draws and
+FPR calibration diagnostics accompany the package. Previous package and
+review proofs are preserved under `audit/inference_revision_2026-11-03/`.
+No alignment, DESeq2 fit, betAS fit or Matt run was repeated.

@@ -41,6 +41,32 @@ sequence_gc <- function(x) {
   (nchar(clean) - nchar(gsub('[GC]', '', clean))) / nchar(clean)
 }
 
+go_counts <- function(universe, query, sets) {
+  stopifnot(!anyDuplicated(universe), !anyDuplicated(query), all(query %in% universe),
+    length(universe) > length(query), length(query) > 0, !anyDuplicated(names(sets)))
+  sets <- lapply(sets, intersect, universe)
+  n <- lengths(sets); k <- lengths(lapply(sets, intersect, query))
+  data.frame(ID = names(sets), universe_genes = length(universe), query_genes = length(query),
+    background_term_genes = n, Count = k, expected = length(query)*n/length(universe),
+    FoldEnrichment = (k/length(query))/(n/length(universe)),
+    pvalue = phyper(k-1, n, length(universe)-n, length(query), lower.tail = FALSE))
+}
+
+matched_category_counts <- function(selected, membership, degree, iterations = 10000L) {
+  stopifnot(is.logical(selected), is.matrix(membership), is.logical(membership),
+    nrow(membership) == length(selected), length(degree) == length(selected),
+    !anyNA(c(selected, membership, degree)), all(degree >= 1), iterations > 0)
+  strata <- split(seq_along(degree), floor(log2(degree)))
+  set.seed(42)
+  null <- matrix(replicate(iterations, {
+    sampled <- unlist(lapply(strata, function(ix) ix[sample.int(length(ix), sum(selected[ix]))]))
+    colSums(membership[sampled, , drop = FALSE])
+  }), nrow = iterations, ncol = ncol(membership), byrow = TRUE)
+  observed <- colSums(membership[selected, , drop = FALSE])
+  list(summary = data.frame(ID = colnames(membership), observed = observed, expected_matched = colMeans(null),
+    pvalue = (1 + colSums(sweep(null, 2, observed, '>=')))/(iterations+1)), null = null)
+}
+
 # Numeric leaf positions let dendrograms and heatmaps share exactly the same y axis.
 row_clustering <- function(m) {
   stopifnot(is.matrix(m), nrow(m) >= 2, all(is.finite(m)), !anyDuplicated(rownames(m)))

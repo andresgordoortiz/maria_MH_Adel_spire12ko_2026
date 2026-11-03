@@ -20,33 +20,37 @@ predominance of increased intron retention. These selections do not have
 5% multiple-testing FDR control. Clustered event-level PSI profiles show
 the sample heterogeneity within this selected set (SPIRE Fig. 1C).
 
-## Events in division-annotated genes address the manuscript's functional question
+## Affected genes include relevant processes without preferential GO targeting
 
-The manuscript's division question was operationalized using four named GO
-categories: cell division, meiotic cell cycle, spindle organization and
-chromosome segregation. Their membership identified 119 selected splicing
-events in 75 genes after excluding the engineered Spire loci (SPIRE Fig.
-1D; Table S4). Each point represents an exon, retained-intron or alternative
-splice-site event; GO annotation belongs to the host gene. An event can
-appear in more than one category. All matching events are shown, with
-no ranking of favored genes or selection of illustrative extreme profiles.
+The corrected mapping links 127 selected events to 79 named genes in four
+division categories, excluding the engineered loci (SPIRE Fig. S7D; Table S4).
+This adds eight events/four names to the direct-symbol-only annotation through
+unique alias rescue. In the full non-target selection, 971/999 symbols map,
+including 41 rescued aliases; unresolved or ambiguous names remain explicit.
+A gene can contribute several events and belong to several GO categories.
+The union has 79 selected genes versus 76.36 expected from its 780
+testable annotated genes, so pooling the categories does not establish enrichment.
 
-This is functional annotation, not evidence of pathway enrichment or
-impaired division. The four focused overrepresentation tests were
-nonsignificant after BH correction (all adjusted P≈0.597), and broad GO
-enrichment did not persist with the tested-gene background (Tables S4,S6).
-SPIRE Fig. S6 now shows ranked BP, CC and MF terms under both backgrounds,
-and a separate set of nine terms motivated by the manuscript. With the
-full-annotation background, chromosome segregation (BH-adjusted P=0.00160),
-mitotic spindle (2.63×10⁻⁷) and nuclear speck (0.00978) were among the
-significant terms. Their tested-background adjusted P values were approximately
-1.00, 0.476 and 1.00. Thus the relevant annotations are present, while
-robust overrepresentation relative to genes testable in this assay is not
-established. The strongest tested-background BP terms were axon development
-and axonogenesis (both adjusted P=0.0643); these overlapping annotations do
-not demonstrate neuronal phenotypes in oocytes.
-The event list provides directly traceable hypotheses for integration with
-cellular measurements, without establishing isoform function.
+SPIRE Fig. 1D places seven manuscript-relevant GO categories in context,
+showing observed/expected gene counts and complete-family q. Cell division has
+47 selected genes versus 47.38 expected from the tested background;
+chromosome segregation has 36 versus 34.95; nuclear speck has 32 versus
+32.19. Thus these annotations occur among the changes, but their numbers
+are not greater than expected for the assay's accessible genes.
+
+The full-annotation background predicts only 22.67, 15.32 and 15.77 genes,
+respectively, giving apparently strong enrichment. The difference reflects
+background composition, not removal of the observed events. Using identical
+term eligibility and BH across BP/CC/MF, no primary tested-background term
+passes in either study (SPIRE Fig. S6; FMN2 Fig. S5). Matching selected genes
+by testable-event count increases the SPIRE expectations to 52.79, 40.21 and
+34.59; none of the 18 targeted matched tests passes BH (SPIRE Fig. S7).
+Stricter selections yield a few synapse/localization terms in SPIRE, with
+no preferential enrichment of the nine manuscript themes. These are
+sensitivity results, not grounds to change the primary event threshold.
+Expression GO using finite-padj DESeq2 genes as background also yields no
+BH-significant term (Table S6). Functional annotation supports integration
+with the cellular phenotype; these analyses do not establish impaired division.
 
 ## SPIRE events have distinctive sequence contexts and regional motif patterns
 
@@ -73,14 +77,21 @@ profiles make the approximately 2–3 percentage-point SPIRE differences
 visible without claiming uniform shifts at every sequence position
 (SPIRE Fig. S4; GC audit in Table S7).
 
-EX RBP motif profiles provide exploratory regional hypotheses (SPIRE
-Fig. 2C). Rows are selected within SPIRE and clustered by standardized
-regional score patterns; the trees are hidden. The IR
-landscape and motif-score distributions are supplemental (SPIRE Fig. S5).
-Scores are minima over motif variants and windows, not calibrated RBP-level
-p-values, expression measurements or binding assays. Sparse-hit asymptotic
-scores and correlated motifs limit regulator specificity. No causal RBP
-is established.
+An exact regional presence analysis identifies two SPIRE motif associations
+after BH across all 5,278 tests (SPIRE Fig. 2C; Table S8). PCBP2-labelled
+motifs occur in 48/280 increased-use EX events in the upstream-exon 3′
+search region, versus 7,654/89,623 background events (17.14% versus 8.54%;
+q=0.0165). PPRC1-labelled motifs occur in 16/83 increased-use Alt5 events
+in the intron after the long exon, versus 1,530/27,506 background events
+(19.28% versus 5.56%; q=0.0337). Each event is counted once, with catalogue
+variants combined and the regional search fixed before testing.
+
+These are regional sequence associations, with residual event dependence
+and sequence-composition confounding possible. They do not establish RBP
+binding, expression or causal activity. Clustered effects for all displayed
+EX/IR labels and full-region summaries are in SPIRE Fig. S5. The original
+minimum-window asymptotic scores remain reference data because sparse
+counts can give optimistic P values; they are not the primary motif test.
 
 ## FMN2 is presented as an independent comparison dataset
 
@@ -90,8 +101,9 @@ selection criteria. Its event counts and clustered PSI profiles are shown
 separately (FMN2 Fig. 1A,B). Increased-inclusion EX events had longer
 upstream and downstream introns than the FMN2 background (medians 3,311
 versus 1,509 nt and 2,321 versus 1,416 nt; BH-adjusted P=0.00102 and
-0.00219; FMN2 Fig. 1C,D). The EX motif landscape is ranked and clustered
-within FMN2 (FMN2 Fig. 1E).
+0.00219; FMN2 Fig. 1C,D). The regional RBP effects
+are shown separately in FMN2 Fig. S4; no exact regional motif association
+passes the complete BH family.
 
 The FMN2 IR sample sizes are smaller (29 decreased and 14 increased events
 with Matt measurements). Intron GC was not significantly shifted. Predicted
@@ -105,18 +117,18 @@ in calculations and source tables. Across the six features, boxplots and
 individual selected-event points make the population spread and small
 FMN2 IR sets visible without density smoothing.
 
-FMN2 Fig. S5 presents its GO results separately. Full-background terms
-included nuclear speck (BH-adjusted P=0.0171) and actin binding (0.00845);
-tested-background values were 0.999 and 0.403. No BP, CC or MF term retained
-BH-adjusted P ≤0.05 with the FMN2 tested-gene background.
+FMN2 Fig. S5 presents its GO results with the same mapping, engineered-locus
+exclusion and fixed-family rules. No primary BP/CC/MF term passes pooled
+BH with its tested-gene background. Whole-annotation and sensitivity
+results remain visible as reference comparisons.
 
 ## Convergence is limited to selected targets and sequence contexts
 
 Within 48,323 common tested events in 4,229 genes, SPIRE selected 98 events
 and FMN2 selected 263. Eleven events and 22 genes were shared (Convergence
 Fig. 1A). Gene overlap exceeded a uniform expectation (3.44; one-sided
-Fisher P=6.22×10⁻¹³) and an event-count-stratified permutation expectation
-(4.77; Monte Carlo P≈0.00010; Table S5). Seven shared events had concordant
+Fisher q≈5.60×10⁻¹²) and an event-count-stratified permutation expectation
+(4.77; Monte Carlo q≈0.00015; Table S5; BH across all nine overlap/direction tests). Seven shared events had concordant
 fitted effects and four had opposing effects. Across all common events,
 raw changes had Spearman correlation 0.0065 (Convergence Fig. 1B,C).
 

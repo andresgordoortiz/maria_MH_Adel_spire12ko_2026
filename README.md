@@ -1,17 +1,19 @@
 # Spire1/2 knockout oocytes: RNA expression and splicing
 
 Start with the **[publication package](results/publication/index.html)**:
-two SPIRE main figures and six supplements, a separate FMN2 main figure
+two SPIRE main figures and seven supplements, a separate FMN2 main figure
 and five supplements, and a compact convergence figure. The package includes
 methods, results, legends, editable manuscript text and supplementary tables
 S1–S8. Outputs are local and intentionally excluded from Git.
 
 The [figure-selection rationale](docs/PUBLICATION_STORY.md) explains the
 main/supplement boundary. SPIRE expression/splicing is the primary story;
-all 119 selected events in division-annotated genes are shown without a
-favored-gene ranking. Sequence context and exploratory motifs provide a
-second layer. FMN2 is presented independently because study design and
-responses differ. Shared targets do not establish global molecular phenocopy.
+main GO panels compare observed with expected gene counts; all 127 mapped
+division events are supplemental. Sequence contexts and two exact, BH-supported
+regional motif associations provide a second layer. FMN2 is presented independently because study design and
+responses differ. Shared targets do not establish global molecular phenocopy. The
+[inference/background audit](docs/PUBLICATION_INFERENCE_REVIEW.md) explains
+the primary tested-gene background, alias rescue and complete BH families.
 
 SPIRE uses the original FASTQ groups: **Cont_1/2/7 versus DKO_4/5/6**, with
 three independent biological replicates per condition (investigator-confirmed). Historical
@@ -24,6 +26,9 @@ false-positive rate, not a multiple-testing-adjusted FDR.
 With the completed input analyses and the existing isolated R environment:
 
 ```bash
+# Reuse a completed presence report; archive it before recomputing.
+python3 -B tests/regional_motif_checks.py
+python3 -B analysis/regional_motifs.py reports/regional_motif_presence
 bash scripts/run_local_R.sh tests/publication_checks.R
 bash scripts/run_local_R.sh analysis/publication.R results/publication
 python3 analysis/package_publication.py results/publication

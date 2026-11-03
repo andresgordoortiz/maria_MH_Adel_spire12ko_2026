@@ -14,37 +14,33 @@ control. **C**, Every selected splicing event, with row-median-centered
 PSI, Euclidean/complete-linkage row clustering and a visible dendrogram.
 Colors saturate at ±50 pp. Columns retain manifest order; replicate 1–3
 are controls (original IDs 1/2/7), 4–6 DKO (IDs 4/5/6). Each is an independent
-biological replicate. **D**, All selected events in genes annotated to four
-named division GO categories, excluding engineered Spire loci. Each point
-is a splicing event, not a gene-expression measurement. An event may
-appear in multiple categories; event/gene counts are per category. Small
-vertical jitter separates points without changing fitted effects. The
-union comprises 119 events in 75 genes. Gene annotation does not establish
-pathway enrichment or an isoform's function. Tables S2–S4 retain every
-measurement, event ID and event-to-gene-to-GO assignment.
+biological replicate. **D**, Compact GO context for seven processes raised
+by the manuscript. Each point describes genes hosting selected splicing
+events, after direct/unique-alias mapping and exclusion of engineered loci.
+Filled points show observed gene counts; open points show tested-background
+expectations. Connecting lines show their differences. Labels give genes and q from
+BH across the full tested-background BP/CC/MF family. q tests overrepresentation. No displayed category passes
+BH. All 127 division-annotated events in 79 named genes appear in S7D.
 
-## SPIRE Figure 2. Sequence context and regional RBP motif enrichment
+## SPIRE Figure 2. Sequence contexts and two regional motif associations
 
-**A**, Upstream intron length for selected EX events and the unselected
-Matt background. **B**, Whole-intron GC for IR events. Boxes show
-quartiles and 1.5-IQR whiskers; individual selected events are points with
-horizontal jitter only. Background events are summarized by their box;
-separate outlier symbols are suppressed. White points are raw-scale medians;
-the dotted line marks the background median. All finite measurements enter
-summaries and tests; length uses a logarithmic axis. Down/Up denote decreased/increased exon inclusion or
-intron retention. Labels give existing feature-family BH-adjusted P (q)
-against background; events are not biological replicates. These are genomic
-features of affected events, not changes to DNA sequence after knockout.
-**C**, Top 30 EX RBP labels within SPIRE, ranked by maximum raw motif score.
-Columns proceed through the annotated regions, increased then decreased
-usage within each region. Cells are the maximum −log10 raw window P over
-eligible motif variants; eligibility requires P ≤0.05 somewhere in that
-study/direction. Absent combinations display zero. Rows use Euclidean/complete-linkage clustering of row-standardized
-unsaturated score profiles; the tree is hidden. Cell colors retain raw
-scores and saturate at 8. Regions are schematic,
-not nucleotide-scaled. Searching variants/windows and sparse-hit asymptotic
-tests make these scores exploratory. They do not measure RBP expression,
-binding or causality. Tables S7–S8 retain complete results.
+**A**, EX upstream intron length. **B**, IR whole-intron GC. Boxes show
+quartiles/1.5-IQR whiskers; points are individual selected events with
+horizontal jitter. Background events are summarized by boxes; separate
+outlier symbols are suppressed. White points give raw medians; the dotted
+line gives the background median. All observations enter tests and summaries.
+Length uses a logarithmic axis. q is BH across all Matt feature tests and
+contrasts in that study. Measurements are events, not biological replicates.
+These are genomic contexts of affected events, not changes in DNA sequence.
+**C**, The two regional motif-presence tests passing BH in SPIRE. Bars show
+the fraction of events positive for any catalogue variant of the RBP in the
+fixed regional search; labels give positive/total events. PCBP2 uses EX
+upstream-exon 3′ regions; PPRC1 uses the Alt5 intron after the long exon.
+The one-sided exact presence tests are corrected across 5,278 RBP/region/
+direction tests covering all four event types. Neither a window nor a
+variant is selected by P. Regional sequence association does not establish
+RBP abundance, physical binding or causal activity. Full counts, geometry,
+tests and clustered effect profiles accompany Table S8 and Fig. S5.
 
 ## SPIRE Figure S1. RNA quality control and targeted-locus support
 
@@ -94,33 +90,53 @@ sequence and agreed with Matt to tolerance 1e−12. Whole-intron distributions
 and scaled positional bins are different summaries; Table S7 records the
 sequence audit and profile-subset membership.
 
-## SPIRE Figure S5. Intron RBP landscape and regional motif distributions
+## SPIRE Figure S5. Regional RBP effects and complete-family correction
 
-**A**, Top 15 IR RBP labels using the within-study selection and clustering
-rules of SPIRE Fig. 2C. **B,C**, EX and IR motif-score distributions across
-the named exon/intron regions in heatmap order, with angled axis labels. Boxes show median/quartiles and
-1.5-IQR whiskers, with outliers retained as points. The dotted line marks
-raw P=0.05. Motif variants and regions are correlated and are not biological
-replicates; no tests between the preselected score distributions are inferred.
+**A,B**, EX and IR effect heatmaps for 30 and 15 RBP labels, respectively.
+Rows are chosen by their smallest complete-family q, then largest absolute
+effect and label. Colors show log2 motif-presence odds ratios with a 0.5
+continuity correction for display, saturated at ±2. Dots mark exact regional
+presence tests with BH q ≤0.05. Clustering uses row-standardized unsaturated
+effects and Euclidean/complete linkage; trees are hidden. **C,D**, Effect
+summaries across all 91 RBP labels in the named EX and IR regions. Boxes
+show median/quartiles, 1.5-IQR whiskers and outliers; the dotted line is zero.
+These descriptive distributions receive no additional between-group tests.
+Axes use the anatomical region names at 50°. Up/down refers to event use,
+not protein abundance. Complete tests and positive/total counts are in S8.
 
-## SPIRE Figure S6. GO ontologies and processes raised in the manuscript
+## SPIRE Figure S6. GO ontologies under two reference backgrounds
 
-**A**, Union of the three smallest raw-P GO terms in each ontology and
-background for genes with selected splicing events. BP, CC and MF are
-shown separately; terms are selected by rank, including nonsignificant
-results. Related parent/child terms are retained. **B**, Nine explicit
-terms motivated by division, actin, nuclear-envelope, chromatin, speckle
-and splicing questions in the email. Each panel compares the tested-gene
-and full-annotation backgrounds. The x axis is observed/expected gene
-enrichment, point size is contributing genes, and color gives the original
-ontology/background-specific BH-adjusted P. Grey points can have large
-enrichment with nonsignificant adjusted P. “Not tested” means the term
-falls outside the 10–500 background-gene size filter; no P is imputed.
-All SPIRE tested-background terms have adjusted P >0.05. Gene annotation
-does not measure the corresponding cellular phenotype. The GO analysis
-retains engineered loci and uses Entrez mapping, so counts differ slightly
-from the event-level panel that excludes Spire1/2. Source data include
-GO IDs, gene lists, ranks, exact P values and background-term sizes.
+**A**, Union of the top three raw-P terms per ontology/background; all
+terms were tested before display selection. **B**, Nine explicit terms
+motivated by division, actin, nuclear envelope, chromatin, speckles and
+splicing. Columns compare the primary tested-gene and full-annotation
+backgrounds using exactly the same eligible term list, fixed by 10–500
+primary-background genes. BP, CC and MF are faceted. The x axis is observed/
+expected gene enrichment, size gives contributing genes, and color gives
+BH-adjusted P pooled across all three ontologies. Related parent/child
+terms are retained. Engineered loci are excluded; aliases are rescued only
+when unambiguous. No primary tested-background term passes BH. Full-annotation
+results are sensitivity/reference evidence, not a substitute primary result.
+
+## SPIRE Figure S7. Why annotation counts and GO enrichment differ
+
+**A**, Proportion of non-engineered named genes with a selected event,
+grouped by number of testable events. The 128+ group combines higher bins
+for display only; null matching retains log2 strata. **B**, Observed selected
+gene counts versus three expectations: all ontology-annotated genes, tested
+genes, or tested genes matched for event-count opportunity. Matching uses
+10,000 allocations with fixed selected counts per stratum; all 18 question-
+driven study/term tests receive BH correction together. **C**, Observed/
+expected ratios, selected gene counts and full-family q across the original,
+omission ≥10 pp and complete raw-PSI-separation selections. The same GO
+family is retained; the primary selection does not change. Colors saturate
+at 0–2. **D**, All 127 selected events in 79 named genes linked to four
+division GO categories by resolved Entrez mapping. Each point is an event;
+a gene may have several events, and one event may appear in several rows.
+There are 207 category memberships. Counts are 77/47 for cell division,
+42/26 for meiotic cell cycle, 29/17 for spindle organization and 59/36 for
+chromosome segregation (events/genes). Jitter changes only vertical position.
+Neither these annotations nor GO tests measure an impaired cellular process.
 
 ## FMN2 Figure 1. Independent FMN2 splicing and sequence-context analysis
 
@@ -130,8 +146,7 @@ Euclidean/complete-linkage dendrogram. Replicates 1–2 are Fmn2 heterozygous
 controls and 3–4 knockout; each biological replicate is a pool of 50 oocytes,
 with technical sequencing runs merged upstream. **C,D**, Boxplots and individual selected measurements of EX
 upstream/downstream intron lengths, with study-specific background and
-feature-family q values. **E**, Top 30 EX RBP labels selected and clustered
-within FMN2, following SPIRE Fig. 2C. There is no gene-expression panel
+feature-family q values. There is no gene-expression panel
 because a corresponding FMN2 expression analysis was not supplied here.
 The experiments have different controls, replication and tested universes.
 
@@ -156,19 +171,21 @@ computed independently within FMN2. Wider event-level ribbons reflect its
 smaller selected sets. These plots do not establish the SPIRE GC association
 in FMN2. Sequence-level checks and subset summaries accompany Table S7.
 
-## FMN2 Figure S4. Intron motifs and regional score distributions
+## FMN2 Figure S4. Regional RBP effects and correction
 
-**A**, Top 15 IR labels ranked and clustered within FMN2. **B,C**, EX and IR
-regional motif-score distributions. Selection, clustered row order with hidden tree, saturation and
-statistical interpretation follow SPIRE Fig. S5.
+**A–D**, EX/IR regional effect heatmaps and regional effect distributions,
+using the same complete-family exact presence tests and display rules as
+SPIRE Fig. S5. No FMN2 test passes BH across all 5,278 comparisons. Trees
+remain hidden; named regions are angled in C,D. Original minimum-window
+asymptotic maps are reference outputs rather than this figure's test.
 
 ## FMN2 Figure S5. GO ontologies and manuscript processes
 
 **A,B**, Top-ranked GO terms and the same nine question-driven terms,
 using the rules and visual encodings of SPIRE Fig. S6. Each result is
 computed within FMN2's own tested or full-annotation background. No
-FMN2 tested-background term has BH-adjusted P ≤0.05. Missing full-background
-tests are labelled explicitly rather than treated as nonsignificant.
+FMN2 primary tested-background term has BH-adjusted P ≤0.05. Identical
+primary-background eligibility is used in both columns and all sensitivities.
 
 ## Convergence Figure 1. Shared targeting and directional concordance
 
@@ -179,8 +196,8 @@ a shared gene may contain different selected events in each study.
 counts per bin. Symbols mark the 11 shared selected events by concordance
 of fitted effects. **C**, Fitted effects of those 11 events; circles denote
 SPIRE and triangles FMN2. Lines connect estimates, not uncertainty bounds.
-Seven events are concordant and four opposing (exploratory sign-test
-P=0.549); global raw-change Spearman correlation is 0.0065. Table S5 includes
+Seven events are concordant and four opposing (direction-test q≈0.706
+in the nine-test overlap family); global raw-change Spearman correlation is 0.0065. Table S5 includes
 individual sample PSI, complete overlaps and event-count-stratified gene
 overlap sensitivity. Shared targeting does not establish an identical
 splicing program or a global molecular phenocopy.

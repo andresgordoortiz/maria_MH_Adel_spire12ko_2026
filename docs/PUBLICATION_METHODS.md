@@ -85,139 +85,139 @@ variance ≥25 percentage-points squared, one highest-variance event per
 named gene (event-ID tie break), excluding Spire1/2, then centered,
 unscaled PCA. It does not depend on historical sample matching.
 
-## Functional interpretation and study comparison
+## Functional annotation, GO and correction families
 
-Division relevance was defined by membership in GO:0051301 (cell division),
-GO:0051321 (meiotic cell cycle), GO:0007051 (spindle organization) or
-GO:0007059 (chromosome segregation), including inherited GOALL membership
-in the pinned mouse OrgDb. Evidence codes and all matching genes were
-exported. All selected events in genes annotated to these categories are
-shown, excluding the engineered Spire1/2 loci. No top-gene ranking or
-extreme-profile selection is used. The units are splicing events; one gene
-can contain multiple events and one event can belong to multiple categories.
-Four targeted one-sided Fisher
-tests used all tested named SPIRE genes as background, with BH adjustment
-across these four tests. GO membership is not evidence that an isoform
-change impairs division.
+The primary functional analysis uses all testable genes, not the full
+annotation catalogue. Original GO objects and raw tests were independently
+reproduced before revising the inference. Input gene symbols were resolved
+in the pinned org.Mm.eg.db by direct SYMBOL mapping, then by ALIAS only when
+the alias resolved to exactly one Entrez ID. Ambiguous mappings were excluded;
+candidate aliases, unresolved names and mapping routes are exported. Entrez
+IDs were deduplicated. Engineered Spire1/2 loci were excluded from functional
+queries and backgrounds. The event-level annotation retains the original
+input gene name linked to its resolved Entrez ID and inherited GOALL evidence.
 
-The existing clusterProfiler enrichGO results were retained, using mouse
-org.Mm.eg.db, BH adjustment, p/adjusted-p cutoffs 0.05, q cutoff 0.2 and
-gene-set sizes 10–500. Both the full OrgDb and tested-N10 backgrounds were
-reported; comparison analyses use a common tested Entrez background.
-All tested-term results, including nonsignificant terms, accompany the
-selected results. Study-specific GO figures show the union of the three
-smallest raw P values per ontology and background, with deterministic GO-ID
-tie breaking. This rank-based display includes nonsignificant terms and
-retains related parent/child terms; it is not a new significance test.
-A separate panel shows nine question-driven terms: division, meiotic cycle,
-chromosome segregation, spindle organization, actin cytoskeleton organization,
-nuclear envelope, chromatin remodeling, nuclear speck and RNA splicing.
-Both panels facet BP/CC/MF and compare the tested-gene and full-annotation
-backgrounds. Point size gives contributing genes, x is observed/expected
-gene enrichment, and color gives the original ontology-specific BH-adjusted
-P. A term absent from the saved tests is labelled “Not tested”; its
-background gene-set size is exported and checked against the 10–500 filter.
-GO panels concern genes with selected splicing events, not DESeq2-selected
-genes. The retained GO analysis includes the engineered loci and uses
-Entrez mapping, whereas the event-level division panel excludes Spire1/2;
-these two gene counts need not match. Package versions and annotation
-metadata are exported.
+For each study and ontology, the primary universe is the set of resolved,
+N10-testable Entrez genes annotated in that ontology. Term eligibility is
+10–500 genes in this primary universe. Exactly the same term list is reused
+for the full-annotation background and for both stricter selections: events
+retaining a raw change ≥10 pp after every sample omission, and events with
+strict raw-PSI group separation. The original event selection remains primary.
+One-sided hypergeometric/Fisher tails test overrepresentation. BH adjustment
+pools BP, CC and MF within each study/background/selection analysis, including
+zero-overlap terms. No correction is restricted to the terms chosen for a
+figure. Full-annotation comparisons are reference diagnostics.
 
-Cross-study analysis required matching event IDs and gene/coordinate/event
-annotations and used only the common tested universe. Shared gene
-targeting, shared events and concordant fitted effects were distinguished.
-Uniform event/locus/gene overlap used one-sided Fisher tests; the existing
-seven reported overlap tests have a separate BH correction. Direction
-agreement used an exploratory two-sided binomial test against 0.5.
-Global similarity was described by Spearman correlation of raw mean PSI
-differences across all common events. An additional gene-level sensitivity
-analysis fixed SPIRE membership and permuted FMN2 selection within strata
-defined by floor(log2(common tested events per gene)), preserving the
-FMN2 selected count in each stratum. With 10,000 permutations and seed 42,
-the upper-tail Monte Carlo P was (1 + exceedances)/(10,001). This controls
-coarsely for event-count opportunity, not all gene-length, expression or
-coverage biases. Dependent events limit the binomial and event-level tests.
+The compact main panel shows seven question-driven GO terms, with
+observed gene counts, their tested-background expectations,
+and q from the complete primary GO family. q tests overrepresentation;
+odds ratios and pointwise exact intervals remain in the source tables.
+The supplemental ontology panel shows the union of the three smallest raw-P terms per ontology and
+background, with GO-ID tie breaking. Nine additional terms motivated by the
+email are displayed separately. These are post-analysis editorial selections,
+not preregistered pathway hypotheses. Related ontology terms are retained.
+The original four-term-only adjusted P values are archived as legacy reference;
+current inference uses the complete pooled GO family.
 
-## Exploratory annotations and presentation
+A second sensitivity test preserves the selected-gene count within strata
+floor(log2(number of testable events per gene)). Ten thousand gene allocations
+(seed 42) supply expected counts and upper-tail Monte Carlo P=(1+exceedances)/
+10,001 for all nine terms in each study. BH corrects these 18 tests together.
+This controls event-count opportunity, with remaining coverage, expression,
+gene-length and annotation biases possible. Mapping, event opportunities,
+observed/expected counts, null draws and all selection sensitivities are exported.
 
-Sequence features came from the pinned Matt 1.3.2 container, GENCODE M10
-and GRCm38; unselected backgrounds were capped at 10,000 with seed 42.
-Existing two-sided Mann–Whitney tests and their BH correction across the
-exported feature-test family were retained. Length ratios compare genomic
-features of selected and unselected events, not changes in intron length.
-VASTDB PROT_IMPACT v3 supplies predicted transcript consequences; it does
-not establish protein depletion. rMAPS3 scans used the corrected window
-counter, 114 motifs under 91 RBP labels, and directional Mann–Whitney
-window tests. Shared labels required raw P ≤0.05 in the same region and
-direction in each study. The displayed RBP/region score is the strongest raw window P across
-eligible motif variants. That selected minimum is not a calibrated
-RBP-level P value: the search spans many overlapping windows and related
-motifs without correction for this final selection. This is the statistical
-reason for describing the RBP findings as exploratory. Sparse-count
-asymptotic P values can also be optimistic. Motif enrichment is measured;
-RBP abundance, binding and causal activity are not measured here.
+Expression GO is a distinct analysis: BH-selected DESeq2 genes versus genes
+with finite DESeq2 padj, with the same mapping/exclusion rules, 10–500 term
+sizes and one BH family across BP/CC/MF. No expression term is promoted from
+its nominal P value. Descriptive PCA, heatmaps, counts and sequence profiles
+are not treated as new hypothesis tests. Table S1 records every inferential
+family and size. Full details and rationale accompany INFERENCE_REVIEW.md.
 
-Figures were composed in R/ggplot2/patchwork using the requested hybrid
-of Lena QuantSeq styling and the reference RBP heatmaps. Liberation Sans provides the installed Helvetica/Arial-compatible face;
-PDFs embed the resolved fonts (explicit family selection avoids the R
-runtime’s generic Helvetica alias to DejaVu). Direction uses blue (#2166AC) and red
-(#B2182B); study identity uses purple (#6A3D9A) and green (#33A02C).
-Fine borders, restrained horizontal grids and explicit facet labels follow
-the Lena visual reference. The RBP matrices retain Cividis and regional usage annotation strips.
-Thirty EX and fifteen IR labels are selected independently within each
-study by maximum raw score across eligible motifs, directions and regions.
-Motif eligibility requires raw P ≤0.05 somewhere within study/direction.
-Each label/region/direction cell retains the maximum −log10 raw P across
-eligible variants; absent combinations are displayed as zero. Unsaturated
-row profiles are standardized to mean zero and unit SD for Euclidean,
-complete-linkage clustering; constant rows are centered without division
-by zero. The clustered ordering is retained with the dendrogram hidden, while
-cell colors show unscaled scores saturated at 8. This separates regional profile similarity from
-absolute score magnitude. No RBP expression or binding is inferred.
+## Cross-study comparison
 
-The six reference Matt features are all retained in study-specific
-supplements. Main sequence panels focus on directly interpretable
-associations: SPIRE EX upstream-intron length and IR whole-intron GC;
-FMN2 EX upstream/downstream-intron lengths. This editorial selection is
-post-analysis, not a new hypothesis-testing family. Annotation-dependent
-co-occurrence counts and all other feature tests remain in Table S7.
-Three candidate displays were compared locally: boxplots with individual
-events, violins with boxes/events, and median/50%/90% intervals. Boxplots
-with individual selected-event points were chosen because they expose
-population overlap without kernel smoothing, including FMN2's small IR
-sets. All selected finite measurements are shown with horizontal jitter
-only; background events are summarized by a box. Boxes show quartiles and
-1.5-IQR whiskers, with separate outlier symbols suppressed; all observations
-remain in calculations. White points mark raw-scale medians; a dotted
-horizontal line marks the background median. Length/number axes are
-logarithmic; GC is percent. Group sizes and medians are checked against the
-saved tests; all six plotted summaries are exported. Feature-family
-BH-adjusted P values are labelled q. MaxEnt uses a −2 to 12 display window,
-with outside-view counts reported on the plot and in source data. All
-values contribute to summaries and tests; negative scores are retained.
+Only identically annotated common tested events are compared. Shared genes,
+shared events and concordant directions are distinguished. The seven existing
+one-sided Fisher overlap tests, a two-sided binomial direction test and an
+event-count-stratified gene-overlap permutation test form one nine-test BH
+family. The matched overlap uses floor(log2(common tested events per gene)),
+10,000 permutations and seed 42. Global similarity is described by Spearman
+correlation of raw mean changes. These event/locus tests are limited by
+within-gene dependence and the independent studies' unequal controls,
+replication and detection opportunities. No factorial interaction is estimated.
 
-Whole-intron GC was recalculated as (G+C)/(A+C+G+T) from each Matt
-SEQ_INTRON and checked against INTRON_GCC at tolerance 1e−12. The audit
-exports each event, its GC values and membership in the spatial-profile
-subset. GC profiles retain reference bins (EX 68, IR fine 88) and the
-1,500-event unselected background. Absolute plots and difference-from-
-background plots are shown separately for each study. For each bin,
-ΔGC is the selected-group mean minus background mean, and descriptive SE
-is sqrt(SE_selected² + SE_background²). Ribbons are ±1.96 SE across
-events, not biological-replicate uncertainty or multiplicity-adjusted
-positional tests. Whole-intron GC and scaled local bins are different
-summaries. Regional motif boxes are descriptive only; their axes use anatomical
-region names with angled labels, matching the region mapping in the heatmaps.
+## Sequence features and exact regional motif presence
 
-All figures are 180 mm wide, with vector PDF layouts and 450 dpi PNGs.
-Every selected PSI row is retained and centered on its sample median,
-then clustered using Euclidean distance and complete linkage. The
-splicing heatmaps show dendrograms and saturate at ±50 pp. The expression
-supplement is gene-mean-centered VST, clustered with the same distance
-and linkage, and saturated at ±3. Sample columns retain manifest order;
-no sample clustering or unreported exclusion is applied. Row orders and
-individual measurements are exported. Main figure sets are separate for
-SPIRE and FMN2, with a compact common-universe convergence figure.
+Matt 1.3.2, GENCODE M10 and GRCm38 inputs are unchanged. Unselected Matt
+backgrounds are capped at 10,000 events with seed 42. Existing two-sided
+Mann–Whitney tests retain BH across every exported EX/IR feature and all
+three contrasts within study; the six displayed features do not define a
+smaller correction family. VASTDB transcript consequences remain predictions.
+
+The primary RBP analysis now tests regional motif presence rather than a
+selected minimum window P. The original rMAPS3 asymptotic window tests and
+maps are reference outputs: sparse examples can have strongly optimistic
+P values, which BH alone cannot repair. The new standard-library Python
+counter reads the validated native FASTA and catalogue: 114 motif variants
+under 91 RBP labels. Variants of an RBP are unioned; each event contributes
+one positive/negative observation for presence in any window of the fixed
+regional search. No P value is used to select a variant or window.
+
+Search geometry matches the existing rMAPS grids: 50-nt windows, 1-nt steps,
+50 exon or 250 intron positions; IR body positions are scaled as in the
+validated native counter. A fully contained motif occurrence, including overlapping occurrences,
+must occur in at least one searched window. Non-scaled grid unions span 99 or 299 nt, subject to source
+sequence length; scaled intron windows can have gaps in long introns.
+Synthetic tests compare membership with every explicit window, including
+both edges, scaled gaps and motif unions. Every FASTA/input is hashed, and
+foreground/background event counts are checked against the prepared manifests.
+
+One-sided exact Fisher/hypergeometric tests compare motif-positive events
+in the selected direction versus its unselected background. BH is applied
+once across all 91 RBPs, 29 regions spanning EX/IR/Alt5/Alt3, and both
+directions: 5,278 tests per study. The two passing SPIRE associations appear
+in the main figure; complete effects and corrected results are supplemental.
+Event correlation, GC/length composition and catalogue specificity remain
+limitations of this sequence-level association analysis. It measures neither
+RBP expression nor binding or causal activity.
+
+## Figure construction
+
+R/ggplot2/patchwork layouts use Liberation Sans, embedded in vector PDFs,
+with 450-dpi PNGs at 180-mm width. Direction is blue (#2166AC), red (#B2182B)
+and background grey (#BDBDBD); study identity uses purple/green. Restrained
+borders and grids follow the Lena reference. Both studies have distinct
+figure sets and a compact convergence figure.
+
+The RBP heatmaps are supplemental. Thirty EX and fifteen IR labels per
+study are ordered by their smallest regional q, then largest absolute effect
+and label; all tests were corrected before this display selection. Cell
+color shows log2 odds ratio with a 0.5 continuity correction for display,
+saturated at ±2. Dots mark exact regional tests with BH q ≤0.05. Unsaturated
+row effects are standardized for Euclidean/complete-linkage clustering;
+constant rows are centered without division by zero. Trees are hidden.
+Regional boxplots summarize log2 odds ratios across all 91 labels; they
+receive no second test between preselected score distributions. Full,
+angled region names match the heatmap mapping.
+
+Matt boxplots show quartiles/1.5-IQR whiskers and individual selected-event
+measurements with horizontal jitter. Background measurements are summarized
+by boxes; separate outlier symbols are suppressed, with all values retained
+in statistics. White points mark raw medians, dotted lines the background
+median. Length/number axes are logarithmic, GC is percent. Group sizes and
+medians match saved tests. MaxEnt uses a labelled −2 to 12 view with all
+outside-view counts exported; negative scores remain valid observations.
+
+Whole-intron GC recalculated from each sequence agrees with Matt within
+1e−12. Positional profiles retain reference bins (EX 68, IR 88) and a
+1,500-event background. Difference profiles subtract the background bin
+mean; descriptive SE=sqrt(SE_selected²+SE_background²). Ribbons ±1.96 SE
+are across events, not biological-replicate or multiplicity-adjusted
+uncertainty. PSI heatmaps retain every selected event, center each row on
+its median, and use Euclidean/complete-linkage clustering with visible
+trees and saturation at ±50 pp. Expression heatmaps are mean-centered VST,
+clustered the same way and saturated at ±3. Sample columns retain manifest
+order; no unreported exclusions or sample clustering are applied.
 
 ## References and author completion
 
@@ -231,6 +231,11 @@ SPIRE and FMN2, with a compact common-universe convergence figure.
 - Upstream splicing code, betAS/Matt/rMAPS attribution, exact resource
   hashes and additional method references: [SOURCES.md](../analysis/SOURCES.md)
   and [RMAPS3.md](../analysis/RMAPS3.md).
+
+- [GO reference-list guidance](https://geneontology.org/docs/go-enrichment-analysis/).
+- [Young et al. 2010: RNA-seq selection bias](https://pmc.ncbi.nlm.nih.gov/articles/PMC2872874/).
+- [betAS FPR definition](https://pmc.ncbi.nlm.nih.gov/articles/PMC10946425/).
+- [R multiple-testing documentation](https://stat.ethz.ch/R-manual/R-devel/library/stats/html/p.adjust.html).
 
 Before submission, authors must supply the mouse allele/genotyping details,
 donor ages, oocyte collection/stage, RNA isolation/library preparation,

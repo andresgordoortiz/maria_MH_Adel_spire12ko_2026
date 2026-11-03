@@ -376,7 +376,7 @@ division_tests <- bind_rows(lapply(names(division_terms), function(term) {
     odds_ratio = test$odds_ratio, pvalue = test$p.value)
 }))
 division_tests$padj <- p.adjust(division_tests$pvalue, 'BH')
-export(division_tests, 'S4_division_targeted_enrichment')
+export(division_tests, 'S4_legacy_four_term_enrichment')
 ps3d <- ggplot(division_tests, aes(-log10(padj), reorder(term, -log10(padj)))) +
   geom_segment(aes(x = 0, xend = -log10(padj), yend = reorder(term, -log10(padj))), color = '#BBBBBB') +
   geom_point(size = 2, color = '#222222') + geom_vline(xintercept = -log10(.05), linetype = 'dashed', linewidth = .3) +
@@ -393,6 +393,7 @@ ps4b <- ggplot(impact_counts, aes(n, Impact, fill = direction)) + geom_col() +
   scale_y_discrete(labels = c('ORF disrupted upon inclusion' = 'ORF disrupted\non inclusion',
     'ORF disrupted upon exclusion' = 'ORF disrupted\non exclusion', 'Unknown/noncoding' = 'Unknown / noncoding')) +
   labs(x = 'Selected SPIRE events', y = NULL, title = 'Predicted transcript consequences', subtitle = 'VASTDB v3 annotation; not measured protein loss')
+source('analysis/publication_inference.R')
 source('analysis/publication_panels.R')
 export(figures, 'figure_manifest')
 for (name in c('Target_gene_DGE', 'Target_gene_expression', 'Target_exon_support_summary',
@@ -425,7 +426,7 @@ overlap_tests <- tab('comparison', 'overlap_enrichment')
 gene_test <- overlap_tests[overlap_tests$unit == 'genes', ]
 target_dge <- tab('spire_review', 'Target_gene_DGE')
 division_non_target <- division_selected[!division_selected$GENE %in% c('Spire1', 'Spire2'), ]
-for (name in c('RESULTS', 'STORY')) {
+for (name in c('RESULTS', 'STORY', 'INFERENCE_REVIEW')) {
   path <- paste0('docs/PUBLICATION_', name, '.md')
   input_files <- union(input_files, path)
   file.copy(path, file.path(out, 'text', paste0(name, '.md')))
@@ -442,15 +443,15 @@ for (name in c('METHODS', 'LEGENDS')) {
 writeLines(c('# Supplementary tables and source data', '',
   'CSV files use comma separators, UTF-8, a header row and NA for missing values. Open them as data, preserving event/gene IDs as text. Tables are grouped by S1–S8 prefixes; split files are parts of the same logical table. Full tested universes and nonsignificant results are retained.', '',
   '| Table | Contents |', '|---|---|',
-  '| S1 | Sample groups, independent-sample confirmation, saved DESeq2 design, alignment QC, target loci, historical-label correspondence and PCA feature IDs |',
+  '| S1 | Sample groups, saved DESeq2 design, inference-family ledger, alignment QC, target loci, historical-label correspondence and PCA feature IDs |',
   '| S2 | All and selected gene-expression statistics; normalized counts and VST values |',
   '| S3 | Every tested SPIRE event, selected events with raw-PSI sensitivity, and threshold sensitivity |',
-  '| S4 | Division GO membership/evidence, all division candidates, targeted enrichment, expression/splicing gene intersection |',
+  '| S4 | Division GO membership/evidence with unique-alias rescue, all mapped division events, legacy four-term reference and expression/splicing intersection |',
   '| S5 | FMN2 universe, common universe, shared targets, overlap tests and event-count-stratified permutation sensitivity |',
-  '| S6 | GO summaries and all tested-term results for full, tested and common backgrounds |',
+  '| S6 | Revised primary and reference GO, expression GO, all selection sensitivities, mapping/alias audits, event-opportunity matched tests/nulls, plus original GO objects exported as reference |',
   '| S7 | All Matt feature tests, individual feature measurements, a sequence-level GC audit, and predicted transcript consequences |',
-  '| S8 | Exploratory motif-region minima, paired RBP-region results and shared-label counts; native window-level scans remain in the source analysis |', '',
-  '`source_data/` contains individual plotted measurements, division-event annotations, feature effects, GC profiles and RBP matrices. The complete expression volcano comes from S2; counts and effects can be reconstructed from S3/S5; exploratory panels use S6–S8. All source input files and generated table checksums are listed separately.', '',
+  '| S8 | Primary exact regional RBP-presence counts/tests with full-family BH, plus original motif-window minima and shared-label summaries as reference only |', '',
+  '`source_data/` contains individual plotted measurements, division-event annotations, feature effects, GC profiles and RBP matrices. The expression MA measurements come from S2; counts and effects can be reconstructed from S3/S5; functional and regional sequence panels use S6–S8. Current inference is identified by `q_BH`; original ontology-specific `p.adjust` and minimum-window raw P columns are reference outputs. All source input files and generated table checksums are listed separately.', '',
   '## Field definitions', '',
   '- `FDR`, `spire_FDR`, `fmn2_FDR`: upstream betAS empirical per-event FPR, **not** BH-adjusted FDR. `invertedFDR` is 1−FPR. Zero has finite simulation resolution.',
   '- `deltapsi`, `spire_deltapsi`, `fmn2_deltapsi`, `betasPsiA/B`: fractions on 0–1 (signed for delta). Delta is knockout minus respective control. Multiply by 100 for percentage points.',
@@ -462,10 +463,11 @@ writeLines(c('# Supplementary tables and source data', '',
   '- `baseMean`: mean normalized expression. `log2FoldChange` and `lfcSE`: imported shrunken effect and accompanying uncertainty; `pvalue`/`padj` in S2 are original DESeq2 Wald P/BH-adjusted P. Missing padj is not set to one.',
   '- `raw_delta_pp`: knockout mean PSI minus control mean PSI. `raw_agrees_with_fit`: strict sign agreement. `loo_same_direction`: every one-sample omission agrees with the fitted sign. `loo_min_signed_pp`: smallest omission effect after orienting to the fitted sign; may be negative. `loo_min_pp`/`loo_max_pp`: signed range of omission effects, not a confidence interval.',
   '- `complete_separation`: strict separation of every knockout/control PSI in the fitted direction. `selected`: uses the documented expression or splicing criterion for that table.',
-  '- GO `p.adjust`: BH within the corresponding ontology/background/gene-set analysis; `qvalue`: exported q-value; `geneID`: contributing genes. Focused division `padj`: BH across four named tests. GOALL/EVIDENCEALL preserve inherited membership and evidence codes.',
-  '- Overlap `p.value`: one-sided Fisher P; `p.BH`: BH over the seven reported overlap tests. Permutation `pvalue`: (1+exceedances)/(1+iterations), not zero.',
+  '- GO `p.adjust`: BH within the corresponding ontology/background/gene-set analysis; `qvalue`: exported q-value; `geneID`: contributing genes. Legacy focused `padj` is the historical four-term reference only. Current GO `q_BH` pools BP+CC+MF in the stated study/background/selection; `family_tests` gives its denominator. GOALL/EVIDENCEALL preserve inherited membership and evidence codes.',
+  '- Overlap legacy `p.BH` covers the original seven tests. Primary S5_overlap_inference_BH `q_BH` covers all nine Fisher/direction/matched-gene tests. Permutation `pvalue` is (1+exceedances)/(1+iterations), not zero.',
   '- Matt `group1/group2`: comparison categories; `median1/median2`, `n1/n2`: actual group medians and event counts; `p.BH`: existing feature-family BH correction. Lengths are nucleotides.',
-  '- Motif `pvalue`: raw minimum window P for the indicated motif/region/direction. Minima across searches are not calibrated RBP-level p-values. `score` is a display transform. Counts describe motif labels, not proteins or biological replicates.',
+  '- Primary S8 regional-presence `pvalue` is an exact Fisher/hypergeometric tail; `q_BH` covers all 5278 tests per study. `positive/n` and `background_positive/background_n` are motif-positive/total event counts. `log2_OR` adds 0.5 only for display; tests use integer counts. Original minimum-window `pvalue` fields are reference outputs, not the primary test.',
+  '- GO `odds_ratio`, `CI_low/CI_high` are conditional odds ratios and pointwise two-sided 95% exact intervals; they are not simultaneous FDR intervals. The main panel displays observed and expected counts instead.',
   '- `centered_PSI`: within-event median-centered PSI; `centered`: within-gene mean-centered VST. Plot saturation does not alter exported values.', ''), file.path(out, 'text/TABLES.md'))
 writeLines(capture.output(sessionInfo()), file.path(out, 'sessionInfo.txt'))
 export(AnnotationDbi::metadata(org.Mm.eg.db), 'annotation_metadata')
@@ -474,13 +476,13 @@ parameter_paths <- c('data/inputs/spire_fastq/dge/pipeline_info/params_2026-10-2
   'data/inputs/spire_fastq/dge/pipeline_info/collated_versions.yml',
   'data/inputs/spire_fastq/dge/other/deseq2/rnaseq/DKO_vs_Cont_SPIRE_DKO.R_sessionInfo.log')
 input_files <- unique(c(input_files, parameter_paths, 'analysis/publication.R', 'analysis/publication_helpers.R',
-  'analysis/publication_panels.R', 'analysis/rbp_helpers.R', 'analysis/common.R', 'analysis/palettes.R', 'analysis/comparison_helpers.R', 'analysis/renv.lock',
+  'analysis/publication_panels.R', 'analysis/publication_inference.R', 'analysis/rbp_helpers.R', 'analysis/common.R', 'analysis/palettes.R', 'analysis/comparison_helpers.R', 'analysis/renv.lock',
   'analysis/package_publication.py', 'scripts/run_local_R.sh', 'renv.lock'))
 export(data.frame(file = input_files, sha256 = vapply(input_files, function(path)
   digest::digest(file = path, algo = 'sha256'), character(1))), 'input_checksums')
 stopifnot(nrow(robust) == sum(selected_counts$n), sum(counts$n) == nrow(spire),
   sum(dge$selected) == summary_dge$padj005, nrow(shared) == 11,
   all(division_tests$padj > .05), all(robust_summary$leave_one_min_10pp <= robust_summary$leave_one_direction_agrees),
-  nrow(figures) == 15, all(file.exists(file.path(out, 'figures', paste0(figures$figure, '.pdf')))))
+  nrow(figures) == 16, all(file.exists(file.path(out, 'figures', paste0(figures$figure, '.pdf')))))
 writeLines('Validated publication assembly; figures and manuscript tables generated.', file.path(out, 'COMPLETE'))
 cat('Publication assembly complete:', out, '\n')

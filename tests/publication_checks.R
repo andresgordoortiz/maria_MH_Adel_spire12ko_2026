@@ -28,3 +28,9 @@ cat('PASS: row-cluster adjacency, dendrogram geometry and invalid matrices.\n')
 stopifnot(identical(sequence_gc(c('ACGT', 'ggNNcc', 'AATT')), c(.5, 1, 0)),
   inherits(try(sequence_gc('NNN'), silent = TRUE), 'try-error'))
 cat('PASS: sequence GC fractions, ambiguous bases and empty sequence rejection.\n')
+z <- go_counts(letters[1:10], letters[1:4], list(term = letters[1:3], zero = letters[9:10]))
+stopifnot(z$Count[1] == 3, z$expected[1] == 1.2, z$pvalue[2] == 1,
+  all.equal(z$pvalue[1], fisher.test(matrix(c(3, 1, 0, 6), 2), alternative = 'greater')$p.value))
+z <- matched_category_counts(c(TRUE, FALSE, TRUE), matrix(TRUE, 3, 1, dimnames = list(NULL, 'all')), c(1, 1, 4), 20L)
+stopifnot(nrow(z$null) == 20, ncol(z$null) == 1, all(z$null == 2), z$summary$pvalue == 1)
+cat('PASS: exact GO counts/tails, zero overlaps and single-category matched null.\n')

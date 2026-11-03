@@ -1,6 +1,9 @@
 # SPIRE y FMN2: revisión desde los FASTQ originales
 
-Actualizado el 2 de noviembre de 2026. La referencia actual es el
+La inferencia del manuscrito se actualizó el 3 de noviembre de 2026; véase
+[la auditoría de GO, fondos y corrección](PUBLICATION_INFERENCE_REVIEW.md).
+Los apartados de reconstrucción siguientes documentan las salidas anteriores.
+La referencia de la revisión de muestras es el
 [informe de revisión SPIRE](../reports/spire_review/REPORT.md).
 Las conclusiones anteriores se conservan en
 [el archivo histórico](../legacy/pre_fastq_2026-11-02/docs/CONCLUSIONS.md).
@@ -165,9 +168,12 @@ por evento de betAS y la calibración de los motivos limitan la inferencia.
 
 ## Figuras para el manuscrito
 
-La selección final para publicación está en `results/publication/index.html`:
-dos figuras principales, cuatro suplementarias, métodos/resultados/leyendas y
-tablas S1–S8. Añade sensibilidad al retirar cada animal, candidatos de división
-seleccionados con una regla explícita y control aproximado por número de eventos
-por gen en el solapamiento con FMN2. Las conclusiones cuantitativas actualizadas
-se generan directamente en `results/publication/text/RESULTS.md`.
+La versión actual está en `results/publication/index.html`: dos figuras SPIRE
+y siete suplementos; una figura FMN2 y cinco suplementos; una comparación
+compacta. GO usa genes evaluables, mapeo directo/alias único, exclusión de
+los loci manipulados y BH sobre BP/CC/MF. La unión de división contiene 127
+eventos en 79 genes, sin sobrerrepresentación: 47 genes de división frente
+a 47,4 esperados. La presencia regional exacta de motivos pasa BH para
+PCBP2/EX y PPRC1/Alt5 en SPIRE; ninguna asociación pasa en FMN2. Los mapas
+nativos de mínimos asintóticos quedan como referencia. Las familias de
+pruebas, métodos, resultados y límites están documentados en el paquete.

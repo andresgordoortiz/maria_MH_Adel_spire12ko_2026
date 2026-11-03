@@ -99,9 +99,11 @@ The comparison runs BP/CC/MF GO for each study, the shared genes and the concord
 
 Overlap Fisher tests use a uniform event/locus/gene null. Events within genes and complementary alternative-site rows are dependent; gene length and event-count biases are not fully corrected. Direction agreement is reported separately, with an exploratory sign test. These independent experiments cannot estimate a genetic interaction, and a missing selection is not evidence of no effect.
 
-## Methods and limits
+## Upstream reconstruction settings and limits
 
-- Current Spire: Cont_1/2/7 versus DKO_4/5/6, exactly as named in the original FASTQ manifest. Historical Cont_a/b/c and DKO_a/b/c results are archived. The investigator confirmed three independent animals per condition on 2 November 2026; batch identities remain unverified. FMN2: two merged Het control pools versus two KO pools; these are four profiles, not twelve biological replicates. See [the cluster guide](../docs/CLUSTER.md) for the GEO mapping. Positive delta means higher inclusion/site use/retention in the knockout group.
+The current manuscript uses the [publication inference policy](../docs/PUBLICATION_INFERENCE_REVIEW.md). It supersedes the reference raw-P star plots and paper-background choices described below.
+
+- Current Spire: Cont_1/2/7 versus DKO_4/5/6, exactly as named in the original FASTQ manifest. Historical Cont_a/b/c and DKO_a/b/c results are archived. The investigator confirmed three independent biological replicates per condition on 2 November 2026; batch identities remain unverified. FMN2: two merged Het control pools versus two KO pools; these are four profiles, not twelve biological replicates. See [the cluster guide](../docs/CLUSTER.md) for the GEO mapping. Positive delta means higher inclusion/site use/retention in the knockout group.
 - N≥10 and complete PSI in every sample (six for Spire, four for FMN2), as filtered by the existing workflow. Paper selection: upstream `FDR <= 0.05` and `abs(deltapsi) >= 0.10`; Pdiff is not an extra selection criterion for these figures. Delta is a fraction: 0.10 is 10 percentage points. The reference scripts use inclusive cutoffs, even where prose says “lower than”.
 - betAS calls its empirical per-event false-positive rate `FDR`. It is not a BH-adjusted multiple-testing FDR. Exact zeros have finite simulation resolution, and tiny fitted changes at PSI boundaries can have FPR zero. Raw values are preserved; the volcano floor, compression and jitter affect display only. The effect-size filter matches the paper and does not calibrate the FPR.
 - Legacy reconstruction requires identical statistical vectors across the three full `spire_pdiff_*.csv` files, and exact annotation/sample-PSI agreement at every identified row. ANN annotations come from the inclusion table at verified positions. The historical R/betAS revision, simulation settings and seed remain unverified. Historical “differential” and “combination” exports are not pooled into this analysis.
@@ -111,7 +113,7 @@ Overlap Fisher tests use a uniform event/locus/gene null. Events within genes an
 - Sequence length and GC plots from VASTDB are explicitly separate from Matt. Missing reference IDs remain in splicing/GO results and are excluded from unavailable sequence annotations. IDs whose original coordinates differ from the downloaded reference are recorded and excluded from sequence/Matt/RBP inputs. Available PROT_IMPACT is v3; v2.3 is not available at the original URL. All annotation coverage and exclusions are exported.
 - Matt uses the paper container, GENCODE vM10, GRCm38/mm10, species Mmus, 150 nt for branch-point analysis and `-notrbts`. Unselected background events are sampled to at most 10,000 with seed 42. No three-drug union is possible for Spire alone. Matt deduplicates genomic events and excludes events not found in the GTF; retained rows are checked and counted. All numeric features are tested with Mann–Whitney, `exact=FALSE`, ≥3 observations/group and ≥10 total. Paper-style stars use raw p; an additional BH column exposes sensitivity to multiple testing. Tests use full values, with clipping only in plotted coordinates.
 - GC gradients reuse the repository's binning functions and sequences from Matt. The reference script accidentally extracts the last intron bases for its 5′ flank and the first bases for its 3′ flank; this is corrected and checked with an asymmetric sequence fixture. The ndiff pool is capped at 1,500 with seed 42; introns have fine/coarse layouts. Bands are descriptive mean ±1.96 SE across events, not independent biological replicate confidence intervals.
-- GO uses the same `clusterProfiler::enrichGO`, mouse `org.Mm.eg.db`, BH correction, 0.05 p/adjusted-p cutoffs and default q cutoff 0.2, gene-set sizes 10–500. The primary `paper_OrgDb` universe matches the paper; `tested_N10` is a separately named sensitivity analysis. Gene mappings, full results and objects are exported. GO annotations/package versions are pinned here but the paper did not pin its OrgDb release, so exact historical GO replication is not claimed.
+- GO uses the same `clusterProfiler::enrichGO`, mouse `org.Mm.eg.db`, BH correction, 0.05 p/adjusted-p cutoffs and default q cutoff 0.2, gene-set sizes 10–500. The upstream `paper_OrgDb` universe reconstructs the paper. Current publication inference makes `tested_N10` primary and uses full annotation as reference. Gene mappings, full results and objects are exported. GO annotations/package versions are pinned here but the paper did not pin its OrgDb release, so exact historical GO replication is not claimed.
 - Paper drug intersections/convergence are adapted to a two-study comparison, with the different coverage and controls made explicit. These legacy modules cover splicing; the publication assembly below adds gene expression. Protein abundance/stability and microscopy measurements are not available here. No mechanistic or meiotic phenotype is inferred from these tables alone.
 
 ## RBP motif analysis
@@ -146,11 +148,14 @@ The analysis checks cover exact threshold boundaries, invalid statistics, scalin
 
 The separate SPIRE, FMN2 and convergence publication layouts are generated by
 `publication.R`, with the existing ggplot2/patchwork/OrgDb environment.
-They add imported DESeq2 results, current-only PSI PCA, individual-animal
+They add imported DESeq2 results, current-only PSI PCA, individual-sample
 sensitivity, explicit division annotations and event-count-stratified
-cross-study overlap sensitivity. Existing statistics and reports are preserved.
+cross-study overlap sensitivity. The inference module resolves unique aliases, revises GO families and computes exact regional-presence tests. Upstream statistics and reports are preserved.
 
 ```bash
+python3 -B tests/regional_motif_checks.py
+# Reuse a completed presence report; archive that directory before recomputing.
+python3 -B analysis/regional_motifs.py reports/regional_motif_presence
 bash scripts/run_local_R.sh tests/publication_checks.R
 bash scripts/run_local_R.sh analysis/publication.R results/publication
 python3 analysis/package_publication.py results/publication
